@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "ArthSetu",
+    "slug": "arthsetu",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B3B60"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "ArthSetu uses your location to show nearby NSFDC channel partners and calculate travel routes.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "ArthSetu uses your location to show nearby NSFDC channel partners and calculate travel routes."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B3B60"
+      },
+      "package": "com.runtime.arthsetu",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font",
+      "@maplibre/maplibre-react-native",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "ArthSetu uses your location to find nearby NSFDC channel partners and show driving routes.",
+          "locationAlwaysAndWhenInUsePermission": "ArthSetu uses your location to find nearby NSFDC channel partners and show driving routes."
+        }
+      ]
+    ]
+  }
+}

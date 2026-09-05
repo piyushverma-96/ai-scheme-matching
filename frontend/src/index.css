@@ -1,0 +1,161 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme {
+  /* ── Colour palette tokens ─────────────────────────── */
+  --color-navy:          #0B3B60;
+  --color-navy-dark:     #07263F;
+  --color-navy-light:    #16507D;
+  --color-navy-tint:     #EAF1F6;
+  --color-teal:          #0F8B8D;
+  --color-teal-dark:     #0B696B;
+  --color-teal-light:    #15A7A9;
+  --color-teal-tint:     #E7F6F6;
+  --color-amber:         #C77D02;
+  --color-amber-dark:    #A56701;
+  --color-amber-light:   #E59310;
+  --color-amber-tint:    #FDF5E7;
+  --color-bg-page:       #F7F9FB;
+  --color-card-border:   #E5E7EB;
+  --color-card-bg:       #FFFFFF;
+  --color-ink:           #1C1C1C;
+  --color-ink-muted:     #4A5568;
+  --color-ink-light:     #6B7280;
+  --color-success:       #1A7F4E;
+  --color-success-tint:  #E8F7EE;
+  --color-warning:       #B8860B;
+  --color-warning-tint:  #FEF9E7;
+  --color-error:         #B3261E;
+  --color-error-tint:    #FDF2F2;
+
+  /* ── Typography ─────────────────────────────── */
+  --font-sans:  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Lora", Georgia, serif;
+  --font-mono:  "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Base resets */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  background-color: #F7F9FB;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #F7F9FB;
+  color: #1C1C1C;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ── Typography helpers ─────────────────────────── */
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Custom range slider ───────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  background: #E5E7EB;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0B3B60;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 5px rgba(11, 59, 96, 0.3);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0B3B60;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 5px rgba(11, 59, 96, 0.3);
+  cursor: pointer;
+}
+
+/* ── Leaflet overrides ───────────────────────── */
+.leaflet-container {
+  border-radius: 0.75rem;
+  z-index: 0;
+  font-family: var(--font-sans);
+}
+
+/* ── Tooltip ────────────────────────────────── */
+.tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1C1C1C;
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  width: 230px;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.15s ease;
+  z-index: 50;
+}
+.tooltip-wrapper:hover .tooltip-text,
+.tooltip-wrapper:focus-within .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ── Focus ring ─────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #C77D02;
+  outline-offset: 2px;
+}
+
+/* ── Smooth transition helpers ──────────────── */
+.transition-base {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Step indicator line ─────────────────────── */
+.step-connector {
+  flex: 1;
+  height: 2px;
+  background: #E5E7EB;
+  transition: background-color 0.3s ease;
+}
+.step-connector.done {
+  background: #0F8B8D;
+}
