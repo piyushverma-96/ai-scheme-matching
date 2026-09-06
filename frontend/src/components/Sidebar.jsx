@@ -14,10 +14,12 @@ import {
   ShieldCheck,
   X,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Logo from './Logo';
 import { useApp } from '../context/AppContext';
 
 export default function Sidebar() {
+  const { t } = useTranslation();
   const {
     currentView,
     navigateTo,
@@ -31,67 +33,67 @@ export default function Sidebar() {
   const mainNav = [
     {
       id: 'home',
-      label: 'Dashboard',
+      label: t('nav.dashboard', 'Dashboard'),
       icon: LayoutDashboard,
       action: () => navigateTo('home'),
     },
     {
       id: 'journey',
-      label: 'My Journey',
+      label: t('nav.journey', 'My Journey'),
       icon: Route,
       action: () => startJourney(journeyStep || 1),
     },
     {
       id: 'tracking',
-      label: 'Applications',
+      label: t('nav.applications', 'Applications'),
       icon: FileCheck2,
       action: () => navigateTo('tracking'),
     },
     {
       id: 'saved_schemes',
-      label: 'Saved Schemes',
+      label: t('nav.schemes', 'Saved Schemes'),
       icon: Bookmark,
       action: () => navigateTo('schemes'),
     },
     {
       id: 'partners',
-      label: 'Find Partner',
+      label: t('nav.partners', 'Find Partner'),
       icon: Users,
       action: () => navigateTo('partners'),
     },
     {
       id: 'calculator',
-      label: 'EMI Calculator',
+      label: t('nav.calculator', 'EMI Calculator'),
       icon: Calculator,
       action: () => navigateTo('calculator'),
     },
     {
       id: 'documents',
-      label: 'Documents',
+      label: t('nav.documents', 'Documents'),
       icon: FolderOpen,
       action: () => navigateTo('documents'),
     },
     {
       id: 'ai',
-      label: 'Ask ArthSetu',
+      label: t('nav.ai', 'Ask ArthSetu'),
       icon: MessageSquare,
       action: () => setAiAssistantOpen(true),
     },
     {
       id: 'help_trust',
-      label: 'Help & Support',
+      label: t('nav.help', 'Help & Support'),
       icon: HelpCircle,
       action: () => navigateTo('help_trust'),
     },
     {
       id: 'profile',
-      label: 'Profile',
+      label: t('nav.profile', 'Profile'),
       icon: User,
       action: () => navigateTo('profile'),
     },
     {
       id: 'settings',
-      label: 'Settings',
+      label: t('nav.settings', 'Settings'),
       icon: Settings,
       action: () => navigateTo('settings'),
     },
@@ -172,10 +174,10 @@ export default function Sidebar() {
           <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl p-3.5 space-y-1.5 shadow-2xs">
             <div className="flex items-center gap-2 text-[#0E6655] font-bold text-xs">
               <ShieldCheck className="w-4 h-4 text-[#0E6655] shrink-0" />
-              <span>Your Information is Safe</span>
+              <span>{t('nav.trust_title', 'Your Information is Safe')}</span>
             </div>
             <p className="text-[11px] text-[#64748B] leading-relaxed">
-              We protect your data and use it only to provide verified scheme guidance.
+              {t('nav.trust_desc', 'We protect your data and use it only to provide verified scheme guidance.')}
             </p>
           </div>
         </div>

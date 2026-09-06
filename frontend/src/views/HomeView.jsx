@@ -19,10 +19,12 @@ import {
   Compass,
   FileText,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../context/AppContext';
 import { SCHEMES_DATA } from '../data/mockData';
 
 export default function HomeView() {
+  const { t } = useTranslation();
   const {
     navigateTo,
     startJourney,
@@ -42,65 +44,72 @@ export default function HomeView() {
     profile?.full_name?.split(' ')[0] ||
     user?.user_metadata?.full_name?.split(' ')[0] ||
     user?.email?.split('@')[0] ||
-    'Beneficiary';
+    t('header.guest', 'Beneficiary');
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('dashboard.greeting_morning', 'Good morning');
+    if (hour < 17) return t('dashboard.greeting_afternoon', 'Good afternoon');
+    return t('dashboard.greeting_evening', 'Good evening');
+  };
 
   // Active step info (1 to 6)
   const currentStepNum = Math.min(6, Math.max(1, journeyStep || 1));
   const progressPct = Math.round((currentStepNum / 6) * 100);
 
   const stepTitles = [
-    'Understand User Need',
-    'Identify Eligible Schemes',
-    'Recommend the Best Scheme',
-    'Calculate Financial Impact',
-    'Find the Right Application Channel',
-    'Guide the Application',
+    t('stepper.step1_title', 'Understand User Need'),
+    t('stepper.step2_title', 'Identify Eligible Schemes'),
+    t('stepper.step3_title', 'Recommend the Best Scheme'),
+    t('stepper.step4_title', 'Calculate Financial Impact'),
+    t('stepper.step5_title', 'Find the Right Application Channel'),
+    t('stepper.step6_title', 'Guide the Application'),
   ];
 
-  const currentStepName = stepTitles[currentStepNum - 1] || 'Understand User Need';
+  const currentStepName = stepTitles[currentStepNum - 1] || t('stepper.step1_title', 'Understand User Need');
 
   // 6 Steps definition for the Journey Timeline
   const SIX_STEPS = [
     {
       num: 1,
       id: 'step_1',
-      title: 'Understand User Need',
-      desc: 'Tell us about your purpose, income, required amount and location.',
+      title: t('stepper.step1_title', 'Understand User Need'),
+      desc: t('stepper.step1_desc', 'Tell us about your purpose, income, required amount and location.'),
       icon: Search,
     },
     {
       num: 2,
       id: 'step_2',
-      title: 'Identify Eligible Schemes',
-      desc: 'We check schemes you may be eligible for based on your details.',
+      title: t('stepper.step2_title', 'Identify Eligible Schemes'),
+      desc: t('stepper.step2_desc', 'We check schemes you may be eligible for based on your details.'),
       icon: ShieldCheck,
     },
     {
       num: 3,
       id: 'step_3',
-      title: 'Recommend the Best Scheme',
-      desc: 'We recommend the most suitable scheme and explain why.',
+      title: t('stepper.step3_title', 'Recommend the Best Scheme'),
+      desc: t('stepper.step3_desc', 'We recommend the most suitable scheme and explain why.'),
       icon: Award,
     },
     {
       num: 4,
       id: 'step_4',
-      title: 'Calculate Financial Impact',
-      desc: 'Understand financial assistance, eligible support, and repayment impact.',
+      title: t('stepper.step4_title', 'Calculate Financial Impact'),
+      desc: t('stepper.step4_desc', 'Understand financial assistance, eligible support, and repayment impact.'),
       icon: Calculator,
     },
     {
       num: 5,
       id: 'step_5',
-      title: 'Find the Right Application Channel',
-      desc: 'Find the designated channel partner or direct official government portal.',
+      title: t('stepper.step5_title', 'Find the Right Application Channel'),
+      desc: t('stepper.step5_desc', 'Find the designated channel partner or direct official government portal.'),
       icon: Compass,
     },
     {
       num: 6,
       id: 'step_6',
-      title: 'Guide the Application',
-      desc: 'Complete scheme-specific documents, submit application and track progress.',
+      title: t('stepper.step6_title', 'Guide the Application'),
+      desc: t('stepper.step6_desc', 'Complete scheme-specific documents, submit application and track progress.'),
       icon: FileText,
     },
   ];
@@ -123,11 +132,10 @@ export default function HomeView() {
         <div className="lg:col-span-8 bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-8 shadow-xs relative overflow-hidden flex flex-col justify-between">
           <div className="space-y-3 max-w-xl z-10">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#0B3B60] tracking-tight">
-              Good morning, {userFirstName} 👋
+              {getGreeting()}, {userFirstName} 👋
             </h2>
             <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
-              We help you identify the right government financial schemes and guide you through the
-              official 6-step application process for verified government support.
+              {t('dashboard.hero_desc', 'We help you identify the right government financial schemes and guide you through the official 6-step application process for verified government support.')}
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
@@ -136,7 +144,7 @@ export default function HomeView() {
                 onClick={() => startJourney(currentStepNum)}
                 className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >
-                <span>{currentStepNum > 1 ? 'Continue Journey' : 'Start My Journey'}</span>
+                <span>{currentStepNum > 1 ? t('dashboard.continue_journey', 'Continue Journey') : t('dashboard.start_journey', 'Start My Journey')}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -146,7 +154,7 @@ export default function HomeView() {
                 className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-[#CBD5E1] hover:bg-slate-50 text-[#0B3B60] font-semibold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >
                 <Play className="w-3.5 h-3.5 fill-[#0B3B60] text-[#0B3B60]" />
-                <span>How It Works</span>
+                <span>{t('dashboard.how_it_works', 'How It Works')}</span>
               </button>
             </div>
           </div>
@@ -174,10 +182,10 @@ export default function HomeView() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider">
-                Your Progress
+                {t('dashboard.your_progress', 'Your Progress')}
               </span>
               <span className="text-xs font-bold text-[#0E6655] bg-[#E8F8F2] px-2.5 py-0.5 rounded-full border border-[#10B981]/30">
-                Step {currentStepNum} of 6
+                {t('stepper.step', 'Step')} {currentStepNum} {t('stepper.of', 'of')} 6
               </span>
             </div>
 
@@ -185,15 +193,15 @@ export default function HomeView() {
               <h4 className="text-base font-bold text-[#0B3B60]">{currentStepName}</h4>
               <p className="text-[11px] text-[#64748B] mt-0.5">
                 {currentStepNum > 1
-                  ? "Keep going! You're making real progress."
-                  : 'Start Step 1 to unlock eligible government schemes.'}
+                  ? t('dashboard.keep_going', "Keep going! You're making real progress.")
+                  : t('dashboard.start_step1', 'Start Step 1 to unlock eligible government schemes.')}
               </p>
             </div>
 
             {/* Real Progress Bar */}
             <div className="space-y-1 pt-1">
               <div className="flex justify-between text-xs font-semibold text-[#64748B]">
-                <span>Progress</span>
+                <span>{t('dashboard.progress', 'Progress')}</span>
                 <span className="text-[#0E6655] font-bold">{progressPct}%</span>
               </div>
               <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
@@ -210,7 +218,7 @@ export default function HomeView() {
             onClick={() => startJourney(currentStepNum)}
             className="w-full py-2.5 rounded-xl border border-[#0E6655] text-[#0E6655] hover:bg-[#E8F8F2] font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer mt-2 min-h-[44px]"
           >
-            <span>Continue Journey</span>
+            <span>{t('dashboard.continue_journey', 'Continue Journey')}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -220,10 +228,10 @@ export default function HomeView() {
       <div className="space-y-4">
         <div>
           <h3 className="text-lg sm:text-xl font-bold text-[#0B3B60]">
-            Your 6-Step Journey
+            {t('dashboard.journey_section_title', 'Your 6-Step Journey')}
           </h3>
           <p className="text-xs sm:text-sm text-[#64748B] mt-0.5">
-            Follow these steps to find the right scheme and complete your application.
+            {t('dashboard.journey_section_sub', 'Follow these steps to find the right scheme and complete your application.')}
           </p>
         </div>
 
@@ -293,16 +301,16 @@ export default function HomeView() {
                 <div>
                   {isCompleted ? (
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#0E6655] bg-[#E8F8F2] px-2 py-0.5 rounded-md border border-[#10B981]/30">
-                      <span>Completed</span>
+                      <span>{t('dashboard.status_completed', 'Completed')}</span>
                       <Check className="w-3 h-3 stroke-[2.5]" />
                     </span>
                   ) : isInProgress ? (
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#0E6655] bg-[#D1F2E6] px-2 py-0.5 rounded-md border border-[#0E6655]/30">
-                      <span>In Progress</span>
+                      <span>{t('dashboard.status_in_progress', 'In Progress')}</span>
                     </span>
                   ) : (
                     <span className="inline-flex items-center text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
-                      Upcoming
+                      {t('dashboard.status_upcoming', 'Upcoming')}
                     </span>
                   )}
                 </div>
@@ -320,14 +328,14 @@ export default function HomeView() {
             <div className="flex items-center justify-between pb-1 border-b border-slate-100">
               <h4 className="text-sm sm:text-base font-bold text-[#0B3B60] flex items-center gap-2">
                 <FileCheck2 className="w-4 h-4 text-[#0E6655]" />
-                <span>Your Applications</span>
+                <span>{t('dashboard.your_applications', 'Your Applications')}</span>
               </h4>
               <button
                 type="button"
                 onClick={() => navigateTo('tracking')}
                 className="text-xs font-bold text-[#0E6655] hover:underline cursor-pointer"
               >
-                View All
+                {t('dashboard.view_all', 'View All')}
               </button>
             </div>
 
@@ -337,9 +345,9 @@ export default function HomeView() {
                   <FileText className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-[#1E293B]">No applications yet</p>
+                  <p className="text-xs font-bold text-[#1E293B]">{t('dashboard.no_apps_title', 'No applications yet')}</p>
                   <p className="text-[11px] text-[#64748B] mt-0.5">
-                    Start your 6-step journey to find a suitable scheme and apply.
+                    {t('dashboard.no_apps_desc', 'Start your 6-step journey to find a suitable scheme and apply.')}
                   </p>
                 </div>
                 <button
@@ -347,7 +355,7 @@ export default function HomeView() {
                   onClick={() => startJourney(1)}
                   className="px-3.5 py-1.5 bg-[#0B3B60] hover:bg-[#07263F] text-white text-xs font-bold rounded-xl transition-all cursor-pointer inline-block"
                 >
-                  Start My Journey
+                  {t('dashboard.start_journey', 'Start My Journey')}
                 </button>
               </div>
             ) : (
@@ -366,7 +374,7 @@ export default function HomeView() {
                         <div>
                           <h5 className="text-xs font-bold text-[#0B3B60]">{app.scheme_name}</h5>
                           <span className="text-[10px] text-slate-500 font-mono">
-                            ID: {app.application_number}
+                            {t('dashboard.app_id', 'ID')}: {app.application_number}
                           </span>
                         </div>
                       </div>
@@ -388,7 +396,7 @@ export default function HomeView() {
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1.5 border-t border-slate-100 text-[10px]">
                       <div>
-                        <span className="text-slate-400 block">Submitted</span>
+                        <span className="text-slate-400 block">{t('dashboard.submitted_date', 'Submitted')}</span>
                         <span className="font-semibold text-slate-700">
                           {new Date(app.created_at).toLocaleDateString('en-IN', {
                             day: 'numeric',
@@ -397,11 +405,11 @@ export default function HomeView() {
                         </span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block">Current Step</span>
+                        <span className="text-slate-400 block">{t('dashboard.current_step', 'Current Step')}</span>
                         <span className="font-semibold text-slate-700">{app.status}</span>
                       </div>
                       <div className="col-span-2 sm:col-span-1 text-left sm:text-right">
-                        <span className="text-slate-400 block">Partner</span>
+                        <span className="text-slate-400 block">{t('dashboard.partner', 'Partner')}</span>
                         <span className="font-semibold text-slate-700 truncate block">
                           {app.partner_name || 'Lead Partner'}
                         </span>
@@ -420,14 +428,14 @@ export default function HomeView() {
             <div className="flex items-center justify-between pb-1 border-b border-slate-100">
               <h4 className="text-sm sm:text-base font-bold text-[#0B3B60] flex items-center gap-2">
                 <Bookmark className="w-4 h-4 text-[#0E6655]" />
-                <span>Saved Schemes</span>
+                <span>{t('dashboard.saved_schemes', 'Saved Schemes')}</span>
               </h4>
               <button
                 type="button"
                 onClick={() => navigateTo('schemes')}
                 className="text-xs font-bold text-[#0E6655] hover:underline cursor-pointer"
               >
-                Browse All
+                {t('dashboard.browse_all', 'Browse All')}
               </button>
             </div>
 
@@ -437,9 +445,9 @@ export default function HomeView() {
                   <Bookmark className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-[#1E293B]">No saved schemes yet</p>
+                  <p className="text-xs font-bold text-[#1E293B]">{t('dashboard.no_saved_title', 'No saved schemes yet')}</p>
                   <p className="text-[11px] text-[#64748B] mt-0.5">
-                    Bookmark schemes during your journey or browse verified NSFDC schemes.
+                    {t('dashboard.no_saved_desc', 'Bookmark schemes during your journey or browse verified NSFDC schemes.')}
                   </p>
                 </div>
                 <button
@@ -447,7 +455,7 @@ export default function HomeView() {
                   onClick={() => navigateTo('schemes')}
                   className="px-3.5 py-1.5 border border-[#CBD5E1] hover:bg-white text-[#0B3B60] text-xs font-bold rounded-xl transition-all cursor-pointer inline-block"
                 >
-                  Browse Schemes
+                  {t('dashboard.browse_schemes', 'Browse Schemes')}
                 </button>
               </div>
             ) : (
@@ -492,11 +500,10 @@ export default function HomeView() {
         {/* 3. Need Help? Card */}
         <div className="bg-white rounded-3xl border border-[#E2E8F0] p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4">
           <div className="space-y-2">
-            <h4 className="text-sm sm:text-base font-bold text-[#0B3B60]">Need Help?</h4>
-            <h5 className="text-xs font-bold text-slate-800">Ask ArthSetu Assistant</h5>
+            <h4 className="text-sm sm:text-base font-bold text-[#0B3B60]">{t('dashboard.need_help', 'Need Help?')}</h4>
+            <h5 className="text-xs font-bold text-slate-800">{t('dashboard.ask_assistant', 'Ask ArthSetu Assistant')}</h5>
             <p className="text-[11px] text-[#64748B] leading-relaxed">
-              Get instant answers to your questions about verified NSFDC schemes, eligibility
-              criteria, required documents, and empanelled channel partners.
+              {t('dashboard.ask_desc', 'Get instant answers to your questions about verified NSFDC schemes, eligibility criteria, required documents, and empanelled channel partners.')}
             </p>
           </div>
 
@@ -506,7 +513,7 @@ export default function HomeView() {
               onClick={() => setAiAssistantOpen(true)}
               className="px-4 py-2.5 bg-[#0E6655] hover:bg-[#0B5345] text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer min-h-[44px]"
             >
-              <span>Ask Now</span>
+              <span>{t('dashboard.ask_now', 'Ask Now')}</span>
               <MessageSquare className="w-3.5 h-3.5" />
             </button>
 
@@ -522,8 +529,7 @@ export default function HomeView() {
       <div className="p-3.5 bg-white rounded-2xl border border-[#E2E8F0] flex items-center gap-3 text-[11px] text-[#64748B]">
         <Info className="w-4 h-4 text-[#0B3B60] shrink-0" />
         <span>
-          The information and guidance provided are based on verified NSFDC scheme guidelines.
-          Official sanction and disbursement are subject to partner bank verification.
+          {t('dashboard.trust_footer', 'The information and guidance provided are based on verified NSFDC scheme guidelines. Official sanction and disbursement are subject to partner bank verification.')}
         </span>
       </div>
 
@@ -533,7 +539,7 @@ export default function HomeView() {
           <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-8 max-w-xl w-full shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-base sm:text-lg font-bold text-[#0B3B60]">
-                How ArthSetu Works — 6-Step Journey
+                {t('dashboard.how_modal_title', 'How ArthSetu Works — 6-Step Journey')}
               </h3>
               <button
                 type="button"
@@ -567,7 +573,7 @@ export default function HomeView() {
                 }}
                 className="px-5 py-2 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
               >
-                Continue Journey →
+                {t('dashboard.continue_journey', 'Continue Journey →')}
               </button>
             </div>
           </div>

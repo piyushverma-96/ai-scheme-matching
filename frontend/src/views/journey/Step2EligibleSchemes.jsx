@@ -8,10 +8,12 @@ import {
   Info,
   Check,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../context/AppContext';
-import { SCHEMES_DATA } from '../../data/mockData';
+import { SCHEMES_DATA, getLocalizedScheme } from '../../data/mockData';
 
 export default function Step2EligibleSchemes({ onContinue }) {
+  const { t, i18n } = useTranslation();
   const { nextJourneyStep, prevJourneyStep, setSelectedScheme, journeyFormData } = useApp();
 
   const handleSelectAndProceed = (scheme) => {
@@ -32,23 +34,23 @@ export default function Step2EligibleSchemes({ onContinue }) {
       {/* 1. Progress State Banner */}
       <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-3xl p-5 sm:p-6 space-y-3 shadow-2xs">
         <h3 className="text-xs font-bold text-[#1E40AF] uppercase tracking-wider">
-          Stage Status
+          {t('step2.stage_status', 'Stage Status')}
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           <div className="flex items-center gap-2 text-[#10B981] font-semibold">
             <span className="w-5 h-5 rounded-full bg-[#E8F8F2] flex items-center justify-center font-bold text-xs">✓</span>
-            <span>1. Understanding your requirement</span>
+            <span>{t('step2.stage_step1', '1. Understanding your requirement')}</span>
           </div>
 
           <div className="flex items-center gap-2 text-[#0B3B60] font-bold">
             <span className="w-5 h-5 rounded-full bg-[#0B3B60] text-white flex items-center justify-center font-bold text-xs">●</span>
-            <span>2. Checking scheme eligibility</span>
+            <span>{t('step2.stage_step2', '2. Checking scheme eligibility')}</span>
           </div>
 
           <div className="flex items-center gap-2 text-[#94A3B8]">
             <span className="w-5 h-5 rounded-full bg-white border border-[#CBD5E1] flex items-center justify-center font-bold text-xs">○</span>
-            <span>3. Ranking suitable schemes</span>
+            <span>{t('step2.stage_step3', '3. Ranking suitable schemes')}</span>
           </div>
         </div>
       </div>
@@ -56,18 +58,20 @@ export default function Step2EligibleSchemes({ onContinue }) {
       {/* 2. Main Title */}
       <div>
         <h2 className="text-xl sm:text-2xl font-bold text-[#0B3B60]">
-          Potentially eligible schemes
+          {t('step2.heading', 'Potentially eligible schemes')}
         </h2>
         <p className="text-xs sm:text-sm text-[#64748B] mt-1">
-          The following government-supported loan schemes match your basic purpose, income ceiling, and requested amount ({amountStr}).
+          {t('step2.subheading', 'The following government-supported loan schemes match your basic purpose, income ceiling, and requested amount.')} ({amountStr}).
         </p>
       </div>
 
       {/* 3. List of Matching Schemes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-        {SCHEMES_DATA.map((scheme, idx) => (
+        {SCHEMES_DATA.map((scheme, idx) => {
+          const item = getLocalizedScheme(scheme, i18n.language);
+          return (
           <div
-            key={scheme.id}
+            key={item.id}
             className="bg-white rounded-3xl border border-[#E2E8F0] p-5 sm:p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
           >
             <div className="space-y-4">
@@ -89,52 +93,52 @@ export default function Step2EligibleSchemes({ onContinue }) {
                   </div>
                   <div>
                     <h4 className="text-sm sm:text-base font-bold text-[#0B3B60] leading-tight">
-                      {scheme.name}
+                      {item.name}
                     </h4>
                     <p className="text-[11px] text-[#64748B] mt-0.5 line-clamp-1">
-                      {scheme.fullName}
+                      {item.fullName}
                     </p>
                   </div>
                 </div>
 
                 <span className="text-[10px] font-bold text-[#10B981] bg-[#E8F8F2] px-2.5 py-1 rounded-full shrink-0 border border-[#10B981]/20">
-                  Potentially Eligible
+                  {t('journey_step3.badge_potentially_eligible', 'Potentially Eligible')}
                 </span>
               </div>
 
               {/* Description */}
               <p className="text-xs text-[#64748B] leading-relaxed line-clamp-2">
-                {scheme.short_description}
+                {item.short_description}
               </p>
 
               {/* Verified Criteria Checkmarks */}
               <div className="p-3.5 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] space-y-1.5 text-[11px]">
                 <span className="font-bold text-[#1E293B] block mb-1">
-                  Why this scheme may fit:
+                  {t('journey_step2.criteria_heading', 'Statutory Eligibility Breakdown')}:
                 </span>
                 <div className="flex items-center gap-2 text-[#065F46]">
                   <Check className="w-3.5 h-3.5 text-[#10B981] stroke-[3]" />
-                  <span>Purpose matches listed eligible activities</span>
+                  <span>{t('journey_step2.criteria_sc', 'Targeted specifically for SC beneficiaries')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-[#065F46]">
                   <Check className="w-3.5 h-3.5 text-[#10B981] stroke-[3]" />
-                  <span>Income within listed criteria</span>
+                  <span>{t('journey_step2.criteria_income', 'Household income qualifies for interest subvention')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-[#065F46]">
                   <Check className="w-3.5 h-3.5 text-[#10B981] stroke-[3]" />
-                  <span>Requested amount within listed limit ({scheme.loan_amount_short})</span>
+                  <span>{t('journey_step2.criteria_amount', 'Requested amount fits within scheme limits')} ({item.loan_amount_short})</span>
                 </div>
               </div>
 
               {/* Key Specs */}
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <span className="text-[10px] text-[#64748B] block font-medium">Interest Rate</span>
-                  <span className="font-bold text-[#1E293B] font-mono">{scheme.interest_rate_display}</span>
+                  <span className="text-[10px] text-[#64748B] block font-medium">{t('journey_step2.interest_rate', 'Concessional Interest Rate')}</span>
+                  <span className="font-bold text-[#1E293B] font-mono">{item.interest_rate_display}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#64748B] block font-medium">Max Tenure</span>
-                  <span className="font-bold text-[#1E293B]">{scheme.repayment_period}</span>
+                  <span className="text-[10px] text-[#64748B] block font-medium">{t('journey_step2.repayment_tenure', 'Repayment Tenure')}</span>
+                  <span className="font-bold text-[#1E293B]">{item.repayment_period}</span>
                 </div>
               </div>
             </div>
@@ -146,18 +150,19 @@ export default function Step2EligibleSchemes({ onContinue }) {
                 onClick={() => handleSelectAndProceed(scheme)}
                 className="w-full py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] border border-[#0B3B60] text-[#0B3B60] hover:text-[#07263F] text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <span>Select & Proceed</span>
+                <span>{t('journey_step2.btn_select', 'Select & Proceed')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Note that this identifies eligible schemes, not yet ranking best */}
       <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] text-slate-600 flex items-center gap-2">
         <Info className="w-4 h-4 text-slate-400 shrink-0" />
-        <span>This stage identifies all matching schemes based on structured rules. Next, we rank the most suitable scheme for your profile.</span>
+        <span>{t('journey_step2.disclaimer_note', 'This stage identifies all matching schemes based on structured rules. Next, we rank the most suitable scheme for your profile.')}</span>
       </div>
 
       {/* Step Navigation Controls */}
@@ -168,7 +173,7 @@ export default function Step2EligibleSchemes({ onContinue }) {
           className="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-semibold text-[#475569] cursor-pointer min-h-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Need</span>
+          <span>{t('journey_step2.btn_back', 'Back to Need')}</span>
         </button>
 
         <button
@@ -176,7 +181,7 @@ export default function Step2EligibleSchemes({ onContinue }) {
           onClick={() => handleSelectAndProceed(SCHEMES_DATA[0])}
           className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#0B3B60] hover:bg-[#07263F] text-white font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer min-h-[44px]"
         >
-          <span>Continue to Best Scheme Recommendation</span>
+          <span>{t('journey_step2.btn_continue', 'Continue to Best Scheme Recommendation')}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

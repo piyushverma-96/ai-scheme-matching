@@ -1,15 +1,17 @@
 import React from 'react';
 import { Home, Layers, FileCheck2, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../context/AppContext';
 
 export default function BottomNav() {
+  const { t } = useTranslation();
   const { currentView, navigateTo } = useApp();
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: Home, action: () => navigateTo('home') },
-    { id: 'schemes', label: 'Schemes', icon: Layers, action: () => navigateTo('schemes') },
-    { id: 'tracking', label: 'Applications', icon: FileCheck2, action: () => navigateTo('tracking') },
-    { id: 'profile', label: 'Profile', icon: User, action: () => navigateTo('profile') },
+    { id: 'home', label: t('nav.dashboard', 'Home'), icon: Home, action: () => navigateTo('home') },
+    { id: 'schemes', label: t('nav.browse_schemes', 'Schemes'), icon: Layers, action: () => navigateTo('schemes') },
+    { id: 'tracking', label: t('nav.applications', 'Applications'), icon: FileCheck2, action: () => navigateTo('tracking') },
+    { id: 'profile', label: t('nav.profile', 'Profile'), icon: User, action: () => navigateTo('profile') },
   ];
 
   return (

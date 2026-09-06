@@ -13,12 +13,14 @@ import {
   Layers,
   Award,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../context/AppContext';
-import { SCHEMES_DATA } from '../../data/mockData';
+import { SCHEMES_DATA, getLocalizedScheme } from '../../data/mockData';
 import { checkEligibility, getBestMatch } from '../../api';
 import StatusBadge from '../../components/StatusBadge';
 
 export default function Step3RecommendBestScheme({ onContinue }) {
+  const { t, i18n } = useTranslation();
   const {
     selectedScheme,
     setSelectedScheme,
@@ -63,6 +65,7 @@ export default function Step3RecommendBestScheme({ onContinue }) {
     state: journeyFormData?.stateName || journeyFormData?.state || 'Madhya Pradesh',
     district: journeyFormData?.district || 'Bhopal',
     city: journeyFormData?.city || 'Bhopal',
+    language: i18n.language === 'hi' ? 'hindi' : 'english',
   };
 
   // Fetch or update live eligibility results from backend rule engine
@@ -97,7 +100,8 @@ export default function Step3RecommendBestScheme({ onContinue }) {
 
   // Best match is top-ranked eligible scheme
   const bestMatchFromEngine = candidateSchemes[0];
-  const primaryScheme = activeScheme || selectedScheme || bestMatchFromEngine;
+  const rawPrimary = activeScheme || selectedScheme || bestMatchFromEngine;
+  const primaryScheme = getLocalizedScheme(rawPrimary, i18n.language);
 
   // Other eligible schemes shown as alternatives
   const alternatives = candidateSchemes.filter(
@@ -128,14 +132,16 @@ export default function Step3RecommendBestScheme({ onContinue }) {
 
   // Build clean, verified matching reasons
   const matchingReasons =
-    primaryScheme.matching_factors && primaryScheme.matching_factors.length > 0
+    primaryScheme.why_matched && primaryScheme.why_matched.length > 0
+      ? primaryScheme.why_matched
+      : primaryScheme.matching_factors && primaryScheme.matching_factors.length > 0
       ? primaryScheme.matching_factors
       : [
-          `Purpose Match: Your need for '${purposeDisplay}' aligns with this scheme's target focus.`,
-          `Income Criteria: Household income falls within the ₹3,00,000 statutory eligibility ceiling.`,
-          `Financial Scale: Your requirement of ${amountDisplay} fits within the scheme's statutory tier.`,
-          `Applicant Category: Scheduled Caste (SC) category is the designated beneficiary group.`,
-          `Location Coverage: Scheme is operational across ${stateDisplay} via State Channelizing Agencies (SCAs).`,
+          t('journey_step3.reason_purpose', `Purpose Match: Your need for '${purposeDisplay}' aligns with this scheme's target focus.`),
+          t('journey_step3.reason_income', `Income Criteria: Household income falls within the ₹3,00,000 statutory eligibility ceiling.`),
+          t('journey_step3.reason_amount', `Financial Scale: Your requirement of ${amountDisplay} fits within the scheme's statutory tier.`),
+          t('journey_step3.reason_category', `Applicant Category: Scheduled Caste (SC) category is the designated beneficiary group.`),
+          t('journey_step3.reason_location', `Location Coverage: Scheme is operational across ${stateDisplay} via State Channelizing Agencies (SCAs).`),
         ];
 
   const schemeName = primaryScheme.scheme_name || primaryScheme.name;
@@ -158,13 +164,13 @@ export default function Step3RecommendBestScheme({ onContinue }) {
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFF6FF] text-[#1E40AF] text-xs font-bold mb-2">
           <Award className="w-3.5 h-3.5 text-[#2563EB]" />
-          <span>Stage 3 · Best Scheme Recommendation</span>
+          <span>{t('journey_step3.stage_badge', 'Stage 3 · Best Scheme Recommendation')}</span>
         </div>
         <h2 className="text-xl sm:text-3xl font-bold text-[#0B3B60] tracking-tight">
-          Best Government Scheme for You
+          {t('journey_step3.title', 'Best Government Scheme for You')}
         </h2>
         <p className="text-xs sm:text-sm text-[#64748B] mt-1.5 leading-relaxed max-w-3xl">
-          Ranked based on how well each government scheme matches your actual purpose, business sector, project scale, community eligibility, and location applicability — not on loan size or interest rate.
+          {t('journey_step3.subtitle', 'Ranked based on how well each government scheme matches your actual purpose, business sector, project scale, community eligibility, and location applicability — not on loan size or interest rate.')}
         </p>
       </div>
 
@@ -175,25 +181,25 @@ export default function Step3RecommendBestScheme({ onContinue }) {
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0B3B60] text-white text-xs font-bold tracking-wide shadow-xs">
               <Award className="w-3.5 h-3.5 text-[#F59E0B]" />
-              <span>BEST MATCH</span>
+              <span>{t('journey_step3.badge_best_match', 'BEST MATCH')}</span>
             </span>
 
             <StatusBadge
               status={isPartiallyEligible ? 'partially_eligible' : 'potentially_eligible'}
-              text={isPartiallyEligible ? 'Partially Eligible' : 'Potentially Eligible'}
+              text={isPartiallyEligible ? t('journey_step3.badge_partially_eligible', 'Partially Eligible') : t('journey_step3.badge_potentially_eligible', 'Potentially Eligible')}
               size="xs"
             />
           </div>
 
           {/* Transparent Match Score Badge (Never AI confidence) */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#64748B] font-semibold">Match Score:</span>
+            <span className="text-xs text-[#64748B] font-semibold">{t('journey_step3.match_score_label', 'Match Score')}:</span>
             <span className={`text-xs sm:text-sm font-bold font-mono px-3 py-1 rounded-full border shadow-2xs ${
               isPartiallyEligible
                 ? 'bg-[#FEF3C7] text-[#92400E] border-[#D97706]/30'
                 : 'bg-[#E8F8F2] text-[#10B981] border-[#10B981]/30'
             }`}>
-              {matchScore}/100 Match Score
+              {matchScore}{t('journey_step3.match_score_suffix', '/100 Match Score')}
             </span>
           </div>
         </div>
@@ -216,7 +222,7 @@ export default function Step3RecommendBestScheme({ onContinue }) {
 
           {/* Explicit Benefit Type Tag */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#F0FDF4] border border-[#BBF7D0] text-xs font-semibold text-[#166534] mt-2">
-            <span className="font-bold text-[#14532D]">Benefit Type:</span>
+            <span className="font-bold text-[#14532D]">{t('journey_step3.benefit_type_label', 'Benefit Type:')}</span>
             <span>{benefitTypeDisplay}</span>
           </div>
         </div>
@@ -231,10 +237,10 @@ export default function Step3RecommendBestScheme({ onContinue }) {
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold text-[#166534] uppercase tracking-wider flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />
-              <span>Why this scheme matches you:</span>
+              <span>{t('journey_step3.why_recommended', 'Why this scheme is recommended')}:</span>
             </h4>
             <span className="text-[11px] text-[#166534]/80 font-medium">
-              Verified Official Criteria
+              {t('journey_step3.verified_criteria', 'Verified Official Criteria')}
             </span>
           </div>
 
@@ -251,25 +257,25 @@ export default function Step3RecommendBestScheme({ onContinue }) {
         {/* Key Verified Terms Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] text-xs">
           <div>
-            <span className="text-[10px] text-[#64748B] block font-medium">Project / Loan Scale</span>
+            <span className="text-[10px] text-[#64748B] block font-medium">{t('journey_step3.statutory_cap', 'Statutory Loan Cap')}</span>
             <span className="font-bold text-[#0B3B60] font-mono text-xs sm:text-sm">
               {primaryScheme.loan_amount_short || (primaryScheme.max_loan_amount ? `Up to ₹${(primaryScheme.max_loan_amount / 100000).toFixed(1)}L` : 'Up to Scheme Limit')}
             </span>
           </div>
           <div>
-            <span className="text-[10px] text-[#64748B] block font-medium">Concessional Rate</span>
+            <span className="text-[10px] text-[#64748B] block font-medium">{t('journey_step3.interest_rate_p_a', 'Interest Rate (% p.a.)')}</span>
             <span className="font-bold text-[#10B981] font-mono text-xs sm:text-sm">
               {primaryScheme.interest_rate_display || `${primaryScheme.rate_beneficiary_min}% p.a.`}
             </span>
           </div>
           <div>
-            <span className="text-[10px] text-[#64748B] block font-medium">Repayment Tenure</span>
+            <span className="text-[10px] text-[#64748B] block font-medium">{t('journey_step3.max_tenure', 'Maximum Tenure')}</span>
             <span className="font-bold text-[#1E293B] text-xs sm:text-sm">
               {primaryScheme.repayment_period || (primaryScheme.repayment_years ? `Up to ${primaryScheme.repayment_years} Years` : '3 - 7 Years')}
             </span>
           </div>
           <div>
-            <span className="text-[10px] text-[#64748B] block font-medium">Moratorium Period</span>
+            <span className="text-[10px] text-[#64748B] block font-medium">{t('journey_step3.moratorium_period', 'Moratorium Period (अधिस्थगन अवधि)')}</span>
             <span className="font-bold text-[#D97706] text-xs sm:text-sm">
               {primaryScheme.moratorium_note || primaryScheme.moratorium_period || '3 - 6 Months'}
             </span>
@@ -280,10 +286,10 @@ export default function Step3RecommendBestScheme({ onContinue }) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 text-[11px] text-[#64748B] border-t border-slate-100">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-[#10B981]" />
-            <span>Verified Source: {sourceName}</span>
+            <span>{t('journey_step3.verified_source', 'Verified Source:')} {sourceName}</span>
           </div>
           <span className="font-mono text-[10px] text-slate-400">
-            Official Data Verified: {lastVerifiedAt}
+            {t('journey_step3.official_verified', 'Official Data Verified:')} {lastVerifiedAt}
           </span>
         </div>
 
@@ -293,7 +299,7 @@ export default function Step3RecommendBestScheme({ onContinue }) {
           onClick={handleProceed}
           className="w-full py-4 rounded-2xl bg-[#0B3B60] hover:bg-[#07263F] text-white font-bold text-xs sm:text-base flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all cursor-pointer"
         >
-          <span>Continue with {schemeName} to Financial Impact</span>
+          <span>{t('journey_step3.btn_proceed_impact', 'Proceed to Financial Impact Calculation →')}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
@@ -303,22 +309,23 @@ export default function Step3RecommendBestScheme({ onContinue }) {
         <div className="space-y-4 pt-4">
           <div>
             <h3 className="text-sm sm:text-base font-bold text-[#0B3B60]">
-              Other eligible government schemes
+              {t('journey_step3.alternatives_title', 'Other Potentially Eligible Schemes')}
             </h3>
             <p className="text-xs text-[#64748B] mt-0.5">
-              You also qualify for the following verified schemes. Each offers distinct statutory support based on project scale and purpose:
+              {t('journey_step3.alternatives_subtitle', 'You also qualify for the following verified schemes. Each offers distinct statutory support based on project scale and purpose:')}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {alternatives.map((alt, idx) => {
+            {alternatives.map((rawAlt, idx) => {
+              const alt = getLocalizedScheme(rawAlt, i18n.language);
               const altName = alt.scheme_name || alt.name;
               const altScore = alt.match_score != null ? alt.match_score : (alt.match_percentage || 85);
               const altBenefitType =
                 alt.support_type_display ||
                 (alt.benefit_type === 'loan' ? 'Credit-Linked Financial Support' : alt.benefit_type || 'Financial Assistance');
 
-              const altReasons = alt.matching_factors?.slice(0, 3) || alt.why_matched?.slice(0, 3) || [
+              const altReasons = alt.why_matched?.slice(0, 3) || alt.matching_factors?.slice(0, 3) || [
                 `Purpose matches eligible activity guidelines`,
                 `Income qualifies under statutory ceiling`,
                 `Project scale fits statutory limit`,
@@ -336,12 +343,12 @@ export default function Step3RecommendBestScheme({ onContinue }) {
                         <p className="text-[11px] text-[#64748B] mt-0.5 line-clamp-1">{alt.fullName || alt.issuing_body}</p>
                       </div>
                       <span className="text-[10px] font-bold font-mono px-2.5 py-0.5 rounded-full bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE] shrink-0">
-                        {altScore}/100 Match Score
+                        {altScore}{t('journey_step3.match_score_suffix', '/100 Match Score')}
                       </span>
                     </div>
 
                     <div className="text-[11px] font-semibold text-[#166534] bg-[#F0FDF4] px-2.5 py-1 rounded-lg border border-[#BBF7D0]">
-                      Benefit Type: {altBenefitType}
+                      {t('journey_step3.benefit_type_label', 'Benefit Type:')} {altBenefitType}
                     </div>
 
                     <p className="text-xs text-[#64748B] line-clamp-2 leading-relaxed">
@@ -351,7 +358,7 @@ export default function Step3RecommendBestScheme({ onContinue }) {
                     {/* Quick Reasons Checklist */}
                     <div className="p-3 bg-slate-50 rounded-xl space-y-1.5 text-xs text-slate-700">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
-                        Why this matches:
+                        {t('journey_step3.why_matches_label', 'Why this matches:')}
                       </span>
                       {altReasons.map((r, rIdx) => (
                         <div key={rIdx} className="flex items-start gap-1.5 text-[11px] text-[#065F46]">
@@ -363,10 +370,10 @@ export default function Step3RecommendBestScheme({ onContinue }) {
 
                     <div className="flex justify-between text-xs pt-2 border-t border-[#F1F5F9]">
                       <span className="text-[#64748B]">
-                        Rate: <strong className="text-[#1E293B]">{alt.interest_rate_display || `${alt.rate_beneficiary_min}% p.a.`}</strong>
+                        {t('journey_step3.rate_label', 'Rate:')} <strong className="text-[#1E293B]">{alt.interest_rate_display || `${alt.rate_beneficiary_min}% p.a.`}</strong>
                       </span>
                       <span className="text-[#64748B]">
-                        Tenure: <strong className="text-[#1E293B]">{alt.repayment_period || `${alt.repayment_years || 5} Years`}</strong>
+                        {t('journey_step3.tenure_label', 'Tenure:')} <strong className="text-[#1E293B]">{alt.repayment_period || `${alt.repayment_years || 5} Years`}</strong>
                       </span>
                     </div>
                   </div>
@@ -377,7 +384,7 @@ export default function Step3RecommendBestScheme({ onContinue }) {
                       onClick={() => handleSelectAlternative(alt)}
                       className="w-full py-2.5 rounded-xl bg-[#F8FAFC] hover:bg-[#0B3B60] hover:text-white text-[#0B3B60] text-xs font-bold border border-[#CBD5E1] transition-all cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      <span>Select as Preferred Scheme</span>
+                      <span>{t('journey_step3.btn_switch', 'Switch to this Scheme')}</span>
                     </button>
                   </div>
                 </div>
@@ -395,7 +402,7 @@ export default function Step3RecommendBestScheme({ onContinue }) {
           className="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-semibold text-[#475569] cursor-pointer min-h-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Eligible Schemes</span>
+          <span>{t('journey_step3.btn_back_schemes', '← Back to Eligible Schemes')}</span>
         </button>
 
         <button
@@ -403,7 +410,7 @@ export default function Step3RecommendBestScheme({ onContinue }) {
           onClick={handleProceed}
           className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#0B3B60] hover:bg-[#07263F] text-white font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer min-h-[44px]"
         >
-          <span>Continue to Financial Impact</span>
+          <span>{t('journey_step3.btn_proceed_impact', 'Proceed to Financial Impact Calculation →')}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../context/AppContext';
 import SixStepProgressStepper from '../../components/SixStepProgressStepper';
 import Step1UnderstandNeed from './Step1UnderstandNeed';
@@ -10,6 +11,7 @@ import Step6GuideApplication from './Step6GuideApplication';
 import { ArrowLeft, ShieldCheck, Sparkles, HelpCircle } from 'lucide-react';
 
 export default function ProductJourneyContainer() {
+  const { t } = useTranslation();
   const { journeyStep, setJourneyStep, setView } = useApp();
 
   // Scroll to top whenever step changes
@@ -47,17 +49,17 @@ export default function ProductJourneyContainer() {
             className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors bg-slate-100/80 hover:bg-slate-200/80 px-3 py-1.5 rounded-lg cursor-pointer min-h-[36px]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Dashboard</span>
+            <span>{t('journey_nav.dashboard_back', 'Dashboard')}</span>
           </button>
 
           <div className="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-500">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Technical Approach: 6-Stage Verified Delivery Pipeline</span>
+            <span>{t('journey_nav.pipeline_title', 'Technical Approach: 6-Stage Verified Delivery Pipeline')}</span>
           </div>
 
           <div className="flex items-center gap-1.5 text-xs text-slate-500">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span className="font-semibold text-slate-700">Official Portal</span>
+            <span className="font-semibold text-slate-700">{t('journey_nav.official_portal', 'Official Portal')}</span>
           </div>
         </div>
       </div>

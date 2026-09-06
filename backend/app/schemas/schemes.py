@@ -247,6 +247,10 @@ class EligibilityCheckRequest(BaseModel):
         default=None,
         description="Current occupation of the applicant.",
     )
+    language: Optional[str] = Field(
+        default="english",
+        description="Preferred language for matching explanations ('english' | 'hindi').",
+    )
 
     @field_validator("purpose")
     @classmethod

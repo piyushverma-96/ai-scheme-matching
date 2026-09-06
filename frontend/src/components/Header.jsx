@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, Bell, ChevronDown, User, LogOut, ShieldCheck, Globe, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../context/AppContext';
 import useWindowDimensions from '../hooks/useWindowDimensions';
 import Logo from './Logo';
-import i18n from '../i18n';
 
 export default function Header() {
+  const { t, i18n } = useTranslation();
   const {
     navigateTo,
     setSidebarOpen,
@@ -146,14 +147,14 @@ export default function Header() {
             {notificationsOpen && (
               <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-32px)] bg-white rounded-2xl shadow-xl border border-[#E2E8F0] p-3.5 z-50 animate-in fade-in zoom-in-95 duration-100">
                 <div className="flex items-center justify-between pb-2 border-b border-[#F1F5F9] mb-2 px-1">
-                  <span className="text-xs font-bold text-[#0B3B60]">Official Notifications</span>
+                  <span className="text-xs font-bold text-[#0B3B60]">{t('header.notifications', 'Official Notifications')}</span>
                   <span className="text-[10px] text-[#0E6655] font-semibold bg-[#E8F8F2] px-2 py-0.5 rounded-full border border-[#10B981]/20">
                     {notificationsCount} Active
                   </span>
                 </div>
                 {notificationsCount === 0 ? (
                   <p className="text-xs text-[#64748B] py-3 text-center">
-                    No new alerts. All applications are up to date.
+                    {t('header.no_notifications', 'No new alerts. All applications are up to date.')}
                   </p>
                 ) : (
                   <div className="space-y-2 text-xs">
@@ -170,7 +171,7 @@ export default function Header() {
                           {app.scheme_name} — {app.status}
                         </p>
                         <p className="text-[11px] text-[#64748B] mt-0.5">
-                          Application ID: {app.application_number}
+                          {t('dashboard.app_id', 'Application ID')}: {app.application_number}
                         </p>
                       </div>
                     ))}
@@ -235,7 +236,7 @@ export default function Header() {
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#1E293B] hover:bg-[#F8FAFC] cursor-pointer transition-colors min-h-[40px]"
                   >
                     <User className="w-3.5 h-3.5 text-gray-500" />
-                    <span>Profile</span>
+                    <span>{t('header.profile', 'Profile')}</span>
                   </button>
 
                   <button
@@ -247,7 +248,7 @@ export default function Header() {
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#1E293B] hover:bg-[#F8FAFC] cursor-pointer transition-colors min-h-[40px]"
                   >
                     <Settings className="w-3.5 h-3.5 text-gray-500" />
-                    <span>Settings</span>
+                    <span>{t('header.settings', 'Settings')}</span>
                   </button>
 
                   <button
@@ -259,7 +260,7 @@ export default function Header() {
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#1E293B] hover:bg-[#F8FAFC] cursor-pointer transition-colors min-h-[40px]"
                   >
                     <ShieldCheck className="w-3.5 h-3.5 text-gray-500" />
-                    <span>My Applications</span>
+                    <span>{t('nav.applications', 'My Applications')}</span>
                   </button>
 
                   <div className="my-1 border-t border-[#F1F5F9]" />
@@ -273,7 +274,7 @@ export default function Header() {
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#FEF2F2] cursor-pointer transition-colors min-h-[40px]"
                   >
                     <LogOut className="w-3.5 h-3.5" />
-                    <span>Logout</span>
+                    <span>{t('header.logout', 'Logout')}</span>
                   </button>
                 </div>
               )}

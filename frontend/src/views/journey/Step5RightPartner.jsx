@@ -23,9 +23,11 @@ import {
   Mail,
   SlidersHorizontal,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../context/AppContext';
 import { getNearbyPartners } from '../../api';
 import MapLibrePartnerMap from '../../components/MapLibrePartnerMap';
+import { getLocalizedScheme } from '../../data/mockData';
 
 // Default Fallback Partners for instant offline rendering
 const FALLBACK_ELIGIBLE_PARTNERS = [
@@ -167,6 +169,7 @@ const FALLBACK_EXCLUDED_PARTNERS = [
 ];
 
 export default function Step5RightPartner({ onContinue }) {
+  const { t, i18n } = useTranslation();
   const {
     selectedPartner,
     setSelectedPartner,
@@ -176,6 +179,8 @@ export default function Step5RightPartner({ onContinue }) {
     formData,
     saveJourneyProgress,
   } = useApp();
+
+  const locScheme = getLocalizedScheme(selectedScheme, i18n.language);
 
   // Location state
   const [userLocation, setUserLocation] = useState({
@@ -352,21 +357,21 @@ export default function Step5RightPartner({ onContinue }) {
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF1F6] text-[#0B3B60] text-xs font-bold mb-2">
             <Building2 className="w-3.5 h-3.5 text-[#0B3B60]" />
-            <span>Stage 5 · Find the Right Application Channel</span>
+            <span>{t('journey_step5.stage_badge', 'Stage 5 · Channel Partner & Application Channel Locator')}</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-[#0B3B60] tracking-tight">
-            Find the Right Application Channel
+            {t('journey_step5.title', 'Find the Right Channel Partner Near You')}
           </h2>
           <p className="text-xs sm:text-sm text-[#64748B] mt-1">
             {isPartnerChannel ? (
               <>
-                Nearest verified channelizing agency (SCA / Empanelled Bank / NBFC-MFI) with active operational status for{' '}
-                <strong className="text-[#0B3B60]">{selectedScheme?.name || 'Selected Government Scheme'}</strong>.
+                {t('journey_step5.nearest_channel_intro', 'Nearest verified channelizing agency (SCA / Empanelled Bank / NBFC-MFI) with active operational status for')}{' '}
+                <strong className="text-[#0B3B60]">{locScheme?.scheme_name || locScheme?.name || 'Selected Government Scheme'}</strong>.
               </>
             ) : (
               <>
-                Official direct application channel designated for{' '}
-                <strong className="text-[#0B3B60]">{selectedScheme?.name || 'Selected Government Scheme'}</strong>.
+                {t('journey_step5.direct_channel_intro', 'Official direct application channel designated for')}{' '}
+                <strong className="text-[#0B3B60]">{locScheme?.scheme_name || locScheme?.name || 'Selected Government Scheme'}</strong>.
               </>
             )}
           </p>
@@ -382,7 +387,7 @@ export default function Step5RightPartner({ onContinue }) {
                   type="text"
                   value={cityInput}
                   onChange={(e) => setCityInput(e.target.value)}
-                  placeholder="Enter city or district..."
+                  placeholder={t('journey_step5.location_placeholder', 'Enter city or district...')}
                   className="text-xs px-2 py-1 border border-slate-300 rounded-lg outline-none focus:border-[#0B3B60]"
                   autoFocus
                 />
@@ -390,7 +395,7 @@ export default function Step5RightPartner({ onContinue }) {
                   type="submit"
                   className="px-2 py-1 bg-[#0B3B60] text-white text-[11px] font-bold rounded-lg cursor-pointer"
                 >
-                  Set
+                  {t('journey_step5.btn_set', 'Set')}
                 </button>
                 <button
                   type="button"
@@ -402,14 +407,14 @@ export default function Step5RightPartner({ onContinue }) {
               </form>
             ) : (
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-[#64748B]">Location:</span>
+                <span className="text-[#64748B]">{t('journey_step5.location_label', 'Location:')}</span>
                 <span className="font-bold text-[#0B3B60]">{userLocation.city}</span>
                 <button
                   type="button"
                   onClick={() => setIsEditingLocation(true)}
                   className="text-[11px] text-[#2563EB] hover:underline font-semibold cursor-pointer"
                 >
-                  Change
+                  {t('journey_step5.btn_change', 'Change')}
                 </button>
               </div>
             )}
@@ -428,20 +433,20 @@ export default function Step5RightPartner({ onContinue }) {
                   {channelType.replace('_', ' ')}
                 </span>
                 <span className="text-xs text-[#065F46] font-bold bg-[#E8F8F2] px-3 py-1 rounded-full border border-[#BBF7D0]">
-                  Direct Official Channel
+                  {t('journey_step5.direct_official_channel', 'Direct Official Channel')}
                 </span>
               </div>
               <span className="text-xs text-slate-400">
-                Verified Official Channel
+                {t('journey_step5.verified_official_channel', 'Verified Official Channel')}
               </span>
             </div>
 
             <div className="space-y-3">
               <h3 className="text-lg sm:text-xl font-bold text-[#0B3B60]">
-                Official Direct Application Channel
+                {t('journey_step5.direct_channel_heading', 'Official Direct Application Channel')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                This government scheme does not require an intermediary bank, SCA, or NBFC-MFI branch. You can apply directly through the designated government authority below.
+                {t('journey_step5.direct_channel_desc', 'This government scheme does not require an intermediary bank, SCA, or NBFC-MFI branch. You can apply directly through the designated government authority below.')}
               </p>
             </div>
 
@@ -451,7 +456,7 @@ export default function Step5RightPartner({ onContinue }) {
                 <div className="flex items-start gap-3">
                   <ExternalLink className="w-5 h-5 text-[#2563EB] shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block text-slate-800 text-sm">Designated Application Portal</strong>
+                    <strong className="block text-slate-800 text-sm">{t('journey_step5.portal_label', 'Designated Application Portal')}</strong>
                     <a
                       href={channelDetails.portal_url}
                       target="_blank"
@@ -468,7 +473,7 @@ export default function Step5RightPartner({ onContinue }) {
                 <div className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block text-slate-800 text-sm">Department Office / Authority</strong>
+                    <strong className="block text-slate-800 text-sm">{t('journey_step5.office_label', 'Department Office / Authority')}</strong>
                     <p className="text-slate-600">{channelDetails.office_address}</p>
                   </div>
                 </div>
@@ -478,7 +483,7 @@ export default function Step5RightPartner({ onContinue }) {
                 <div className="flex items-start gap-3">
                   <Phone className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block text-slate-800 text-sm">Helpdesk &amp; Inquiries</strong>
+                    <strong className="block text-slate-800 text-sm">{t('journey_step5.helpdesk_label', 'Helpdesk & Inquiries')}</strong>
                     <p className="text-slate-600">{channelDetails.contact_info}</p>
                   </div>
                 </div>
@@ -488,9 +493,9 @@ export default function Step5RightPartner({ onContinue }) {
                 <div className="flex items-start gap-3">
                   <Info className="w-5 h-5 text-[#0B3B60] shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block text-slate-800 text-sm">Ministry Nodal Portal</strong>
+                    <strong className="block text-slate-800 text-sm">{t('journey_step5.nodal_portal_label', 'Ministry Nodal Portal')}</strong>
                     <p className="text-slate-600">
-                      Applications are processed via the Central Ministry of Social Justice and Empowerment single-window window portal (e-Anudaan / PM SURAJ).
+                      {t('journey_step5.nodal_portal_desc', 'Applications are processed via the Central Ministry of Social Justice and Empowerment single-window window portal (e-Anudaan / PM SURAJ).')}
                     </p>
                   </div>
                 </div>
@@ -500,7 +505,7 @@ export default function Step5RightPartner({ onContinue }) {
             <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-800 flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <span>
-                <strong>Notice:</strong> No fee is charged for official scheme applications. Beware of unauthorized intermediaries.
+                {t('journey_step5.fee_notice', 'Notice: No fee is charged for official scheme applications. Beware of unauthorized intermediaries.')}
               </span>
             </div>
           </div>
@@ -513,32 +518,32 @@ export default function Step5RightPartner({ onContinue }) {
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className="font-bold uppercase tracking-wider text-[10px] text-[#166534] flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-[#16A34A]" />
-                <span>Deterministic Multi-Gate Eligibility Engine (Filter First → Rank Second)</span>
+                <span>{t('journey_step5.gate_engine_title', 'Deterministic Multi-Gate Eligibility Engine (Filter First → Rank Second)')}</span>
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#DCFCE7] text-[#15803D] border border-[#86EFAC]">
-                Zero High-NPA / Overdue Guarantee
+                {t('journey_step5.zero_npa_guarantee', 'Zero High-NPA / Overdue Guarantee')}
               </span>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
               <span className="bg-white px-2.5 py-1 rounded-lg border border-[#BBF7D0] text-[#166534] font-bold">
-                1. Scheme Compatibility
+                {t('journey_step5.gate_1', '1. Scheme Compatibility')}
               </span>
               <span className="text-[#16A34A]">→</span>
               <span className="bg-white px-2.5 py-1 rounded-lg border border-[#BBF7D0] text-[#166534] font-bold">
-                2. Active Authorization
+                {t('journey_step5.gate_2', '2. Active Authorization')}
               </span>
               <span className="text-[#16A34A]">→</span>
               <span className="bg-white px-2.5 py-1 rounded-lg border border-[#BBF7D0] text-[#166534] font-bold">
-                3. Fund Utilization (≥40%)
+                {t('journey_step5.gate_3', '3. Fund Utilization (≥40%)')}
               </span>
               <span className="text-[#16A34A]">→</span>
               <span className="bg-white px-2.5 py-1 rounded-lg border border-[#BBF7D0] text-[#166534] font-bold">
-                4. Overdue &amp; NPA Clearance
+                {t('journey_step5.gate_4', '4. Overdue & NPA Clearance')}
               </span>
               <span className="text-[#16A34A]">→</span>
               <span className="bg-[#15803D] text-white px-2.5 py-1 rounded-lg font-bold shadow-2xs">
-                5. Closest Eligible Partner
+                {t('journey_step5.gate_5', '5. Closest Eligible Partner')}
               </span>
             </div>
           </div>
@@ -563,7 +568,7 @@ export default function Step5RightPartner({ onContinue }) {
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0B3B60] text-white text-xs font-bold tracking-wide shadow-2xs">
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" />
-                    <span>RECOMMENDED CHANNEL PARTNER</span>
+                    <span>{t('journey_step5.recommended_desk', 'Recommended Partner Desk')}</span>
                   </span>
 
                   <span className="text-xs font-bold text-[#065F46] bg-[#D1FAE5] px-3 py-1 rounded-full border border-[#A7F3D0]">
@@ -597,13 +602,13 @@ export default function Step5RightPartner({ onContinue }) {
                   {/* Operational Eligibility Pillars */}
                   <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
                     <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                      Fund Utilization: <strong>{recommendedPartner.fund_utilization_percent || 92.5}%</strong>
+                      {t('journey_step5.fund_utilization', 'Fund Utilization Rate:')} <strong>{recommendedPartner.fund_utilization_percent || 92.5}%</strong>
                     </span>
                     <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-semibold border border-blue-200">
-                      Overdue Status: <strong>{recommendedPartner.overdue_status || 'Current'}</strong>
+                      {t('journey_step5.overdue_status', 'Overdue Status:')} <strong>{recommendedPartner.overdue_status || 'Current'}</strong>
                     </span>
                     <span className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 font-semibold border border-purple-200">
-                      Asset Category: <strong>{recommendedPartner.npa_status || 'Standard Asset'}</strong>
+                      {t('journey_step5.npa_status', 'Asset Classification:')} <strong>{recommendedPartner.npa_status || 'Standard Asset'}</strong>
                     </span>
                   </div>
                 </div>
@@ -612,7 +617,7 @@ export default function Step5RightPartner({ onContinue }) {
               {/* Why this partner matches */}
               <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2 text-xs text-slate-700">
                 <strong className="text-[#0B3B60] block font-bold uppercase tracking-wider text-[10px]">
-                  Why this partner was recommended:
+                  {t('journey_step5.compliance_title', 'Eligibility & Inspection Checklist:')}
                 </strong>
                 <ul className="space-y-1 text-slate-600">
                   {(recommendedPartner.compatibility_factors || [
@@ -631,9 +636,9 @@ export default function Step5RightPartner({ onContinue }) {
 
               <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
                 <div className="flex items-center gap-2 text-slate-500 text-[11px]">
-                  <span>Contact: <strong>{recommendedPartner.phone || '+91 755 2554101'}</strong></span>
+                  <span>{t('journey_step5.contact_label', 'Contact:')} <strong>{recommendedPartner.phone || '+91 755 2554101'}</strong></span>
                   <span>·</span>
-                  <span>Hours: <strong>{recommendedPartner.operating_hours || '10 AM – 4 PM'}</strong></span>
+                  <span>{t('journey_step5.hours_label', 'Hours:')} <strong>{recommendedPartner.operating_hours || '10 AM – 4 PM'}</strong></span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -642,14 +647,14 @@ export default function Step5RightPartner({ onContinue }) {
                     onClick={() => openDetails(recommendedPartner)}
                     className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#0B3B60] hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
                   >
-                    Audit Details
+                    {t('journey_step5.btn_audit_details', 'Audit Details')}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSelect(recommendedPartner)}
                     className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#0B3B60] hover:bg-[#07263F] transition-all cursor-pointer"
                   >
-                    Select this Partner
+                    {t('journey_step5.btn_select_partner', 'Select This Partner Desk')}
                   </button>
                 </div>
               </div>
@@ -660,7 +665,7 @@ export default function Step5RightPartner({ onContinue }) {
           {eligiblePartners.length > 1 && (
             <div className="space-y-3">
               <h3 className="text-sm sm:text-base font-bold text-[#0B3B60]">
-                Other Verified Eligible Partners
+                {t('journey_step5.other_partners_title', 'Other Verified Eligible Partners')}
               </h3>
               <div className="grid grid-cols-1 gap-3">
                 {eligiblePartners.slice(1).map((partner) => (
@@ -687,7 +692,7 @@ export default function Step5RightPartner({ onContinue }) {
                             {partner.partner_type || partner.type}
                           </span>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                            Fund Util: {partner.fund_utilization_percent || 88}%
+                            {t('journey_step5.fund_utilization', 'Fund Utilization:')} {partner.fund_utilization_percent || 88}%
                           </span>
                         </div>
 
@@ -697,7 +702,7 @@ export default function Step5RightPartner({ onContinue }) {
                         </p>
 
                         <p className="text-[11px] text-[#065F46] font-medium">
-                          Status: <strong>{partner.status || 'Operational'}</strong> · {partner.distance_text}
+                          {t('journey_step5.status_label', 'Status:')} <strong>{partner.status || 'Operational'}</strong> · {partner.distance_text}
                         </p>
                       </div>
                     </div>
@@ -711,7 +716,7 @@ export default function Step5RightPartner({ onContinue }) {
                         }}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#64748B] hover:text-[#0B3B60] bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
                       >
-                        Details
+                        {t('journey_step5.btn_details', 'Details')}
                       </button>
 
                       <button
@@ -726,7 +731,7 @@ export default function Step5RightPartner({ onContinue }) {
                             : 'bg-white border border-[#0B3B60] text-[#0B3B60] hover:bg-[#0B3B60] hover:text-white'
                         }`}
                       >
-                        {activePartner?.id === partner.id ? 'Selected' : 'Select'}
+                        {activePartner?.id === partner.id ? t('journey_step5.btn_selected', 'Selected') : t('journey_step5.btn_select', 'Select')}
                       </button>
                     </div>
                   </div>
@@ -745,14 +750,14 @@ export default function Step5RightPartner({ onContinue }) {
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                   <span className="text-xs font-bold text-amber-900 uppercase tracking-wider">
-                    Ineligible &amp; Excluded Nearby Partners ({excludedPartners.length})
+                    {t('journey_step5.excluded_partners_title', 'Ineligible & Excluded Nearby Partners')} ({excludedPartners.length})
                   </span>
                 </div>
                 <button
                   type="button"
                   className="text-xs font-semibold text-amber-800 hover:underline flex items-center gap-1"
                 >
-                  <span>{showExcluded ? 'Hide' : 'Show'} Audit Log</span>
+                  <span>{showExcluded ? t('journey_step5.hide_audit_log', 'Hide Audit Log') : t('journey_step5.show_audit_log', 'Show Audit Log')}</span>
                   {showExcluded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                 </button>
               </div>
@@ -760,7 +765,7 @@ export default function Step5RightPartner({ onContinue }) {
               {showExcluded && (
                 <div className="space-y-2.5 pt-2">
                   <p className="text-[11px] text-amber-800 leading-relaxed">
-                    The following institutions are physically near your location but were filtered out before distance ranking because they violate mandatory operational criteria (e.g. pending overdues &gt;90 days, low fund utilization, or scheme incompatibility):
+                    {t('journey_step5.excluded_reason_desc', 'The following institutions are physically near your location but were filtered out before distance ranking because they violate mandatory operational criteria (e.g. pending overdues >90 days, low fund utilization, or scheme incompatibility):')}
                   </p>
 
                   {excludedPartners.map((ex) => (
@@ -772,17 +777,17 @@ export default function Step5RightPartner({ onContinue }) {
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-[#1E293B]">{ex.name}</span>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-800 border border-red-200">
-                            Excluded from Routing
+                            {t('journey_step5.excluded_badge', 'Excluded from Routing')}
                           </span>
                           <span className="text-[11px] text-[#64748B] font-medium">{ex.distance_text}</span>
                         </div>
                         <p className="text-[#B45309] text-[11px] leading-relaxed">
-                          <strong>Exclusion Reason:</strong> {ex.exclusion_reason}
+                          <strong>{t('journey_step5.excluded_reason_label', 'Exclusion Reason:')}</strong> {ex.exclusion_reason}
                         </p>
                       </div>
 
                       <span className="text-[10px] text-slate-400 whitespace-nowrap self-start">
-                        Audit Date: {ex.last_verified_at || '10/08/2026'}
+                        {t('journey_step5.audit_date_label', 'Audit Date:')} {ex.last_verified_at || '10/08/2026'}
                       </span>
                     </div>
                   ))}
@@ -796,11 +801,11 @@ export default function Step5RightPartner({ onContinue }) {
             <div className="flex items-center gap-2">
               <Info className="w-4 h-4 text-slate-400 shrink-0" />
               <span>
-                <strong>Demo Partner Data:</strong> Channel partner eligibility criteria simulated per NSFDC Master Guidelines &amp; RBI NBFC inspection norms.
+                <strong>{t('journey_step5.demo_footer', 'Demo Partner Data: Channel partner eligibility criteria simulated per NSFDC Master Guidelines & RBI NBFC inspection norms.')}</strong>
               </span>
             </div>
             <span className="font-semibold text-slate-500 whitespace-nowrap">
-              Last Verified: 15/08/2026
+              {t('journey_step5.last_verified', 'Last Verified: 15/08/2026')}
             </span>
           </div>
         </>
@@ -815,7 +820,7 @@ export default function Step5RightPartner({ onContinue }) {
           className="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-semibold text-[#475569] transition-colors cursor-pointer min-h-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Financial Impact</span>
+          <span>{t('journey_step5.btn_back_impact', '← Back to Financial Impact')}</span>
         </button>
 
         <button
@@ -823,7 +828,7 @@ export default function Step5RightPartner({ onContinue }) {
           onClick={handleProceed}
           className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#0B3B60] hover:bg-[#07263F] text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer min-h-[44px]"
         >
-          <span>Continue to Application</span>
+          <span>{t('journey_step5.btn_proceed_guide', 'Proceed to Application Guide →')}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
@@ -852,34 +857,34 @@ export default function Step5RightPartner({ onContinue }) {
 
             <div className="space-y-2.5 text-xs text-[#475569] divide-y divide-slate-100">
               <div className="pt-2">
-                <strong>Address:</strong>
+                <strong>{t('journey_step5.modal_address', 'Address:')}</strong>
                 <p className="text-slate-700 mt-0.5">{selectedDetailPartner.address}</p>
               </div>
 
               <div className="pt-2 grid grid-cols-2 gap-2">
                 <div>
-                  <strong>Fund Utilization:</strong>
+                  <strong>{t('journey_step5.modal_fund_util', 'Fund Utilization:')}</strong>
                   <p className="text-emerald-700 font-bold">{selectedDetailPartner.fund_utilization_percent || 92.5}%</p>
                 </div>
                 <div>
-                  <strong>Overdue Status:</strong>
+                  <strong>{t('journey_step5.modal_overdue', 'Overdue Status:')}</strong>
                   <p className="text-emerald-700 font-bold">{selectedDetailPartner.overdue_status || 'Clean'}</p>
                 </div>
               </div>
 
               <div className="pt-2 grid grid-cols-2 gap-2">
                 <div>
-                  <strong>Nodal Contact:</strong>
+                  <strong>{t('journey_step5.modal_nodal_contact', 'Nodal Contact:')}</strong>
                   <p className="text-slate-800">{selectedDetailPartner.contact_person || 'Liaison Desk'}</p>
                 </div>
                 <div>
-                  <strong>Phone:</strong>
+                  <strong>{t('journey_step5.modal_phone', 'Phone:')}</strong>
                   <p className="text-slate-800">{selectedDetailPartner.phone || '+91 755 2554101'}</p>
                 </div>
               </div>
 
               <div className="pt-2">
-                <strong>Supported NSFDC Schemes:</strong>
+                <strong>{t('journey_step5.modal_supported_schemes', 'Supported NSFDC Schemes:')}</strong>
                 <ul className="list-disc list-inside mt-1 space-y-0.5 text-slate-700">
                   {Array.isArray(selectedDetailPartner.supported_schemes)
                     ? selectedDetailPartner.supported_schemes.map((s, i) => <li key={i}>{s}</li>)
@@ -888,7 +893,7 @@ export default function Step5RightPartner({ onContinue }) {
               </div>
 
               <div className="pt-2">
-                <strong>Eligibility Audit Reason:</strong>
+                <strong>{t('journey_step5.modal_audit_reason', 'Eligibility Audit Reason:')}</strong>
                 <p className="text-slate-600 italic text-[11px] mt-0.5">
                   {selectedDetailPartner.eligibility_reason || 'Verified empanelled partner meeting all operational standards.'}
                 </p>
@@ -901,7 +906,7 @@ export default function Step5RightPartner({ onContinue }) {
                 onClick={() => setDetailsModalOpen(false)}
                 className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
               >
-                Close
+                {t('journey_step5.btn_close', 'Close')}
               </button>
               <button
                 type="button"
@@ -911,7 +916,7 @@ export default function Step5RightPartner({ onContinue }) {
                 }}
                 className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#0B3B60] hover:bg-[#07263F] cursor-pointer"
               >
-                Select this Partner
+                {t('journey_step5.btn_select_this_partner', 'Select this Partner')}
               </button>
             </div>
           </div>

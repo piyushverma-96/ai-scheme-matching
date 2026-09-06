@@ -4,6 +4,8 @@ import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
 import hi from './locales/hi.json';
 
+const savedLang = (typeof window !== 'undefined' && localStorage.getItem('arthsetu_language')) || 'en';
+
 i18n
   .use(initReactI18next)
   .init({
@@ -11,9 +13,21 @@ i18n
       en: { translation: en },
       hi: { translation: hi },
     },
-    lng: 'en',
+    lng: savedLang,
     fallbackLng: 'en',
     interpolation: { escapeValue: false },
   });
+
+if (typeof window !== 'undefined') {
+  document.documentElement.lang = savedLang;
+  i18n.on('languageChanged', (lng) => {
+    try {
+      localStorage.setItem('arthsetu_language', lng);
+      document.documentElement.lang = lng;
+    } catch {
+      // ignore storage errors
+    }
+  });
+}
 
 export default i18n;

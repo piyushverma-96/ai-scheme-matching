@@ -1,4 +1,5 @@
 import axios from 'axios';
+import i18n from './i18n';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -10,6 +11,16 @@ const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  try {
+    const currentLang = i18n?.language || (typeof window !== 'undefined' && localStorage.getItem('arthsetu_language')) || 'en';
+    config.headers['Accept-Language'] = currentLang;
+  } catch {
+    // Ignore storage errors
+  }
+  return config;
+});
+
 // ── Step 2 Verified Scheme & Deterministic Eligibility Rule Engine APIs ────
 export const getSchemes = () => api.get('/schemes');
 export const getSchemeById = (id) => api.get(`/schemes/${id}`);
@@ -18,8 +29,21 @@ export const matchSchemes = (body) => api.post('/schemes/match', body);
 export const getBestMatch = (body) => api.post('/eligibility/best-match', body);
 
 // ── Step 3 AI Intelligence Layer (NLU + RAG + Rule Engine + Explanation) ───
-export const understandRequirement = (body) => api.post('/ai/understand-requirement', body);
-export const askSchemeQuestion = (body) => api.post('/ai/ask', body);
+export const understandRequirement = (body) => {
+  const currentLang = i18n?.language === 'hi' ? 'hindi' : 'english';
+  return api.post('/ai/understand-requirement', {
+    language: body.language || currentLang,
+    ...body,
+  });
+};
+
+export const askSchemeQuestion = (body) => {
+  const currentLang = i18n?.language === 'hi' ? 'hindi' : 'english';
+  return api.post('/ai/ask', {
+    language: body.language || currentLang,
+    ...body,
+  });
+};
 export const refreshSchemeEmbeddings = () => api.post('/ai/embed-schemes');
 
 // ── Step 4 Beneficiary Workflow APIs ──────────────────────────────────────

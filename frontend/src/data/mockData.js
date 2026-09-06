@@ -20,8 +20,21 @@ export const SCHEMES_DATA = [
   {
     id: 'nsfdc_term_loan',
     name: 'NSFDC Term Loan Scheme',
+    name_hi: 'NSFDC Term Loan Scheme (सावधि ऋण योजना)',
     fullName: 'National SC Finance & Development Corp Term Loan',
+    fullName_hi: 'राष्ट्रीय अनुसूचित जाति वित्त एवं विकास निगम - सावधि ऋण योजना',
     category: 'Small Industry & Services',
+    category_hi: 'लघु उद्योग एवं सेवा क्षेत्र',
+    short_description_hi: 'विनिर्माण, व्यापार या सेवा क्षेत्रों में आय सृजन करने वाले व्यवहार्य उद्यमों के लिए परियोजना लागत का 90% तक रियायती सावधि ऋण।',
+    description_hi: 'NSFDC अनुसूचित जाति के लाभार्थियों को व्यवहार्य स्व-रोजगार उद्यम स्थापित करने में सहायता के लिए ₹1,40,000 से ₹50,00,000 की लागत वाली इकाइयों के लिए रियायती सावधि ऋण प्रदान करता है।',
+    repayment_period_hi: '7 वर्ष तक',
+    moratorium_period_hi: '6 - 12 महीने',
+    why_matched_hi: [
+      'अनुसूचित जाति के आवेदकों के लिए प्रत्यक्ष वैधानिक अधिदेश',
+      'राज्य चैनल एजेंसियों (SCA) के माध्यम से 8.00% वार्षिक रियायती ब्याज दर',
+      '7 वर्ष तक की लचीली पुनर्भुगतान अवधि से मासिक किस्त का बोझ कम होता है',
+      'परियोजना लागत का 90% तक NSFDC ऋण सबवेंशन द्वारा कवर',
+    ],
     benefit_type: 'loan',
     has_financial_calculation: true,
     application_channel_type: 'channel_partner',
@@ -74,8 +87,20 @@ export const SCHEMES_DATA = [
   {
     id: 'micro_credit_finance',
     name: 'Micro Credit Finance',
+    name_hi: 'Micro Credit Finance (महिला समृद्धि योजना)',
     fullName: 'NSFDC Micro Credit Finance (Mahila Samriddhi Yojana)',
+    fullName_hi: 'NSFDC माइक्रो क्रेडिट वित्त (महिला समृद्धि योजना)',
     category: 'Micro-Enterprise & SHGs',
+    category_hi: 'सूक्ष्म उद्यम एवं स्वयं सहायता समूह',
+    short_description_hi: 'छोटे उद्यमों, कारीगरों और महिला स्वयं सहायता समूहों के लिए ₹1,40,000 तक का त्वरित माइक्रो-क्रेडिट ऋण।',
+    description_hi: 'अनुसूचित जाति के व्यक्तिगत उद्यमियों और स्वयं सहायता समूह के सदस्यों के लिए 6.5% वार्षिक की कम रियायती ब्याज दर पर ₹1,40,000 तक का त्वरित माइक्रो-क्रेडिट ऋण प्रदान करता है।',
+    repayment_period_hi: '3 वर्ष तक',
+    moratorium_period_hi: '3 महीने',
+    why_matched_hi: [
+      'जमीनी स्तर के सूक्ष्म उद्यमों के लिए 6.50% की रियायती ब्याज दर',
+      '3 महीने के प्रारंभिक अधिस्थगन के साथ 3 साल का संक्षिप्त पुनर्भुगतान',
+      'स्थानीय राज्य चैनल एजेंसी डेस्क के माध्यम से त्वरित मूल्यांकन',
+    ],
     benefit_type: 'loan',
     has_financial_calculation: true,
     application_channel_type: 'channel_partner',
@@ -123,8 +148,20 @@ export const SCHEMES_DATA = [
   {
     id: 'educational_loan_scheme',
     name: 'Educational Loan Scheme (ELS)',
+    name_hi: 'Educational Loan Scheme (शिक्षा ऋण योजना)',
     fullName: 'NSFDC Educational Loan Scheme for SC Students',
+    fullName_hi: 'NSFDC अनुसूचित जाति के विद्यार्थियों हेतु शिक्षा ऋण योजना',
     category: 'Higher Education',
+    category_hi: 'उच्च शिक्षा',
+    short_description_hi: 'भारत में पूर्णकालिक व्यावसायिक/तकनीकी पाठ्यक्रमों के लिए ₹30 लाख तक (विदेश में ₹40 लाख तक) शिक्षा ऋण सहायता।',
+    description_hi: 'भारत या विदेश में मान्यता प्राप्त पूर्णकालिक व्यावसायिक/तकनीकी पाठ्यक्रमों को आगे बढ़ाने वाले पात्र अनुसूचित जाति के छात्रों के लिए शिक्षा ऋण, छात्राओं के लिए 0.5% ब्याज छूट के साथ।',
+    repayment_period_hi: 'पाठ्यक्रम पूरा होने के बाद 12 वर्ष तक',
+    moratorium_period_hi: 'पाठ्यक्रम अवधि + 1 वर्ष',
+    why_matched_hi: [
+      '6.00% वार्षिक से शुरू होने वाली न्यूनतम रियायती छात्र ब्याज दर',
+      'उदार अधिस्थगन अवधि जो पूरे पाठ्यक्रम और 1 अतिरिक्त वर्ष तक चलती है',
+      'अनुसूचित जाति की छात्राओं के लिए 0.5% विशेष ब्याज छूट',
+    ],
     benefit_type: 'loan',
     has_financial_calculation: true,
     application_channel_type: 'channel_partner',
@@ -344,4 +381,23 @@ export const AI_KNOWLEDGE_RESPONSES = {
   docs: 'Standard required documents for NSFDC scheme applications include: (1) Valid SC Caste Certificate from Tehsildar/SDM, (2) Income Certificate (family income <= ₹3 Lakhs), (3) Aadhaar Card linked with mobile number, (4) Project Report / Machinery Quotation, and (5) Bank Passbook with IFSC.',
   emi: 'EMI is calculated using reducing monthly balance interest. For example, a ₹3,00,000 NSFDC Term Loan at 8.00% p.a. for 5 years (with 6 months moratorium) results in an estimated monthly repayment of approx **₹6,083/month**.',
   partner: 'Channelizing agencies such as State SC Cooperative Finance Corporations and empanelled Public Sector Banks (SBI, CBI, PNB) receive and process applications in your district. Use the **Partner Finder** tab to view nearest branches on map.',
+};
+
+
+export const getLocalizedScheme = (scheme, lang) => {
+  if (!scheme) return scheme;
+  if (lang === 'hi') {
+    return {
+      ...scheme,
+      name: scheme.name_hi || scheme.name,
+      fullName: scheme.fullName_hi || scheme.fullName,
+      category: scheme.category_hi || scheme.category,
+      short_description: scheme.short_description_hi || scheme.short_description,
+      description: scheme.description_hi || scheme.description,
+      repayment_period: scheme.repayment_period_hi || scheme.repayment_period,
+      moratorium_period: scheme.moratorium_period_hi || scheme.moratorium_period,
+      why_matched: scheme.why_matched_hi || scheme.why_matched,
+    };
+  }
+  return scheme;
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../context/AppContext';
 
 export const SIX_STAGES = [
@@ -12,7 +13,17 @@ export const SIX_STAGES = [
 ];
 
 export default function SixStepProgressStepper({ currentStep = 1, onStepClick }) {
+  const { t } = useTranslation();
   const { setJourneyStep } = useApp();
+
+  const stages = [
+    { id: 1, shortLabel: t('stepper.step1_short', 'Need'), title: t('stepper.step1_title', 'Understand Need'), desc: t('stepper.step1_desc', 'Requirements') },
+    { id: 2, shortLabel: t('stepper.step2_short', 'Eligibility'), title: t('stepper.step2_title', 'Identify Eligible Schemes'), desc: t('stepper.step2_desc', 'Filter Criteria') },
+    { id: 3, shortLabel: t('stepper.step3_short', 'Best Match'), title: t('stepper.step3_title', 'Recommend Best Scheme'), desc: t('stepper.step3_desc', 'Top Selection') },
+    { id: 4, shortLabel: t('stepper.step4_short', 'Impact'), title: t('stepper.step4_title', 'Financial Impact'), desc: t('stepper.step4_desc', 'Benefits & Calculation') },
+    { id: 5, shortLabel: t('stepper.step5_short', 'Channel'), title: t('stepper.step5_title', 'Find the Right Application Channel'), desc: t('stepper.step5_desc', 'Channel Agency / Bank') },
+    { id: 6, shortLabel: t('stepper.step6_short', 'Application'), title: t('stepper.step6_title', 'Guide Application'), desc: t('stepper.step6_desc', 'Docs & Tracking') },
+  ];
 
   const handleStepClick = (stepNum) => {
     if (onStepClick) {
@@ -29,7 +40,7 @@ export default function SixStepProgressStepper({ currentStep = 1, onStepClick })
       <div className="block md:hidden space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="font-bold text-[#0B3B60]">
-            Step {currentStep} of 6: <span className="text-[#1E293B]">{SIX_STAGES[currentStep - 1]?.title}</span>
+            {t('stepper.step', 'Step')} {currentStep} {t('stepper.of', 'of')} 6: <span className="text-[#1E293B]">{stages[currentStep - 1]?.title}</span>
           </span>
           <span className="font-mono text-[11px] font-bold text-[#10B981]">
             {Math.round((currentStep / 6) * 100)}%
@@ -46,7 +57,7 @@ export default function SixStepProgressStepper({ currentStep = 1, onStepClick })
       {/* Desktop & Tablet Full 6-Stage Stepper (>= 768px) */}
       <nav aria-label="6-Step Product Journey" className="hidden md:block">
         <ol className="flex items-center justify-between relative">
-          {SIX_STAGES.map((stage, idx) => {
+          {stages.map((stage, idx) => {
             const stepNum = stage.id;
             const isDone = currentStep > stepNum;
             const isCurrent = currentStep === stepNum;

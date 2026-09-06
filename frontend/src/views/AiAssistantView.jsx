@@ -7,16 +7,24 @@ import {
   Sparkles,
   HelpCircle,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../context/AppContext';
 import { AI_QUICK_PROMPTS, AI_KNOWLEDGE_RESPONSES } from '../data/mockData';
 
 export default function AiAssistantView() {
+  const { t, i18n } = useTranslation();
   const { navigateTo, user, profile } = useApp();
+  const isHi = i18n.language === 'hi';
   const userName = profile?.full_name?.split(' ')[0] || user?.user_metadata?.full_name?.split(' ')[0] || '';
+  
+  const defaultText = isHi
+    ? `नमस्ते${userName ? ' ' + userName : ''}! मैं आपका अर्थसेतु मार्गदर्शन सहायक हूँ। आज मैं सरकारी योजनाओं, पात्रता या पार्टनर स्थानों के संबंध में आपकी क्या मदद कर सकता हूँ?`
+    : `Namaste${userName ? ' ' + userName : ''}! I am your ArthSetu Guidance Assistant. How can I help you today with government schemes, eligibility, or partner locations?`;
+
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      text: `Namaste${userName ? ' ' + userName : ''}! I am your ArthSetu Guidance Assistant. How can I help you today with government schemes, eligibility, or partner locations?`,
+      text: defaultText,
     },
   ]);
   const [input, setInput] = useState('');
@@ -30,18 +38,27 @@ export default function AiAssistantView() {
     if (!textToSend) setInput('');
 
     setTimeout(() => {
-      let reply =
-        'All listed schemes provide concessional interest rates (4%–8% p.a.) with up to 90% project financing for eligible beneficiaries.';
+      let reply = isHi
+        ? 'सभी सूचीबद्ध योजनाएं पात्र लाभार्थियों के लिए 90% तक परियोजना वित्तपोषण के साथ रियायती ब्याज दरें (4%–8% प्रति वर्ष) प्रदान करती हैं।'
+        : 'All listed schemes provide concessional interest rates (4%–8% p.a.) with up to 90% project financing for eligible beneficiaries.';
       const lower = q.toLowerCase();
 
-      if (lower.includes('suit') || lower.includes('which') || lower.includes('scheme')) {
-        reply = AI_KNOWLEDGE_RESPONSES.suit;
-      } else if (lower.includes('document') || lower.includes('paper') || lower.includes('need')) {
-        reply = AI_KNOWLEDGE_RESPONSES.docs;
-      } else if (lower.includes('emi') || lower.includes('calculat') || lower.includes('repay')) {
-        reply = AI_KNOWLEDGE_RESPONSES.emi;
-      } else if (lower.includes('partner') || lower.includes('where') || lower.includes('branch') || lower.includes('find')) {
-        reply = AI_KNOWLEDGE_RESPONSES.partner;
+      if (lower.includes('suit') || lower.includes('which') || lower.includes('scheme') || lower.includes('योजना')) {
+        reply = isHi
+          ? 'व्यवसाय के लिए: सावधिक ऋण (Term Loan) ₹50 लाख तक या महिला समृद्धि योजना ₹1.4 लाख तक। शिक्षा के लिए: भारत में ₹30 लाख और विदेश में ₹40 लाख तक।'
+          : AI_KNOWLEDGE_RESPONSES.suit;
+      } else if (lower.includes('document') || lower.includes('paper') || lower.includes('need') || lower.includes('दस्तावेज')) {
+        reply = isHi
+          ? 'आवश्यक दस्तावेज: (1) जाति प्रमाण पत्र, (2) आय प्रमाण पत्र / स्व-घोषणा, (3) आधार कार्ड, (4) परियोजना रिपोर्ट / प्रवेश पत्र, (5) बैंक पासबुक।'
+          : AI_KNOWLEDGE_RESPONSES.docs;
+      } else if (lower.includes('emi') || lower.includes('calculat') || lower.includes('repay') || lower.includes('किस्त')) {
+        reply = isHi
+          ? 'ईएमआई की गणना आपके ऋण मूलधन, ब्याज दर और चुकौती अवधि पर निर्भर करती है। सटीक गणना के लिए हमारे ईएमआई कैलकुलेटर का उपयोग करें!'
+          : AI_KNOWLEDGE_RESPONSES.emi;
+      } else if (lower.includes('partner') || lower.includes('where') || lower.includes('branch') || lower.includes('find') || lower.includes('पार्टनर')) {
+        reply = isHi
+          ? 'चैनल पार्टनर एजेंसियां (SCA, सार्वजनिक बैंक, क्षेत्रीय ग्रामीण बैंक) स्थानीय स्तर पर आवेदन स्वीकार करती हैं। निकटतम कार्यालय खोजने के लिए साइडबार पर "पार्टनर खोजें" चुनें।'
+          : AI_KNOWLEDGE_RESPONSES.partner;
       }
 
       setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
@@ -57,7 +74,7 @@ export default function AiAssistantView() {
           className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer min-h-[44px] px-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Dashboard</span>
+          <span>{t('journey_nav.dashboard_back', 'Dashboard')}</span>
         </button>
       </div>
 

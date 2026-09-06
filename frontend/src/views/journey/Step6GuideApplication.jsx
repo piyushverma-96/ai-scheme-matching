@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../context/AppContext';
 import { 
   CheckCircle2, 
@@ -27,6 +28,7 @@ import {
   Printer
 } from 'lucide-react';
 import { createApplication } from '../../api';
+import { getLocalizedScheme } from '../../data/mockData';
 
 // Verified scheme-specific document requirement templates
 const SCHEME_DOCUMENTS = {
@@ -61,16 +63,17 @@ const SCHEME_DOCUMENTS = {
   ],
 };
 
-const TRACKING_TIMELINE = [
-  { stage: 'Stage 1', title: 'Application Created', desc: 'Entrepreneur profile and requirement validated against official scheme eligibility criteria.', status: 'completed', time: 'Completed' },
-  { stage: 'Stage 2', title: 'Submitted to Channel', desc: 'Transmitted securely to designated Channel Partner Nodal Desk or Direct Government Portal.', status: 'completed', time: 'Completed' },
-  { stage: 'Stage 3', title: 'Desk Scrutiny', desc: 'Verification of Aadhaar, SC caste certificate, and income credentials against State Revenue records.', status: 'active', time: 'In Progress' },
-  { stage: 'Stage 4', title: 'Field Appraisal & Inspection', desc: 'Physical verification of proposed business premises, unit viability, or course admission status.', status: 'upcoming', time: 'Pending' },
-  { stage: 'Stage 5', title: 'Sanction Committee Review', desc: 'Official sanction by State Channelizing Agency / Bank District Sanctioning Committee.', status: 'upcoming', time: 'Pending' },
-  { stage: 'Stage 6', title: 'Sanction & DBT Disbursement', desc: 'Issuance of formal sanction letter and electronic credit of financial assistance via Aadhaar-linked DBT.', status: 'upcoming', time: 'Final Step' }
+const getTrackingTimeline = (t) => [
+  { stage: 'Stage 1', title: t('journey_step6.timeline_stage1_title', 'Application Created'), desc: t('journey_step6.timeline_stage1_desc', 'Entrepreneur profile and requirement validated against official scheme eligibility criteria.'), status: 'completed', time: 'Completed' },
+  { stage: 'Stage 2', title: t('journey_step6.timeline_stage2_title', 'Submitted to Channel'), desc: t('journey_step6.timeline_stage2_desc', 'Transmitted securely to designated Channel Partner Nodal Desk or Direct Government Portal.'), status: 'completed', time: 'Completed' },
+  { stage: 'Stage 3', title: t('journey_step6.timeline_stage3_title', 'Desk Scrutiny'), desc: t('journey_step6.timeline_stage3_desc', 'Verification of Aadhaar, SC caste certificate, and income credentials against State Revenue records.'), status: 'active', time: 'In Progress' },
+  { stage: 'Stage 4', title: t('journey_step6.timeline_stage4_title', 'Field Appraisal & Inspection'), desc: t('journey_step6.timeline_stage4_desc', 'Physical verification of proposed business premises, unit viability, or course admission status.'), status: 'upcoming', time: 'Pending' },
+  { stage: 'Stage 5', title: t('journey_step6.timeline_stage5_title', 'Sanction Committee Review'), desc: t('journey_step6.timeline_stage5_desc', 'Official sanction by State Channelizing Agency / Bank District Sanctioning Committee.'), status: 'upcoming', time: 'Pending' },
+  { stage: 'Stage 6', title: t('journey_step6.timeline_stage6_title', 'Sanction & DBT Disbursement'), desc: t('journey_step6.timeline_stage6_desc', 'Issuance of formal sanction letter and electronic credit of financial assistance via Aadhaar-linked DBT.'), status: 'upcoming', time: 'Final Step' }
 ];
 
 export default function Step6GuideApplication() {
+  const { t, i18n } = useTranslation();
   const { 
     journeyFormData, 
     selectedScheme, 
@@ -81,6 +84,8 @@ export default function Step6GuideApplication() {
     profile, 
     recommendResult 
   } = useApp();
+
+  const locScheme = getLocalizedScheme(selectedScheme, i18n.language);
 
   // Determine scheme category for dynamic documents
   const schemeType = selectedScheme?.scheme_type || 
@@ -111,12 +116,12 @@ export default function Step6GuideApplication() {
     user?.email?.split('@')[0] || 
     'Beneficiary Applicant';
 
-  const schemeName = selectedScheme?.name || 'NSFDC Term Loan Scheme';
+  const schemeName = locScheme?.scheme_name || locScheme?.name || 'NSFDC Term Loan Scheme';
   const benefitTypeDisplay = selectedScheme?.benefit_type === 'loan' 
-    ? 'Concessional Loan Assistance (90% Financing)' 
+    ? (i18n.language === 'hi' ? 'रियायती ऋण सहायता (90% वित्तपोषण)' : 'Concessional Loan Assistance (90% Financing)')
     : (selectedScheme?.support_type_display || 'Government Financial Assistance');
   
-  const benefitSummary = selectedScheme?.benefit_summary || 
+  const benefitSummary = locScheme?.benefit_summary || locScheme?.description || 
     'Concessional credit financing up to 90% of viable project cost with subsidized interest rates under Ministry of Social Justice and Empowerment.';
 
   const isChannelPartner = (selectedScheme?.application_channel_type || 'channel_partner') === 'channel_partner';
@@ -136,13 +141,19 @@ export default function Step6GuideApplication() {
   
   const recommendationReasons = rawMatchingFactors.length > 0 
     ? rawMatchingFactors 
-    : [
+    : (i18n.language === 'hi' ? [
+        `उद्देश्य सीधे सत्यापित योजना के दायरे से मेल खाता है (${purposeName})`,
+        `वार्षिक पारिवारिक आय (₹${Number(journeyFormData?.incomeValue || 250000).toLocaleString('en-IN')}) <= ₹3,00,000 की आधिकारिक सीमा को पूरा करती है`,
+        `आवेदक का स्थान अधिकृत कार्यक्षेत्र के अंतर्गत आता है (${applicantLocation})`,
+        `आवेदक समुदाय अनुसूचित जाति (SC) अधिदेश के तहत सत्यापित`,
+        `रियायती वित्तपोषण सरकारी सब्सिडी वाली शर्तों के साथ 90% तक सहायता प्रदान करता है`
+      ] : [
         `Purpose directly aligns with verified scheme scope (${purposeName})`,
         `Annual household income (₹${Number(journeyFormData?.incomeValue || 250000).toLocaleString('en-IN')}) satisfies the <= ₹3,00,000 official ceiling`,
         `Applicant location falls within authorized operational coverage (${applicantLocation})`,
         `Applicant community verified under Scheduled Caste (SC) mandate`,
         `Concessional financing provides up to 90% project support with government-subsidized terms`
-      ];
+      ]);
 
   const toggleDoc = (id) => {
     setUploadedDocs(prev => ({
@@ -209,19 +220,19 @@ export default function Step6GuideApplication() {
         <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#E8F8F2] text-[#065F46] rounded-full text-xs font-bold uppercase tracking-wider border border-[#10B981]/20">
             <FileCheck className="w-3.5 h-3.5 text-[#10B981]" />
-            <span>Stage 6 of 6 · Guide the Application</span>
+            <span>{t('journey_step6.stage_badge', 'Stage 6 · Complete Application Guidance & Statutory Checklist')}</span>
           </div>
           <span className="text-xs font-semibold text-[#0B3B60] bg-[#EFF6FF] border border-[#BFDBFE] px-2.5 py-1 rounded-lg">
-            Final Step: Scheme-Specific Dossier & Guidance
+            {t('journey_step6.final_step_badge', 'Final Step: Scheme-Specific Dossier & Guidance')}
           </span>
         </div>
         <h2 className="text-xl sm:text-2xl font-bold text-[#0B3B60]">
-          {isSubmitted ? 'Official Application Tracking & Receipt' : 'Complete and submit your application'}
+          {isSubmitted ? t('journey_step6.submitted_title', 'Official Application Tracking & Receipt') : t('journey_step6.title', 'Application Roadmap & Required Documentation')}
         </h2>
         <p className="text-xs sm:text-sm text-[#64748B] mt-1 leading-relaxed">
           {isSubmitted 
-            ? 'Your application package has been formally submitted. Retain your Application ID for physical verification and direct benefit tracking.'
-            : 'Review the verified scheme recommendation, complete your scheme-specific document checklist, and receive step-by-step instructions for submission.'
+            ? t('journey_step6.submitted_subtitle', 'Your application package has been formally submitted. Retain your Application ID for physical verification and direct benefit tracking.')
+            : t('journey_step6.subtitle', 'Follow this step-by-step checklist to assemble your dossier and submit to your chosen partner channel.')
           }
         </p>
       </div>
@@ -233,24 +244,28 @@ export default function Step6GuideApplication() {
             <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#F1F5F9] pb-4">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#065F46] bg-[#E8F8F2] px-2.5 py-0.5 rounded-md border border-[#10B981]/20">
-                  Selected Government Scheme
+                  {t('journey_step6.selected_gov_scheme', 'Selected Government Scheme')}
                 </span>
                 <h3 className="text-lg sm:text-xl font-bold text-[#0B3B60] mt-1.5">{schemeName}</h3>
                 <p className="text-xs text-[#64748B] mt-0.5">
-                  Ministry of Social Justice and Empowerment · National Scheduled Castes Finance & Development Corporation (NSFDC)
+                  {t('journey_step6.ministry_nsfdc', 'Ministry of Social Justice and Empowerment · National Scheduled Castes Finance & Development Corporation (NSFDC)')}
                 </p>
               </div>
               <div className="text-right">
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE] inline-block">
                   {benefitTypeDisplay}
                 </span>
-                <p className="text-xs font-mono font-bold text-[#10B981] mt-1">Requested Support: {requestedAmt}</p>
+                <p className="text-xs font-mono font-bold text-[#10B981] mt-1">
+                  {t('journey_step6.requested_support_label', 'Requested Support:')} {requestedAmt}
+                </p>
               </div>
             </div>
 
             {/* Benefit Summary Description */}
             <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] text-xs text-[#334155] leading-relaxed">
-              <span className="font-bold text-[#0B3B60] block mb-1">Benefit Structure & Purpose:</span>
+              <span className="font-bold text-[#0B3B60] block mb-1">
+                {t('journey_step6.benefit_structure_title', 'Benefit Structure & Purpose:')}
+              </span>
               {benefitSummary}
             </div>
 
@@ -258,7 +273,9 @@ export default function Step6GuideApplication() {
             <div className="space-y-2.5 pt-1">
               <div className="flex items-center gap-2">
                 <Award className="w-4 h-4 text-[#0E6655]" />
-                <h4 className="text-xs sm:text-sm font-bold text-[#0B3B60]">Why this scheme matches your profile:</h4>
+                <h4 className="text-xs sm:text-sm font-bold text-[#0B3B60]">
+                  {t('journey_step6.why_matches_title', 'Why this scheme matches your profile:')}
+                </h4>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {recommendationReasons.map((reason, idx) => (
@@ -274,10 +291,16 @@ export default function Step6GuideApplication() {
             <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-[#EFF6FF]/60 rounded-2xl border border-[#BFDBFE] text-xs">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#2563EB]" />
-                <span className="font-bold text-[#1E40AF]">Eligibility Rule Engine Verdict:</span>
-                <span className="font-bold text-[#0B3B60]">Potentially Eligible (All Mandatory Criteria Satisfied)</span>
+                <span className="font-bold text-[#1E40AF]">
+                  {t('journey_step6.verdict_title', 'Eligibility Rule Engine Verdict:')}
+                </span>
+                <span className="font-bold text-[#0B3B60]">
+                  {t('journey_step6.verdict_eligible', 'Potentially Eligible (All Mandatory Criteria Satisfied)')}
+                </span>
               </div>
-              <span className="text-[11px] text-[#64748B]">Income Ceiling &lt;= ₹3.00L · SC Welfare Group</span>
+              <span className="text-[11px] text-[#64748B]">
+                {t('journey_step6.verdict_criteria_note', 'Income Ceiling <= ₹3.00L · SC Welfare Group')}
+              </span>
             </div>
           </div>
 
@@ -285,20 +308,20 @@ export default function Step6GuideApplication() {
           <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E2E8F0] shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-[#F1F5F9] pb-3">
               <div>
-                <h3 className="text-base font-bold text-[#0B3B60]">2. Designated Application Channel</h3>
+                <h3 className="text-base font-bold text-[#0B3B60]">{t('journey_step6.channel_title', '2. Designated Application Channel')}</h3>
                 <p className="text-xs text-[#64748B] mt-0.5">
                   {isChannelPartner 
-                    ? 'Submit your application package to your empanelled Channel Partner Nodal Desk.'
-                    : 'Submit your application directly through the official Government Administrative Portal.'}
+                    ? t('journey_step6.channel_partner_desc', 'Submit your application package to your empanelled Channel Partner Nodal Desk.')
+                    : t('journey_step6.channel_direct_desc', 'Submit your application directly through the official Government Administrative Portal.')}
                 </p>
               </div>
               {isChannelPartner && (
                 <button
                   type="button"
                   onClick={prevJourneyStep}
-                  className="text-xs font-bold text-[#2563EB] hover:underline"
+                  className="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer"
                 >
-                  Change Partner
+                  {t('journey_step6.btn_change_partner', 'Change Partner')}
                 </button>
               )}
             </div>
@@ -328,11 +351,11 @@ export default function Step6GuideApplication() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#E2E8F0] text-xs">
                   <div className="flex items-center gap-2 text-[#475569]">
                     <Clock className="w-3.5 h-3.5 text-[#94A3B8]" />
-                    <span><strong>Operating Hours:</strong> 10:00 AM – 5:00 PM (Mon–Sat)</span>
+                    <span><strong>{t('journey_step6.operating_hours_label', 'Operating Hours:')}</strong> {t('journey_step6.operating_hours_val', '10:00 AM – 5:00 PM (Mon–Sat)')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-[#475569]">
                     <Phone className="w-3.5 h-3.5 text-[#94A3B8]" />
-                    <span><strong>Nodal Desk:</strong> {partnerNodalOfficer} ({partnerPhone})</span>
+                    <span><strong>{t('journey_step6.nodal_desk_label', 'Nodal Desk:')}</strong> {partnerNodalOfficer} ({partnerPhone})</span>
                   </div>
                 </div>
               </div>
@@ -343,9 +366,9 @@ export default function Step6GuideApplication() {
                     <Building2 className="w-5 h-5" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="text-sm font-bold text-[#0B3B60]">Official Direct Government Portal</h4>
+                    <h4 className="text-sm font-bold text-[#0B3B60]">{t('journey_step6.direct_portal_title', 'Official Direct Government Portal')}</h4>
                     <p className="text-xs text-[#475569]">
-                      This scheme accepts direct digital submissions without requiring an intermediary channel partner.
+                      {t('journey_step6.direct_portal_desc', 'This scheme accepts direct digital submissions without requiring an intermediary channel partner.')}
                     </p>
                     <a
                       href="https://nsfdc.nic.in/scheme"
@@ -353,7 +376,7 @@ export default function Step6GuideApplication() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2563EB] hover:underline mt-1"
                     >
-                      <span>Visit Official NSFDC Portal (nsfdc.nic.in)</span>
+                      <span>{t('journey_step6.visit_nsfdc_portal', 'Visit Official NSFDC Portal (nsfdc.nic.in)')}</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
@@ -367,19 +390,19 @@ export default function Step6GuideApplication() {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F1F5F9] pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-[#0B3B60]">3. Scheme-Specific Required Documents</h3>
+                  <h3 className="text-base font-bold text-[#0B3B60]">{t('journey_step6.docs_checklist_title', 'Mandatory Statutory Document Checklist')}</h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EFF6FF] text-[#1E40AF]">
-                    Official Verified Checklist
+                    {t('journey_step6.official_verified_badge', 'Official Verified Checklist')}
                   </span>
                 </div>
                 <p className="text-xs text-[#64748B] mt-0.5">
-                  Documents required specifically for <strong>{schemeName}</strong>. Every scheme specifies its own tailored requirements.
+                  {t('journey_step6.docs_for_scheme', 'Documents required specifically for')} <strong>{schemeName}</strong>. {t('journey_step6.docs_tailored_note', 'Every scheme specifies its own tailored requirements.')}
                 </p>
               </div>
               <div className="flex items-center gap-2 bg-[#F8FAFC] px-3.5 py-1.5 rounded-xl border border-[#E2E8F0] text-xs font-semibold">
-                <span className="text-[#64748B]">Readiness:</span>
+                <span className="text-[#64748B]">{t('journey_step6.readiness_label', 'Readiness:')}</span>
                 <span className={uploadedRequiredCount === requiredCount ? 'text-[#10B981] font-bold' : 'text-[#D97706] font-bold'}>
-                  {uploadedRequiredCount} / {requiredCount} Mandatory Ready
+                  {uploadedRequiredCount} / {requiredCount} {t('journey_step6.mandatory_ready', 'Mandatory Ready')}
                 </span>
               </div>
             </div>
@@ -387,6 +410,9 @@ export default function Step6GuideApplication() {
             <div className="space-y-3">
               {docTemplate.map((doc) => {
                 const isUploaded = uploadedDocs[doc.id];
+                const docName = t(`scheme_docs.${doc.id}_name`, doc.name);
+                const docDesc = t(`scheme_docs.${doc.id}_desc`, doc.desc);
+
                 return (
                   <div 
                     key={doc.id}
@@ -405,17 +431,17 @@ export default function Step6GuideApplication() {
                       </div>
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="text-xs sm:text-sm font-bold text-[#1E293B]">{doc.name}</h4>
+                          <h4 className="text-xs sm:text-sm font-bold text-[#1E293B]">{docName}</h4>
                           {doc.required ? (
-                            <span className="text-[10px] font-bold text-[#DC2626] bg-[#FEF2F2] px-1.5 py-0.5 rounded border border-[#DC2626]/20">Mandatory</span>
+                            <span className="text-[10px] font-bold text-[#DC2626] bg-[#FEF2F2] px-1.5 py-0.5 rounded border border-[#DC2626]/20">{t('journey_step6.tag_required', 'Required')}</span>
                           ) : (
-                            <span className="text-[10px] font-semibold text-[#64748B] bg-[#F1F5F9] px-1.5 py-0.5 rounded">Optional</span>
+                            <span className="text-[10px] font-semibold text-[#64748B] bg-[#F1F5F9] px-1.5 py-0.5 rounded">{t('journey_step6.tag_optional', 'Optional')}</span>
                           )}
                           <span className="text-[10px] text-[#64748B] bg-white border border-[#E2E8F0] px-1.5 py-0.5 rounded">
-                            Issuing: {doc.authority}
+                            {t('journey_step6.issued_by_label', 'Issuing Authority:')} {doc.authority}
                           </span>
                         </div>
-                        <p className="text-[11px] text-[#64748B] mt-0.5">{doc.desc}</p>
+                        <p className="text-[11px] text-[#64748B] mt-0.5">{docDesc}</p>
                       </div>
                     </div>
 
@@ -432,7 +458,7 @@ export default function Step6GuideApplication() {
                             : 'bg-[#0B3B60] text-white hover:bg-[#07263F]'
                         }`}
                       >
-                        {isUploaded ? 'Ready ✓' : 'Mark Ready'}
+                        {isUploaded ? `${t('journey_step6.doc_status_ready', 'Ready')} ✓` : t('journey_step6.doc_status_pending', 'Needs Assembly')}
                       </button>
                     </div>
                   </div>
@@ -443,49 +469,49 @@ export default function Step6GuideApplication() {
 
           {/* ── 4. STEP-BY-STEP APPLICATION INSTRUCTIONS ─────────────────────── */}
           <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E2E8F0] shadow-xs space-y-4">
-            <h3 className="text-base font-bold text-[#0B3B60]">4. Step-by-Step Application Instructions</h3>
+            <h3 className="text-base font-bold text-[#0B3B60]">{t('journey_step6.submission_instructions_title', 'Official Submission Instructions')}</h3>
             <p className="text-xs text-[#64748B]">
-              Follow this verified four-stage workflow to submit and track your scheme application.
+              {t('journey_step6.four_stage_desc', 'Follow this verified four-stage workflow to submit and track your scheme application.')}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
               <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] space-y-1.5">
                 <div className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-[#0B3B60] text-white text-[10px] font-bold flex items-center justify-center">1</span>
-                  <h4 className="text-xs font-bold text-[#0B3B60]">Dossier Compilation & Self-Attestation</h4>
+                  <h4 className="text-xs font-bold text-[#0B3B60]">{t('journey_step6.workflow_stage_1_title', 'Dossier Compilation & Self-Attestation')}</h4>
                 </div>
                 <p className="text-[11px] text-[#64748B] leading-relaxed">
-                  Prepare self-attested photocopies of all mandatory documents listed in section 3. Ensure your Aadhaar number is clear and bank passbook shows active IFSC and account details.
+                  {t('journey_step6.instruction_1', '1. Take printouts of your completed application summary dossier and attach 2 passport-size photographs.')}
                 </p>
               </div>
 
               <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] space-y-1.5">
                 <div className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-[#0B3B60] text-white text-[10px] font-bold flex items-center justify-center">2</span>
-                  <h4 className="text-xs font-bold text-[#0B3B60]">Submission to Channel Nodal Desk</h4>
+                  <h4 className="text-xs font-bold text-[#0B3B60]">{t('journey_step6.workflow_stage_2_title', 'Submission to Channel Nodal Desk')}</h4>
                 </div>
                 <p className="text-[11px] text-[#64748B] leading-relaxed">
-                  Submit your dossier to the designated District Nodal Officer at <strong>{partnerName}</strong>. Obtain an official stamp and acknowledgment receipt with date.
+                  {t('journey_step6.instruction_2', '2. Attach self-attested photocopies of all mandatory documents marked in the checklist above.')}
                 </p>
               </div>
 
               <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] space-y-1.5">
                 <div className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-[#0B3B60] text-white text-[10px] font-bold flex items-center justify-center">3</span>
-                  <h4 className="text-xs font-bold text-[#0B3B60]">Desk Scrutiny & Field Inspection</h4>
+                  <h4 className="text-xs font-bold text-[#0B3B60]">{t('journey_step6.workflow_stage_3_title', 'Desk Scrutiny & Field Inspection')}</h4>
                 </div>
                 <p className="text-[11px] text-[#64748B] leading-relaxed">
-                  The Nodal Agency verifies income and caste certificates against State Revenue databases. A field inspector visits your proposed activity location to appraise technical viability.
+                  {t('journey_step6.instruction_3', '3. Submit the file in person to the designated nodal officer or through the authorized online channel.')}
                 </p>
               </div>
 
               <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] space-y-1.5">
                 <div className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-[#0B3B60] text-white text-[10px] font-bold flex items-center justify-center">4</span>
-                  <h4 className="text-xs font-bold text-[#0B3B60]">Sanction & Direct Benefit Transfer (DBT)</h4>
+                  <h4 className="text-xs font-bold text-[#0B3B60]">{t('journey_step6.workflow_stage_4_title', 'Sanction & Direct Benefit Transfer (DBT)')}</h4>
                 </div>
                 <p className="text-[11px] text-[#64748B] leading-relaxed">
-                  Upon Sanction Committee approval, formal sanction advice is issued and concessional financial assistance is credited directly to your Aadhaar-seeded bank account.
+                  {t('journey_step6.workflow_stage_4_desc', 'Upon Sanction Committee approval, formal sanction advice is issued and concessional financial assistance is credited directly to your Aadhaar-seeded bank account.')}
                 </p>
               </div>
             </div>
@@ -495,13 +521,13 @@ export default function Step6GuideApplication() {
           <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-3xl p-5 sm:p-6 space-y-3">
             <div className="flex items-center gap-2 text-[#92400E]">
               <AlertCircle className="w-4 h-4 shrink-0" />
-              <h4 className="text-xs sm:text-sm font-bold">Important Government Service Conditions:</h4>
+              <h4 className="text-xs sm:text-sm font-bold">{t('journey_step6.gov_conditions_title', 'Important Government Service Conditions:')}</h4>
             </div>
             <ul className="text-xs text-[#78350F] space-y-1.5 list-disc pl-5 leading-relaxed">
-              <li><strong>Zero Intermediary Fees:</strong> All government welfare schemes and NSFDC applications are processed free of charge. Never pay money to middlemen or unauthorized agents.</li>
-              <li><strong>Mandatory Aadhaar Seeding:</strong> Your bank account must be actively linked with your Aadhaar number and mapped to NPCI for receiving Direct Benefit Transfer disbursements.</li>
-              <li><strong>Indicative Eligibility Only:</strong> This matching tool verifies scheme suitability deterministically against published rules; final sanction is subject to physical verification by authorized nodal officers.</li>
-              <li><strong>Verified Official Source:</strong> Information backed by National Scheduled Castes Finance and Development Corporation (NSFDC). Source: <a href="https://nsfdc.nic.in/scheme" target="_blank" rel="noopener noreferrer" className="underline font-bold">nsfdc.nic.in/scheme</a> (Verified: 2026-09-05).</li>
+              <li><strong>{t('journey_step6.cond_zero_fee_title', 'Zero Intermediary Fees:')}</strong> {t('journey_step6.cond_zero_fee_desc', 'All government welfare schemes and NSFDC applications are processed free of charge. Never pay money to middlemen or unauthorized agents.')}</li>
+              <li><strong>{t('journey_step6.cond_aadhaar_title', 'Mandatory Aadhaar Seeding:')}</strong> {t('journey_step6.cond_aadhaar_desc', 'Your bank account must be actively linked with your Aadhaar number and mapped to NPCI for receiving Direct Benefit Transfer disbursements.')}</li>
+              <li><strong>{t('journey_step6.cond_indicative_title', 'Indicative Eligibility Only:')}</strong> {t('journey_step6.cond_indicative_desc', 'This matching tool verifies scheme suitability deterministically against published rules; final sanction is subject to physical verification by authorized nodal officers.')}</li>
+              <li><strong>{t('journey_step6.cond_source_title', 'Verified Official Source:')}</strong> {i18n.language === 'hi' ? 'राष्ट्रीय अनुसूचित जाति वित्त एवं विकास निगम (NSFDC) द्वारा समर्थित जानकारी।' : 'Information backed by National Scheduled Castes Finance and Development Corporation (NSFDC).'} Source: <a href="https://nsfdc.nic.in/scheme" target="_blank" rel="noopener noreferrer" className="underline font-bold">nsfdc.nic.in/scheme</a> (Verified: 2026-09-05).</li>
             </ul>
           </div>
 
@@ -509,23 +535,23 @@ export default function Step6GuideApplication() {
           <div className="bg-white rounded-3xl p-6 border border-[#E2E8F0] shadow-xs space-y-3">
             <h4 className="text-xs sm:text-sm font-bold text-[#0B3B60] flex items-center gap-2">
               <Calendar className="w-4 h-4 text-[#0B3B60]" />
-              <span>What happens next after submission?</span>
+              <span>{t('journey_step6.what_happens_next_title', 'What happens next after submission?')}</span>
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
-                <span className="text-[10px] font-bold text-[#0B3B60] uppercase block">Days 1 to 3</span>
-                <p className="font-semibold text-[#1E293B] mt-0.5">Application Acknowledgement</p>
-                <p className="text-[11px] text-[#64748B] mt-1">Dossier receipt confirmed and preliminary desk validation performed.</p>
+                <span className="text-[10px] font-bold text-[#0B3B60] uppercase block">{t('journey_step6.days_1_3', 'Days 1 to 3')}</span>
+                <p className="font-semibold text-[#1E293B] mt-0.5">{t('journey_step6.step_ack_title', 'Application Acknowledgement')}</p>
+                <p className="text-[11px] text-[#64748B] mt-1">{t('journey_step6.step_ack_desc', 'Dossier receipt confirmed and preliminary desk validation performed.')}</p>
               </div>
               <div className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
-                <span className="text-[10px] font-bold text-[#0B3B60] uppercase block">Days 4 to 10</span>
-                <p className="font-semibold text-[#1E293B] mt-0.5">Field Appraisal</p>
-                <p className="text-[11px] text-[#64748B] mt-1">On-site verification of project feasibility, premises, or course details.</p>
+                <span className="text-[10px] font-bold text-[#0B3B60] uppercase block">{t('journey_step6.days_4_10', 'Days 4 to 10')}</span>
+                <p className="font-semibold text-[#1E293B] mt-0.5">{t('journey_step6.step_field_title', 'Field Appraisal')}</p>
+                <p className="text-[11px] text-[#64748B] mt-1">{t('journey_step6.step_field_desc', 'On-site verification of project feasibility, premises, or course details.')}</p>
               </div>
               <div className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0]">
-                <span className="text-[10px] font-bold text-[#10B981] uppercase block">Days 11 to 21</span>
-                <p className="font-semibold text-[#1E293B] mt-0.5">Sanction & Disbursement</p>
-                <p className="text-[11px] text-[#64748B] mt-1">Formal sanction letter released and DBT disbursement processed to bank account.</p>
+                <span className="text-[10px] font-bold text-[#10B981] uppercase block">{t('journey_step6.days_11_21', 'Days 11 to 21')}</span>
+                <p className="font-semibold text-[#1E293B] mt-0.5">{t('journey_step6.step_disburse_title', 'Sanction & Disbursement')}</p>
+                <p className="text-[11px] text-[#64748B] mt-1">{t('journey_step6.step_disburse_desc', 'Formal sanction letter released and DBT disbursement processed to bank account.')}</p>
               </div>
             </div>
           </div>
@@ -534,14 +560,14 @@ export default function Step6GuideApplication() {
           <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E2E8F0] shadow-xs space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#F1F5F9] pb-4">
               <div>
-                <h3 className="text-base font-bold text-[#0B3B60]">Application Package Ready</h3>
+                <h3 className="text-base font-bold text-[#0B3B60]">{t('journey_step6.app_package_ready', 'Application Package Ready')}</h3>
                 <p className="text-xs text-[#64748B] mt-0.5">
-                  Applicant: <strong>{applicantFullName}</strong> · Location: <strong>{applicantLocation}</strong>
+                  {t('journey_step6.applicant_label', 'Applicant:')} <strong>{applicantFullName}</strong> · {t('journey_step6.location_label', 'Location:')} <strong>{applicantLocation}</strong>
                 </p>
               </div>
               {!isReadyToSubmit && (
                 <span className="text-xs font-bold text-[#DC2626] bg-[#FEF2F2] px-3 py-1 rounded-xl border border-[#DC2626]/20">
-                  Please mark all {requiredCount} mandatory documents ready
+                  {t('journey_step6.mark_all_ready_msg', 'Please mark all {{count}} mandatory documents ready', { count: requiredCount })}
                 </span>
               )}
             </div>
@@ -553,7 +579,7 @@ export default function Step6GuideApplication() {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-semibold text-[#475569] cursor-pointer min-h-[44px]"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Back to Channel Selection</span>
+                <span>{t('journey_step6.btn_back_partner', '← Back to Partner Selection')}</span>
               </button>
 
               <button
@@ -569,12 +595,12 @@ export default function Step6GuideApplication() {
                 {isSubmitting ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Transmitting Application Package...</span>
+                    <span>{t('journey_step6.transmitting_msg', 'Transmitting Application Package...')}</span>
                   </>
                 ) : (
                   <>
                     <Send className="w-4 h-4" />
-                    <span>Submit Application Package</span>
+                    <span>{t('journey_step6.btn_submit_online', 'Submit Official Application Online')}</span>
                   </>
                 )}
               </button>
@@ -592,14 +618,14 @@ export default function Step6GuideApplication() {
               </div>
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#065F46] bg-white px-2.5 py-0.5 rounded-full border border-[#10B981]/20">
-                  Application Successfully Recorded
+                  {t('journey_step6.success_banner_badge', 'Application Successfully Recorded')}
                 </span>
                 <h3 className="text-lg sm:text-xl font-bold text-[#0B3B60] mt-1">
-                  Application Reference: <span className="font-mono text-[#0B3B60]">{applicationId}</span>
+                  {t('journey_step6.app_ref_label', 'Application Reference:')} <span className="font-mono text-[#0B3B60]">{applicationId}</span>
                 </h3>
                 <p className="text-xs text-[#065F46] mt-0.5 leading-relaxed">
-                  Applicant: <strong>{applicantFullName}</strong> · Submitted on <strong>{submissionDate}</strong> for <strong>{schemeName}</strong> ({requestedAmt}).
-                  {isChannelPartner && <span> Assigned to: <strong>{partnerName}</strong>.</span>}
+                  {t('journey_step6.applicant_label', 'Applicant:')} <strong>{applicantFullName}</strong> · {t('journey_step6.submitted_on', 'Submitted on')} <strong>{submissionDate}</strong> {t('journey_step6.for_scheme', 'for')} <strong>{schemeName}</strong> ({requestedAmt}).
+                  {isChannelPartner && <span> {t('journey_step6.assigned_to', 'Assigned to:')} <strong>{partnerName}</strong>.</span>}
                 </p>
               </div>
             </div>
@@ -611,7 +637,7 @@ export default function Step6GuideApplication() {
                 className="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-[#10B981]/40 text-[#065F46] rounded-xl text-xs font-bold hover:bg-[#E8F8F2] flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5" />
-                Print Receipt
+                {t('journey_step6.btn_print', 'Print Application Dossier')}
               </button>
             </div>
           </div>
@@ -620,18 +646,18 @@ export default function Step6GuideApplication() {
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E2E8F0] shadow-xs space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#F1F5F9]">
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-[#0B3B60]">Official Application Progress Tracker</h3>
+                <h3 className="text-base sm:text-lg font-bold text-[#0B3B60]">{t('journey_step6.timeline_title', 'Official 6-Stage Application Lifecycle Roadmap')}</h3>
                 <p className="text-xs text-[#64748B] mt-0.5">
-                  End-to-end transparent visibility of your government scheme application
+                  {t('journey_step6.subtitle', 'End-to-end transparent visibility of your government scheme application')}
                 </p>
               </div>
               <span className="text-xs font-bold px-3 py-1 bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE] rounded-full">
-                Status: Under Review (Desk Scrutiny)
+                {t('journey_step6.tracking_status_under_review', 'Status: Under Review (Desk Scrutiny)')}
               </span>
             </div>
 
             <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-0.5 before:bg-[#E2E8F0]">
-              {TRACKING_TIMELINE.map((item, index) => {
+              {getTrackingTimeline(t).map((item, index) => {
                 const isDone = item.status === 'completed';
                 const isActive = item.status === 'active';
 
@@ -687,7 +713,7 @@ export default function Step6GuideApplication() {
                 onClick={() => navigateTo('home')}
                 className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-bold text-[#475569] cursor-pointer min-h-[44px] flex items-center justify-center"
               >
-                Return to Dashboard
+                {t('journey_step6.btn_finish_dashboard', 'Finish & Return to Dashboard')}
               </button>
 
               <button
@@ -698,7 +724,7 @@ export default function Step6GuideApplication() {
                 }}
                 className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0B3B60] text-white hover:bg-[#07263F] text-xs font-bold shadow-xs cursor-pointer min-h-[44px] flex items-center justify-center"
               >
-                Start New Scheme Evaluation
+                {t('journey_step6.btn_track_status', 'Track Live Application Status')}
               </button>
             </div>
           </div>

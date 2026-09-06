@@ -24,6 +24,7 @@ import {
   Palette,
   Loader2,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../context/AppContext';
 
 // Comprehensive list of Indian States & Union Territories
@@ -116,14 +117,15 @@ const AMOUNT_PRESETS = [
 ];
 
 const INCOME_PRESETS = [
-  { label: 'Under ₹1.5 Lakh', value: '150000' },
-  { label: '₹2.5 Lakh', value: '250000' },
-  { label: '₹3.0 Lakh (NSFDC Cap)', value: '300000' },
-  { label: '₹5.0 Lakh', value: '500000' },
-  { label: 'Above ₹8.0 Lakh', value: '850000' },
+  { key: 'income_preset_under_1_5', label: 'Under ₹1.5 Lakh', value: '150000' },
+  { key: 'income_preset_2_5', label: '₹2.5 Lakh', value: '250000' },
+  { key: 'income_preset_3_0', label: '₹3.0 Lakh (NSFDC Cap)', value: '300000' },
+  { key: 'income_preset_5_0', label: '₹5.0 Lakh', value: '500000' },
+  { key: 'income_preset_above_8_0', label: 'Above ₹8.0 Lakh', value: '850000' },
 ];
 
 export default function Step1UnderstandNeed({ onComplete }) {
+  const { t, i18n } = useTranslation();
   const {
     journeyFormData,
     setJourneyFormData,
@@ -379,25 +381,25 @@ export default function Step1UnderstandNeed({ onComplete }) {
   const validateForm = () => {
     const errs = {};
     if (!applicantName.trim()) {
-      errs.applicantName = 'Please enter beneficiary / applicant full name.';
+      errs.applicantName = t('journey_step1.err_name', 'Please enter beneficiary / applicant full name.');
     }
     if (!fundingAmount || Number(fundingAmount) <= 0) {
-      errs.fundingAmount = 'Please provide required financial support amount.';
+      errs.fundingAmount = t('journey_step1.err_amount', 'Please provide required financial support amount.');
     }
     if (!familyIncome || Number(familyIncome) <= 0) {
-      errs.familyIncome = 'Please provide annual household income.';
+      errs.familyIncome = t('journey_step1.err_income', 'Please provide annual household income.');
     }
     if (!stateName.trim()) {
-      errs.stateName = 'Please select your state.';
+      errs.stateName = t('journey_step1.err_state', 'Please select your state.');
     }
     if (!district.trim()) {
-      errs.district = 'Please enter your district.';
+      errs.district = t('journey_step1.err_district', 'Please enter your district.');
     }
     if (!city.trim()) {
-      errs.city = 'Please enter your city, town, or village.';
+      errs.city = t('journey_step1.err_city', 'Please enter your city, town, or village.');
     }
     if (!pincode.trim() || !/^\d{6}$/.test(pincode.trim())) {
-      errs.pincode = 'Please enter a valid 6-digit postal pincode.';
+      errs.pincode = t('journey_step1.err_pincode', 'Please enter a valid 6-digit postal pincode.');
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -463,6 +465,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
         city: city.trim(),
         pincode: pincode.trim(),
         areaType: 'Semi-Urban',
+        language: i18n.language === 'hi' ? 'hindi' : 'english',
       };
 
       // 1. Update Context & LocalStorage
@@ -548,20 +551,18 @@ export default function Step1UnderstandNeed({ onComplete }) {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE]">
                 <ShieldCheck className="w-3 h-3 text-[#2563EB]" />
-                <span>OFFICIAL INTAKE · FORM ARTH-01</span>
+                <span>{t('journey_step1.badge_form_code', 'OFFICIAL INTAKE · FORM ARTH-01')}</span>
               </span>
               <span className="text-[11px] text-[#64748B] font-medium">
-                Direct Scheme Eligibility Matching
+                {t('journey_step1.badge_scheme_match', 'Direct Scheme Eligibility Matching')}
               </span>
             </div>
 
             <h1 className="text-xl sm:text-2xl font-bold text-[#0B3B60] tracking-tight">
-              Beneficiary Intake & Scheme Requirement Profile
+              {t('journey_step1.title', 'Beneficiary Intake & Scheme Requirement Profile')}
             </h1>
             <p className="text-xs sm:text-sm text-[#64748B] max-w-3xl">
-              Complete this single statutory assessment form. ArthSetu AI cross-references your demographic,
-              purpose, and income criteria against apex welfare corporations (NSFDC, NBCFDC, NSKFDC) and central
-              credit guarantees.
+              {t('journey_step1.subtitle', 'Complete this single statutory assessment form. ArthSetu AI cross-references your demographic, purpose, and income criteria against apex welfare corporations (NSFDC, NBCFDC, NSKFDC) and central credit guarantees.')}
             </p>
           </div>
 
@@ -572,7 +573,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
             className="self-start sm:self-center inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#1D4ED8] transition-all cursor-pointer shadow-2xs shrink-0"
           >
             <Sparkles className="w-4 h-4 text-[#2563EB]" />
-            <span>{aiAssistOpen ? 'Close Smart Fill' : '⚡ Quick Auto-Fill with AI'}</span>
+            <span>{aiAssistOpen ? t('journey_step1.btn_ai_close', 'Close Smart Fill') : t('journey_step1.btn_ai_open', '⚡ Quick Auto-Fill with AI')}</span>
           </button>
         </div>
 
@@ -582,9 +583,9 @@ export default function Step1UnderstandNeed({ onComplete }) {
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[#0B3B60] flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
-                Describe your requirement in ordinary language
+                {t('journey_step1.ai_desc_title', 'Describe your requirement in ordinary language')}
               </span>
-              <span className="text-[11px] text-[#64748B]">Optional Assistant</span>
+              <span className="text-[11px] text-[#64748B]">{t('journey_step1.ai_optional_badge', 'Optional Assistant')}</span>
             </div>
 
             <form onSubmit={handleAiAutoFill} className="space-y-3">
@@ -592,7 +593,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                 rows={2}
                 value={aiInputText}
                 onChange={(e) => setAiInputText(e.target.value)}
-                placeholder="e.g., I want to start a footwear retail shop in Bhopal, I need ₹3 Lakh support, and our family income is ₹2.5 Lakh per year."
+                placeholder={t('journey_step1.ai_placeholder', "e.g., I want to start a footwear retail shop in Bhopal, I need ₹3 Lakh support, and our family income is ₹2.5 Lakh per year.")}
                 className="w-full p-3.5 rounded-xl border border-[#CBD5E1] text-xs sm:text-sm bg-white outline-none focus:border-[#0B3B60] focus:ring-2 focus:ring-[#0B3B60]/10"
               />
 
@@ -604,7 +605,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                   </span>
                 ) : (
                   <span className="text-[11px] text-[#64748B]">
-                    Our parser will automatically extract your purpose, amount, income, and city into this form.
+                    {t('journey_step1.ai_parser_note', 'Our parser will automatically extract your purpose, amount, income, and city into this form.')}
                   </span>
                 )}
 
@@ -612,7 +613,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                   type="submit"
                   className="px-4 py-2 rounded-xl bg-[#0B3B60] hover:bg-[#07263F] text-white text-xs font-bold transition-all cursor-pointer shadow-2xs"
                 >
-                  Populate Form Fields
+                  {t('journey_step1.ai_populate_btn', 'Populate Form Fields')}
                 </button>
               </div>
             </form>
@@ -631,10 +632,10 @@ export default function Step1UnderstandNeed({ onComplete }) {
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-bold text-[#0B3B60]">
-                1. Beneficiary Identity & Personal Demographics
+                {t('journey_step1.sec1_title', '1. Beneficiary Identity & Personal Demographics')}
               </h2>
               <p className="text-[11px] text-[#64748B]">
-                Primary applicant profile used for Aadhaar KYC and state channelizing records.
+                {t('journey_step1.sec1_desc', 'Primary applicant profile used for Aadhaar KYC and state channelizing records.')}
               </p>
             </div>
           </div>
@@ -643,7 +644,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
             {/* Full Name */}
             <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                Full Legal Name (as in Aadhaar / Official ID) <span className="text-[#DC2626]">*</span>
+                {t('journey_step1.full_name_label', 'Full Legal Name (as in Aadhaar / Official ID)')} <span className="text-[#DC2626]">*</span>
               </label>
               <input
                 type="text"
@@ -652,7 +653,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                   setApplicantName(e.target.value);
                   if (errors.applicantName) setErrors((prev) => ({ ...prev, applicantName: null }));
                 }}
-                placeholder="Enter your full name as per Aadhaar"
+                placeholder={t('journey_step1.full_name_placeholder', "Enter your full name as per Aadhaar")}
                 className={`w-full h-11 px-3.5 rounded-xl border text-xs sm:text-sm font-medium outline-none transition-all ${
                   errors.applicantName
                     ? 'border-[#DC2626] bg-[#FEF2F2] focus:ring-2 focus:ring-[#DC2626]/20'
@@ -667,17 +668,17 @@ export default function Step1UnderstandNeed({ onComplete }) {
             {/* Gender */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                Gender <span className="text-[#DC2626]">*</span>
+                {t('journey_step1.gender_label', 'Gender')} <span className="text-[#DC2626]">*</span>
               </label>
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
                 className="w-full h-11 px-3 rounded-xl border border-[#CBD5E1] bg-white text-xs sm:text-sm font-medium outline-none focus:border-[#0B3B60]"
               >
-                <option value="Male">Male</option>
-                <option value="Female">Female (Special Women Subvention Eligible)</option>
-                <option value="Transgender">Transgender</option>
-                <option value="Other">Other</option>
+                <option value="Male">{t('journey_step1.gender_male', 'Male')}</option>
+                <option value="Female">{t('journey_step1.gender_female', 'Female (Special Women Subvention Eligible)')}</option>
+                <option value="Transgender">{t('journey_step1.gender_trans', 'Transgender')}</option>
+                <option value="Other">{t('journey_step1.gender_other', 'Other')}</option>
               </select>
             </div>
 
@@ -685,9 +686,9 @@ export default function Step1UnderstandNeed({ onComplete }) {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold text-[#334155]">
-                  Date of Birth
+                  {t('journey_step1.dob_label', 'Date of Birth')}
                 </label>
-                <span className="text-[10px] text-[#64748B]">Optional / Formats age</span>
+                <span className="text-[10px] text-[#64748B]">{t('journey_step1.dob_hint', 'Optional / Formats age')}</span>
               </div>
               <input
                 type="date"
@@ -701,7 +702,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
             {/* Age in Years */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                Age (in Years) <span className="text-[10px] font-normal text-[#64748B]">(18–50 for entrepreneurship)</span>
+                {t('journey_step1.age_label', 'Age (in Years)')} <span className="text-[10px] font-normal text-[#64748B]">{t('journey_step1.age_sublabel', '(18–50 for entrepreneurship)')}</span>
               </label>
               <input
                 type="number"
@@ -717,18 +718,18 @@ export default function Step1UnderstandNeed({ onComplete }) {
             {/* Social Category / Community Selection */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                Social Category / Community <span className="text-[#DC2626]">*</span>
+                {t('journey_step1.category_label', 'Social Category / Community')} <span className="text-[#DC2626]">*</span>
               </label>
               <select
                 value={categoryKey}
                 onChange={(e) => setCategoryKey(e.target.value)}
                 className="w-full h-11 px-3 rounded-xl border border-[#0B3B60] bg-[#EFF6FF] text-xs sm:text-sm font-bold text-[#0B3B60] outline-none"
               >
-                <option value="SC">Scheduled Caste (SC) — NSFDC Priority</option>
-                <option value="OBC">Other Backward Classes (OBC) — NBCFDC Slabs</option>
-                <option value="ST">Scheduled Tribe (ST) — NSTFDC Schemes</option>
-                <option value="SafaiKaramchari">Safai Karamchari / Waste Worker (NSKFDC)</option>
-                <option value="General">General / Other (PMEGP / Mudra / Stand-Up India)</option>
+                <option value="SC">{t('journey_step1.cat_sc', 'Scheduled Caste (SC) — NSFDC Priority')}</option>
+                <option value="OBC">{t('journey_step1.cat_obc', 'Other Backward Classes (OBC) — NBCFDC Slabs')}</option>
+                <option value="ST">{t('journey_step1.cat_st', 'Scheduled Tribe (ST) — NSTFDC Schemes')}</option>
+                <option value="SafaiKaramchari">{t('journey_step1.cat_safai', 'Safai Karamchari / Waste Worker (NSKFDC)')}</option>
+                <option value="General">{t('journey_step1.cat_general', 'General / Other (PMEGP / Mudra / Stand-Up India)')}</option>
               </select>
             </div>
           </div>
@@ -744,11 +745,10 @@ export default function Step1UnderstandNeed({ onComplete }) {
               />
               <div className="space-y-0.5">
                 <span className="text-xs font-bold text-[#1E293B] block">
-                  Statutory Community & Eligibility Declaration
+                  {t('journey_step1.declaration_title', 'Statutory Community & Eligibility Declaration')}
                 </span>
                 <span className="text-[11px] text-[#475569] leading-relaxed block">
-                  I hereby self-declare that the information provided is accurate and that I hold, or am eligible to obtain,
-                  the required caste/community certificate from the competent revenue/welfare authority to avail targeted government concessional benefits.
+                  {t('journey_step1.declaration_text', 'I hereby self-declare that the information provided is accurate and that I hold, or am eligible to obtain, a valid caste certificate and income declaration for statutory scheme verification.')}
                 </span>
               </div>
             </label>
@@ -763,10 +763,10 @@ export default function Step1UnderstandNeed({ onComplete }) {
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-bold text-[#0B3B60]">
-                2. Assistance Requirement & Activity Details
+                {t('journey_step1.sec2_title', '2. Project Purpose & Activity Details')}
               </h2>
               <p className="text-[11px] text-[#64748B]">
-                Identify whether your primary need is business setup, higher education, or specialized equipment.
+                {t('journey_step1.sec2_desc', 'Select funding domain to configure specialized subsidy limits and interest slabs.')}
               </p>
             </div>
           </div>
@@ -809,7 +809,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                               : 'bg-[#F1F5F9] text-[#64748B]'
                           }`}
                         >
-                          {opt.badge}
+                          {opt.id === 'business' ? t('journey_step1.badge_high_priority', opt.badge) : opt.id === 'education' ? t('journey_step1.badge_subsidized_interest', opt.badge) : opt.id === 'micro_finance' ? t('journey_step1.badge_zero_collateral', opt.badge) : t('journey_step1.badge_special_welfare', opt.badge)}
                         </span>
                       </div>
                       <h3
@@ -817,16 +817,16 @@ export default function Step1UnderstandNeed({ onComplete }) {
                           isSelected ? 'text-[#0B3B60]' : 'text-[#1E293B]'
                         }`}
                       >
-                        {opt.title}
+                        {t(`journey_step1.purpose_${opt.id}_title`, opt.title)}
                       </h3>
                       <p className="text-[10px] sm:text-[11px] text-[#64748B] leading-normal line-clamp-3">
-                        {opt.desc}
+                        {t(`journey_step1.purpose_${opt.id}_desc`, opt.desc)}
                       </p>
                     </div>
 
                     <div className="pt-2 flex items-center justify-between text-[11px] font-bold">
                       <span className={isSelected ? 'text-[#0B3B60]' : 'text-[#94A3B8]'}>
-                        {isSelected ? 'Selected ✓' : 'Select'}
+                        {isSelected ? t('journey_step1.status_selected', 'Selected ✓') : t('journey_step1.status_select', 'Select')}
                       </span>
                       <div
                         className={`w-4 h-4 rounded-full border flex items-center justify-center ${
@@ -850,7 +850,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#2563EB]" />
                 <h4 className="text-xs font-bold text-[#0B3B60] uppercase tracking-wide">
-                  Enterprise Details (Required for Term Loan & Margin Money Matching)
+                  {t('journey_step1.enterprise_details_heading', 'Enterprise Details (Required for Term Loan & Margin Money Matching)')}
                 </h4>
               </div>
 
@@ -858,7 +858,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                 {/* Business Status */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-[#334155]">
-                    Business Status <span className="text-[#DC2626]">*</span>
+                    {t('journey_step1.business_status_label', 'Enterprise Stage / Business Status')} <span className="text-[#DC2626]">*</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <button
@@ -870,7 +870,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                           : 'bg-white text-[#475569] border-[#CBD5E1] hover:bg-slate-50'
                       }`}
                     >
-                      New Enterprise (Greenfield / Setup)
+                      {t('journey_step1.status_new', 'New Enterprise Setup (Greenfield)')}
                     </button>
                     <button
                       type="button"
@@ -881,7 +881,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                           : 'bg-white text-[#475569] border-[#CBD5E1] hover:bg-slate-50'
                       }`}
                     >
-                      Existing Enterprise (Expansion / Modernization)
+                      {t('journey_step1.status_existing', 'Existing Enterprise (Expansion / Modernization)')}
                     </button>
                   </div>
                 </div>
@@ -889,18 +889,28 @@ export default function Step1UnderstandNeed({ onComplete }) {
                 {/* Business Sector / Type */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-[#334155]">
-                    Business Type / Sector <span className="text-[#DC2626]">*</span>
+                    {t('journey_step1.business_sector_label', 'Target Business Sector')} <span className="text-[#DC2626]">*</span>
                   </label>
                   <select
                     value={businessSector}
                     onChange={(e) => setBusinessSector(e.target.value)}
                     className="w-full h-11 px-3 rounded-xl border border-[#CBD5E1] bg-white text-xs sm:text-sm font-medium outline-none focus:border-[#0B3B60]"
                   >
-                    {BUSINESS_SECTORS.map((sec) => (
-                      <option key={sec.id} value={sec.label}>
-                        {sec.label}
-                      </option>
-                    ))}
+                    {BUSINESS_SECTORS.map((sec) => {
+                      const sectorI18nKey = {
+                        retail: 'sector_retail',
+                        manufacturing: 'sector_manufacturing',
+                        services: 'sector_services',
+                        agri_allied: 'sector_agri',
+                        artisan: 'sector_artisan',
+                        transport: 'sector_transport',
+                      }[sec.id];
+                      return (
+                        <option key={sec.id} value={sec.label}>
+                          {sectorI18nKey ? t(`journey_step1.${sectorI18nKey}`, sec.label) : sec.label}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               </div>
@@ -908,13 +918,13 @@ export default function Step1UnderstandNeed({ onComplete }) {
               {/* Brief Business Description */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-[#334155]">
-                  Proposed Business Activity / Machinery Requirement (Brief)
+                  {t('journey_step1.business_activity_label', 'Specific Trade / Proposed Activity')}
                 </label>
                 <input
                   type="text"
                   value={businessActivity}
                   onChange={(e) => setBusinessActivity(e.target.value)}
-                  placeholder="e.g. Setting up a garment tailoring & embroidery shop, purchasing 2 industrial sewing machines"
+                  placeholder={t('journey_step1.business_activity_placeholder', 'e.g., Kirana store, dairy farm, tailoring shop, mobile repair center')}
                   className="w-full h-10 px-3.5 rounded-xl border border-[#CBD5E1] bg-white text-xs sm:text-sm font-medium outline-none focus:border-[#0B3B60]"
                 />
               </div>
@@ -927,29 +937,29 @@ export default function Step1UnderstandNeed({ onComplete }) {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#2563EB]" />
                 <h4 className="text-xs font-bold text-[#0B3B60] uppercase tracking-wide">
-                  Academic Details (Required for NSFDC Educational Loan Scheme & Interest Subvention)
+                  {t('journey_step1.academic_details_heading', 'Academic Details (Required for NSFDC Educational Loan Scheme & Interest Subvention)')}
                 </h4>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-[#334155]">
-                    Course Level / Target Qualification <span className="text-[#DC2626]">*</span>
+                    {t('journey_step1.course_level_label', 'Course / Education Level')} <span className="text-[#DC2626]">*</span>
                   </label>
                   <select
                     value={courseLevel}
                     onChange={(e) => setCourseLevel(e.target.value)}
                     className="w-full h-11 px-3 rounded-xl border border-[#CBD5E1] bg-white text-xs sm:text-sm font-medium outline-none focus:border-[#0B3B60]"
                   >
-                    <option value="12th_pass">12th Standard Passed (Seeking Undergraduate Degree / B.Tech / MBBS / B.Sc)</option>
-                    <option value="graduate">Graduate (Seeking Post-Graduate / Masters / Professional Course)</option>
-                    <option value="vocational">Vocational / Technical Diploma (ITI / Polytechnic)</option>
+                    <option value="12th_pass">{t('journey_step1.course_graduate', 'Graduate / Professional Degree (B.Tech, MBBS, BBA, etc.)')}</option>
+                    <option value="graduate">{t('journey_step1.course_postgraduate', 'Postgraduate Degree / Doctorate (M.Tech, MBA, MD, Ph.D.)')}</option>
+                    <option value="vocational">{t('journey_step1.course_diploma', 'Technical Diploma / ITI / Vocational Certification')}</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-[#334155]">
-                    Study Location <span className="text-[#DC2626]">*</span>
+                    {t('journey_step1.study_loc_label', 'Study Location')} <span className="text-[#DC2626]">*</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <button
@@ -961,7 +971,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                           : 'bg-white text-[#475569] border-[#CBD5E1]'
                       }`}
                     >
-                      Within India (Up to ₹20 Lakh)
+                      {t('journey_step1.study_loc_india', 'In India (Accredited Institutes)')}
                     </button>
                     <button
                       type="button"
@@ -972,7 +982,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                           : 'bg-white text-[#475569] border-[#CBD5E1]'
                       }`}
                     >
-                      Study Abroad (Up to ₹50 Lakh)
+                      {t('journey_step1.study_loc_abroad', 'Abroad / Overseas Studies (Higher Loan Cap)')}
                     </button>
                   </div>
                 </div>
@@ -986,15 +996,15 @@ export default function Step1UnderstandNeed({ onComplete }) {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#0F8B8D]" />
                 <h4 className="text-xs font-bold text-[#0B696B] uppercase tracking-wide">
-                  Sanitation Equipment Category (NSKFDC / Swachhta Udyami Yojana)
+                  {t('journey_step1.sanitation_profile_label', 'Target Activity Category')}
                 </h4>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
-                  { id: 'mechanized_cleaning', label: 'Mechanized Suction & Jetting Equipment' },
-                  { id: 'waste_management', label: 'Solid Waste Segregation & E-Garbage Vehicle' },
-                  { id: 'sanitation_mart', label: 'Community Sanitation Facility / Bio-Toilet Unit' },
+                  { id: 'mechanized_cleaning', key: 'sanitation_mech', label: 'Mechanized Suction & Jetting Equipment' },
+                  { id: 'waste_management', key: 'sanitation_waste', label: 'Solid Waste Segregation & E-Garbage Vehicle' },
+                  { id: 'sanitation_mart', key: 'sanitation_mart', label: 'Community Sanitation Facility / Bio-Toilet Unit' },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -1006,7 +1016,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                         : 'bg-white text-[#475569] border-[#CBD5E1]'
                     }`}
                   >
-                    {item.label}
+                    {t(`journey_step1.${item.key}`, item.label)}
                   </button>
                 ))}
               </div>
@@ -1022,10 +1032,10 @@ export default function Step1UnderstandNeed({ onComplete }) {
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-bold text-[#0B3B60]">
-                3. Financial Support & Household Income Threshold
+                {t('journey_step1.sec3_title', '3. Financial Scale & Household Income')}
               </h2>
               <p className="text-[11px] text-[#64748B]">
-                Accurate figures ensure your profile matches exact scheme loan limits, margin contributions, and interest ceilings.
+                {t('journey_step1.sec3_desc', 'Sets borrowing limits and validates income against statutory subvention caps.')}
               </p>
             </div>
           </div>
@@ -1035,7 +1045,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
             <div className="space-y-3">
               <div className="flex items-baseline justify-between">
                 <label className="block text-xs font-bold text-[#334155]">
-                  Required Financial Support Amount (₹) <span className="text-[#DC2626]">*</span>
+                  {t('journey_step1.funding_amount_label', 'Estimated Project Cost / Required Funding (₹)')} <span className="text-[#DC2626]">*</span>
                 </label>
                 <span className="text-xs font-bold font-mono text-[#0B3B60] bg-[#EFF6FF] px-2.5 py-0.5 rounded-full">
                   ₹{Number(fundingAmount || 0).toLocaleString('en-IN')}
@@ -1068,7 +1078,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
               {/* Amount Presets */}
               <div className="space-y-1">
                 <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
-                  Quick Select Amount:
+                  {t('journey_step1.funding_presets_label', 'Quick Amount Presets')}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {AMOUNT_PRESETS.map((preset) => (
@@ -1093,7 +1103,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
             <div className="space-y-3">
               <div className="flex items-baseline justify-between">
                 <label className="block text-xs font-bold text-[#334155]">
-                  Annual Household / Family Income (₹) <span className="text-[#DC2626]">*</span>
+                  {t('journey_step1.family_income_label', 'Total Annual Family Household Income (₹)')} <span className="text-[#DC2626]">*</span>
                 </label>
                 <span className="text-xs font-bold font-mono text-[#0B3B60] bg-[#EFF6FF] px-2.5 py-0.5 rounded-full">
                   ₹{Number(familyIncome || 0).toLocaleString('en-IN')} / year
@@ -1126,7 +1136,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
               {/* Income Presets */}
               <div className="space-y-1">
                 <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
-                  Quick Select Income Slab:
+                  {t('journey_step1.income_presets_label', 'Quick Select Income Slab:')}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {INCOME_PRESETS.map((preset) => (
@@ -1140,7 +1150,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                           : 'bg-[#F8FAFC] text-[#475569] border border-[#E2E8F0] hover:bg-white'
                       }`}
                     >
-                      {preset.label}
+                      {t(`journey_step1.${preset.key}`, preset.label)}
                     </button>
                   ))}
                 </div>
@@ -1152,9 +1162,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
           <div className="p-4 rounded-2xl bg-[#EFF6FF] border border-[#BFDBFE] flex items-start gap-3">
             <Info className="w-4 h-4 text-[#2563EB] shrink-0 mt-0.5" />
             <p className="text-[11px] text-[#1E40AF] leading-relaxed">
-              <strong>Government Eligibility Note:</strong> For NSFDC and NBCFDC concessional lending schemes,
-              the statutory income eligibility ceiling is <strong>₹3,00,000 per annum</strong>. Applicants within this limit qualify
-              for standard concessional interest tiers (4%–6% p.a.). Special credit lines exist for higher brackets under Stand-Up India and PMEGP.
+              <strong>{t('journey_step1.gov_note_label', 'Government Eligibility Note:')}</strong> {t('journey_step1.income_ceiling_note', 'Statutory Note: NSFDC schemes prioritize families with annual income up to ₹3,00,000 for maximum interest subvention.')}
             </p>
           </div>
         </div>
@@ -1167,10 +1175,10 @@ export default function Step1UnderstandNeed({ onComplete }) {
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-bold text-[#0B3B60]">
-                4. Education Status & Present Occupation
+                {t('journey_step1.sec4_title', '4. Beneficiary Socio-Economic & Educational Profile')}
               </h2>
               <p className="text-[11px] text-[#64748B]">
-                Provides necessary criteria for technical entrepreneurship, skill training, and educational loan tiers.
+                {t('journey_step1.sec4_desc', 'Assists Channel Partner credit evaluation and skill-based scheme mapping.')}
               </p>
             </div>
           </div>
@@ -1179,38 +1187,38 @@ export default function Step1UnderstandNeed({ onComplete }) {
             {/* Occupation */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                Current Occupation <span className="text-[#DC2626]">*</span>
+                {t('journey_step1.occupation_label', 'Current Primary Occupation')} <span className="text-[#DC2626]">*</span>
               </label>
               <select
                 value={occupation}
                 onChange={(e) => setOccupation(e.target.value)}
                 className="w-full h-11 px-3.5 rounded-xl border border-[#CBD5E1] bg-white text-xs sm:text-sm font-medium outline-none focus:border-[#0B3B60]"
               >
-                <option value="Self-Employed / Micro-Entrepreneur">Self-Employed / Micro-Entrepreneur</option>
-                <option value="Daily Wage Earner / Informal Worker">Daily Wage Earner / Informal Worker</option>
-                <option value="Traditional Artisan / Weaver">Traditional Artisan / Weaver / Craftsperson</option>
-                <option value="Salaried / Private Sector Employee">Salaried / Private Sector Employee</option>
-                <option value="Student / Aspiring Scholar">Student / Aspiring Scholar</option>
-                <option value="Unemployed / Seeking Self-Employment">Unemployed / Seeking Self-Employment</option>
-                <option value="Agriculture / Allied Cultivator">Agriculture / Allied Cultivator</option>
+                <option value="Self-Employed / Micro-Entrepreneur">{t('journey_step1.occ_self_employed', 'Self-Employed / Micro-Entrepreneur')}</option>
+                <option value="Daily Wage Earner / Informal Worker">{t('journey_step1.occ_daily_wage', 'Daily Wage Earner / Informal Worker')}</option>
+                <option value="Traditional Artisan / Weaver">{t('journey_step1.occ_artisan', 'Traditional Artisan / Weaver / Craftsperson')}</option>
+                <option value="Salaried / Private Sector Employee">{t('journey_step1.occ_salaried', 'Salaried / Private Sector Employee')}</option>
+                <option value="Student / Aspiring Scholar">{t('journey_step1.occ_student', 'Student / Aspiring Scholar')}</option>
+                <option value="Unemployed / Seeking Self-Employment">{t('journey_step1.occ_unemployed', 'Unemployed / Seeking Self-Employment')}</option>
+                <option value="Agriculture / Allied Cultivator">{t('journey_step1.occ_agri', 'Agriculture / Allied Cultivator')}</option>
               </select>
             </div>
 
             {/* Education Status */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                Highest Educational Qualification <span className="text-[#DC2626]">*</span>
+                {t('journey_step1.edu_status_label', 'Highest Educational Qualification')} <span className="text-[#DC2626]">*</span>
               </label>
               <select
                 value={educationStatus}
                 onChange={(e) => setEducationStatus(e.target.value)}
                 className="w-full h-11 px-3.5 rounded-xl border border-[#CBD5E1] bg-white text-xs sm:text-sm font-medium outline-none focus:border-[#0B3B60]"
               >
-                <option value="below_10th">Below 10th Standard (Elementary / Primary)</option>
-                <option value="10th_pass">10th Standard Passed (Matriculation)</option>
-                <option value="12th_pass">12th Standard Passed (Higher Secondary)</option>
-                <option value="graduate">Graduate / Polytechnic Diploma (B.A. / B.Sc / B.Tech / Diploma)</option>
-                <option value="post_graduate">Post-Graduate / Professional Degree (M.A. / M.Sc / M.Tech / MBA / Ph.D)</option>
+                <option value="below_10th">{t('journey_step1.edu_below_10th', 'Below 10th Standard (Elementary / Primary)')}</option>
+                <option value="10th_pass">{t('journey_step1.edu_10th_pass', '10th Standard Passed (Matriculation)')}</option>
+                <option value="12th_pass">{t('journey_step1.edu_12th_pass', '12th Standard Passed (Higher Secondary)')}</option>
+                <option value="graduate">{t('journey_step1.edu_graduate', 'Graduate / Polytechnic Diploma (B.A. / B.Sc / B.Tech / Diploma)')}</option>
+                <option value="post_graduate">{t('journey_step1.edu_post_graduate', 'Post-Graduate / Professional Degree (M.A. / M.Sc / M.Tech / MBA / Ph.D)')}</option>
               </select>
             </div>
           </div>
@@ -1224,10 +1232,10 @@ export default function Step1UnderstandNeed({ onComplete }) {
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-bold text-[#0B3B60]">
-                5. Location & Channel Partner Jurisdiction
+                {t('journey_step1.sec5_title', '5. Geographic Location & Channel Partner Jurisdiction')}
               </h2>
               <p className="text-[11px] text-[#64748B]">
-                Used to route your scheme application to your state-authorized channelizing agency (SCA) and nearest lead bank branch.
+                {t('journey_step1.sec5_desc', 'Maps your profile to the designated district Channelizing Agency and bank branches.')}
               </p>
             </div>
           </div>
@@ -1236,7 +1244,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
             {/* State */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                State / UT <span className="text-[#DC2626]">*</span>
+                {t('journey_step1.state_label', 'State / Union Territory')} <span className="text-[#DC2626]">*</span>
               </label>
               <select
                 value={stateName}
@@ -1262,7 +1270,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
             {/* District */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                District <span className="text-[#DC2626]">*</span>
+                {t('journey_step1.district_label', 'District')} <span className="text-[#DC2626]">*</span>
               </label>
               <input
                 type="text"
@@ -1271,7 +1279,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                   setDistrict(e.target.value);
                   if (errors.district) setErrors((prev) => ({ ...prev, district: null }));
                 }}
-                placeholder="e.g. Bhopal"
+                placeholder={t('journey_step1.district_placeholder', "e.g. Bhopal")}
                 className={`w-full h-11 px-3.5 rounded-xl border text-xs sm:text-sm font-medium outline-none transition-all ${
                   errors.district ? 'border-[#DC2626] bg-[#FEF2F2]' : 'border-[#CBD5E1] bg-white focus:border-[#0B3B60]'
                 }`}
@@ -1284,7 +1292,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
             {/* City / Town / Village */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                City / Town / Village <span className="text-[#DC2626]">*</span>
+                {t('journey_step1.city_label', 'City / Town / Village')} <span className="text-[#DC2626]">*</span>
               </label>
               <input
                 type="text"
@@ -1306,7 +1314,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
             {/* Pincode */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                Pincode (6-Digits) <span className="text-[#DC2626]">*</span>
+                {t('journey_step1.pincode_label', 'Postal Pincode (6 Digits)')} <span className="text-[#DC2626]">*</span>
               </label>
               <input
                 type="text"
@@ -1333,10 +1341,10 @@ export default function Step1UnderstandNeed({ onComplete }) {
         <div className="bg-white rounded-3xl border border-[#CBD5E1] p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-0.5">
             <span className="text-xs font-bold text-[#0B3B60] block">
-              Stage 1 Intake Ready
+              {t('journey_step1.stage_ready', 'Stage 1 Intake Ready')}
             </span>
             <p className="text-[11px] text-[#64748B]">
-              Submitting saves your verified profile under your account and generates matched schemes in Stage 2.
+              {t('journey_step1.stage_ready_desc', 'Submitting saves your verified profile under your account and generates matched schemes in Stage 2.')}
             </p>
           </div>
 
@@ -1347,7 +1355,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
               className="w-full sm:w-auto px-4 py-3 rounded-2xl border border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] text-[#475569] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[44px]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset</span>
+              <span>{t('journey_step1.btn_reset', 'Reset Form')}</span>
             </button>
 
             <button
@@ -1358,11 +1366,11 @@ export default function Step1UnderstandNeed({ onComplete }) {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Saving & Matching...</span>
+                  <span>{t('journey_step1.btn_submitting', 'Evaluating Eligibility Rules...')}</span>
                 </>
               ) : (
                 <>
-                  <span>SAVE PROFILE & CHECK ELIGIBILITY</span>
+                  <span>{t('journey_step1.btn_submit', 'Submit & Identify Eligible Schemes →')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
