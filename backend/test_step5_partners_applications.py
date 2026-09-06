@@ -46,7 +46,7 @@ def test_every_partner_has_required_data_confidence_label():
     assert len(all_partners) >= 5
 
     for p in all_partners:
-        assert p.data_confidence_label in ("Verified Master Data", "Prototype/Demo Data")
+        assert p.data_confidence_label in ("Verified Master Data", "Prototype/Demo Data", "Pending Live Verification")
         assert p.status in ("Operational", "Active", "Temporarily Inactive")
         assert p.partner_type in ("SCA", "PSB", "RRB", "NBFC_MFI", "Cooperative")
 

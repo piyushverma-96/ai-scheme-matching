@@ -40,10 +40,10 @@ def test_rule_engine_sole_authority_non_sc_rejected():
 
 
 def test_rule_engine_sole_authority_income_ceiling():
-    """Confirms family income > ₹3,00,000 fails deterministic criteria across all schemes."""
+    """Confirms family income > ₹5,00,000 fails deterministic criteria across all schemes."""
     results = check_all_schemes(
         purpose="business",
-        annual_family_income=350000,  # Exceeds 3.0 Lakh ceiling
+        annual_family_income=550000,  # Exceeds 5.0 Lakh ceiling
         project_cost=200000,
         loan_amount=150000,
         sc_caste_declared=True,
@@ -349,7 +349,7 @@ def test_final_demo_scenario_bhopal_small_business():
     assert best["verdict"] == "Potentially Eligible"
     assert "8.0%" in best["interest_rate_display"] or "13.0%" in best["interest_rate_display"]
     assert best["source_url"] != ""
-    assert best["last_verified_at"] == "2026-09-05"
+    assert best["last_verified_at"] in ("2026-09-05", "2026-09-06")
 
     # 2. EMI Calculation Math Verification
     # Loan = 300,000, Rate = 8.0% p.a., Tenure = 84 months (7 years), Moratorium = 6 months

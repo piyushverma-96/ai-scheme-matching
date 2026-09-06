@@ -77,6 +77,11 @@ class SchemeRule:
     application_channel_type: str = "channel_partner"  # 'channel_partner' | 'government_portal' | 'department_office' | 'district_authority' | 'other_official_channel'
     application_channel_details: Optional[Dict[str, Any]] = None
 
+    # Reconciled fields
+    coverage_percent: Optional[float] = None
+    business_categories: Optional[List[str]] = None
+    eligible_channel_types: Optional[List[str]] = None
+
     # Verification flags
     needs_manual_verification: bool = False
     verification_note: str = ""
@@ -84,6 +89,21 @@ class SchemeRule:
     # Specific condition flags
     requires_education_purpose: bool = False
     is_active: bool = True
+
+    def __post_init__(self):
+        if self.coverage_percent is None:
+            self.coverage_percent = float(self.financing_pct)
+        if self.business_categories is None:
+            self.business_categories = list(self.eligible_purposes)
+        if self.eligible_channel_types is None:
+            if self.scheme_id == "a4444444-4444-4444-4444-444444444444":
+                self.eligible_channel_types = ["NBFC-MFI"]
+            elif self.scheme_id == "a5555555-5555-5555-5555-555555555555":
+                self.eligible_channel_types = ["Cooperative", "Cooperative Bank", "Cooperative Society"]
+            elif self.scheme_type == "education_loan":
+                self.eligible_channel_types = ["SCA", "PSB"]
+            else:
+                self.eligible_channel_types = ["SCA", "PSB", "RRB"]
 
 
 
@@ -111,19 +131,19 @@ class SchemeEligibilityRule:
 
 
 # ---------------------------------------------------------------------------
-# VERIFIED SCHEME METADATA (Source: nsfdc.nic.in, 2026-09-05)
+# VERIFIED SCHEME METADATA (Source: nsfdc.nic.in, 2026-09-06)
 # ---------------------------------------------------------------------------
 
 SCHEME_RULES: List[SchemeRule] = [
-    # 1. Micro Credit Finance
+    # 1. Micro Finance Scheme (MFS) / Micro Credit Finance
     SchemeRule(
         scheme_id="a1111111-1111-1111-1111-111111111111",
         category_id="c1000000-0000-0000-0000-000000000001",
-        name="Micro Credit Finance",
+        name="Micro Finance Scheme (MFS)",
         scheme_type="micro_finance",
         short_description="Micro credit for units costing up to ₹1,40,000. Max loan ₹1,25,000 (up to 90% of project cost) at 6.5% p.a.",
         full_description=(
-            "NSFDC provides Micro Credit Finance for units costing up to ₹1,40,000. "
+            "NSFDC provides Micro Finance Scheme (MFS) for units costing up to ₹1,40,000. "
             "Loan amount up to 90% of project cost with maximum ₹1,25,000. "
             "NSFDC charges SCA/CA 2.5% p.a., which in turn charges beneficiary 6.5% p.a. "
             "Repayable in quarterly instalments within 3 years including 3 months moratorium."
@@ -134,7 +154,8 @@ SCHEME_RULES: List[SchemeRule] = [
         project_cost_min_exclusive=False,
         max_loan_amount=125000,
         financing_pct=90.0,
-        max_annual_family_income=300000,
+        coverage_percent=90.0,
+        max_annual_family_income=500000,
         rate_beneficiary_min=6.5,
         rate_beneficiary_max=6.5,
         rate_to_sca=2.5,
@@ -147,13 +168,25 @@ SCHEME_RULES: List[SchemeRule] = [
             "entrepreneurship", "business", "micro_business", "micro_credit",
             "agriculture", "farming", "services", "trade", "handicraft"
         ],
+        business_categories=[
+            "Micro Business", "Services", "Retail Trade", "Artisans", "Animal Husbandry", "Agriculture Allied"
+        ],
+        eligible_channel_types=["SCA", "PSB", "RRB"],
         benefit_type="loan",
         benefit_summary="Concessional micro-enterprise loan up to ₹1,25,000 (up to 90% project financing) at 6.5% p.a.",
-        support_type_display="Credit-Linked Financial Support (Micro-Credit)",
+        support_type_display="Credit-Linked Financial Support (Micro-Credit @ 6.5% p.a.)",
+        benefit_amount_display="Up to ₹1.25L",
         has_financial_calculation=True,
+        application_channel_type="channel_partner",
+        application_channel_details={
+            "channel_category": "State Channelizing Agency (SCA) / Empanelled Bank",
+            "partner_types": ["SCA", "PSB", "RRB"],
+            "channel_type": "SCA",
+            "instructions": "Apply through designated district State Channelizing Agency (SCA) or empanelled regional bank.",
+        },
         source_name="NSFDC Official Website",
         source_url="https://nsfdc.nic.in/en/micro-credit-finance",
-        last_verified_at="2026-09-05",
+        last_verified_at="2026-09-06",
         needs_manual_verification=False,
         verification_note="",
     ),
@@ -179,7 +212,8 @@ SCHEME_RULES: List[SchemeRule] = [
         project_cost_min_exclusive=True,
         max_loan_amount=4500000,
         financing_pct=90.0,
-        max_annual_family_income=300000,
+        coverage_percent=90.0,
+        max_annual_family_income=500000,
         rate_beneficiary_min=8.0,
         rate_beneficiary_max=8.0,
         rate_to_sca=4.0,
@@ -189,16 +223,28 @@ SCHEME_RULES: List[SchemeRule] = [
         moratorium_months=6,
         moratorium_note="6 months moratorium from disbursement (12 months for plantation/construction activities).",
         eligible_purposes=[
-            "entrepreneurship", "business", "agriculture", "industry", "services",
-            "transport", "plantation", "construction", "trade", "startup"
+            "entrepreneurship", "business", "manufacturing", "industry", "services",
+            "agriculture", "transport", "plantation", "construction", "trade", "startup"
         ],
+        business_categories=[
+            "Manufacturing", "Services", "Transport", "Agriculture Allied", "Trading", "Industrial Units"
+        ],
+        eligible_channel_types=["SCA", "PSB", "RRB"],
         benefit_type="loan",
         benefit_summary="Medium enterprise project loan up to ₹45,00,000 (up to 90% project financing) at 8.0% p.a. for up to 7 years",
-        support_type_display="Term Loan Assistance (Project Finance)",
+        support_type_display="Term Loan Assistance (Project Finance @ 8.0% p.a.)",
+        benefit_amount_display="Up to ₹45.00L",
         has_financial_calculation=True,
+        application_channel_type="channel_partner",
+        application_channel_details={
+            "channel_category": "State Channelizing Agency (SCA) / Empanelled Public Sector Bank",
+            "partner_types": ["SCA", "PSB", "RRB"],
+            "channel_type": "SCA",
+            "instructions": "Submit detailed project report (DPR) to district State Channelizing Agency or empanelled bank.",
+        },
         source_name="NSFDC Official Website",
         source_url="https://nsfdc.nic.in/en/term-loan",
-        last_verified_at="2026-09-05",
+        last_verified_at="2026-09-06",
         needs_manual_verification=False,
         verification_note="",
     ),
@@ -225,7 +271,8 @@ SCHEME_RULES: List[SchemeRule] = [
         project_cost_min_exclusive=False,
         max_loan_amount=4000000,
         financing_pct=90.0,
-        max_annual_family_income=300000,
+        coverage_percent=90.0,
+        max_annual_family_income=500000,
         rate_beneficiary_min=6.0,
         rate_beneficiary_max=6.5,
         rate_to_sca=2.5,
@@ -235,14 +282,24 @@ SCHEME_RULES: List[SchemeRule] = [
         moratorium_months=12,
         moratorium_note="Course period plus 1 year (where repayment not started); up to 6 months where repayment started.",
         eligible_purposes=["education", "studies", "higher_education"],
+        business_categories=["Higher Education", "Technical Education", "Professional Courses"],
+        eligible_channel_types=["SCA", "PSB"],
         requires_education_purpose=True,
         benefit_type="loan",
         benefit_summary="Education course financing up to ₹30 Lakh (India) / ₹40 Lakh (Abroad) at 6.0%–7.0% p.a.",
-        support_type_display="Educational Loan Assistance (Higher Education)",
+        support_type_display="Educational Loan Assistance (Higher Education @ 6.0%–6.5% p.a.)",
+        benefit_amount_display="Up to ₹30L (India) / ₹40L (Abroad)",
         has_financial_calculation=True,
+        application_channel_type="channel_partner",
+        application_channel_details={
+            "channel_category": "State Channelizing Agency (SCA) / Empanelled Public Sector Bank",
+            "partner_types": ["SCA", "PSB"],
+            "channel_type": "SCA",
+            "instructions": "Submit admission letter and official fee schedule to the State Channelizing Agency or empanelled bank.",
+        },
         source_name="NSFDC Official Website / NSFDC ELS Policy Document",
         source_url="https://nsfdc.nic.in/scheme",
-        last_verified_at="2026-09-05",
+        last_verified_at="2026-09-06",
         needs_manual_verification=True,
         verification_note=(
             "Repayment tenure confirmed from primary live source nsfdc.nic.in/scheme as 10–12 years with course+1yr moratorium. "
@@ -252,18 +309,19 @@ SCHEME_RULES: List[SchemeRule] = [
     ),
 
 
-    # 4. Aajeevika Micro-Finance Yojana
+    # 4. Aajeevika Micro-Finance Yojana (AMY)
     SchemeRule(
         scheme_id="a4444444-4444-4444-4444-444444444444",
         category_id="c4000000-0000-0000-0000-000000000004",
-        name="Aajeevika Micro-Finance Yojana",
+        name="Aajeevika Micro-Finance Yojana (AMY)",
         scheme_type="micro_finance_mfi",
         short_description="Micro-finance through NBFC-MFIs for projects up to ₹1,40,000. Loan up to ₹1,25,000 (90%) at 15% p.a.",
         full_description=(
             "NSFDC provides prompt need-based micro finance to eligible SC beneficiaries through selected "
-            "NBFC-MFIs for micro-enterprise activities. Loan up to 90% (max ₹1,25,000) for projects up to ₹1,40,000. "
-            "NSFDC charges NBFC-MFIs 5% p.a.; NBFC-MFIs charge beneficiaries 15% p.a. "
-            "Repayment in quarterly instalments up to 3 years with 3 months moratorium."
+            "NBFC-MFIs for micro/income-generating business activities. Loan up to 90% of project cost (max ₹1,25,000) "
+            "for units costing up to ₹1,40,000. NSFDC charges NBFC-MFIs 5% p.a.; NBFC-MFIs charge beneficiaries 15% p.a. "
+            "Repayment in quarterly instalments within a maximum of 3 years including 3 months moratorium. "
+            "Implemented strictly through empanelled NBFC-MFIs."
         ),
         issuing_body="National Scheduled Castes Finance and Development Corporation (NSFDC)",
         project_cost_min=0,
@@ -271,7 +329,8 @@ SCHEME_RULES: List[SchemeRule] = [
         project_cost_min_exclusive=False,
         max_loan_amount=125000,
         financing_pct=90.0,
-        max_annual_family_income=300000,
+        coverage_percent=90.0,
+        max_annual_family_income=500000,
         rate_beneficiary_min=15.0,
         rate_beneficiary_max=15.0,
         rate_to_sca=5.0,
@@ -283,9 +342,25 @@ SCHEME_RULES: List[SchemeRule] = [
         eligible_purposes=[
             "entrepreneurship", "business", "micro_business", "services", "trade"
         ],
+        business_categories=[
+            "Micro Enterprise", "Grassroots Trade", "Artisan Services", "Income-Generating Units"
+        ],
+        eligible_channel_types=["NBFC-MFI"],
+        benefit_type="loan",
+        benefit_summary="Prompt micro-enterprise loan up to ₹1,25,000 (up to 90% financing) through NBFC-MFIs at 15% p.a.",
+        support_type_display="Micro Finance via NBFC-MFI (15.0% p.a.)",
+        benefit_amount_display="Up to ₹1.25L",
+        has_financial_calculation=True,
+        application_channel_type="channel_partner",
+        application_channel_details={
+            "channel_category": "Empanelled NBFC-MFIs",
+            "partner_types": ["NBFC-MFI"],
+            "channel_type": "NBFC-MFI",
+            "instructions": "Apply through empanelled Non-Banking Financial Company - Microfinance Institutions (NBFC-MFIs).",
+        },
         source_name="NSFDC Official Website",
-        source_url="https://nsfdc.nic.in/scheme",
-        last_verified_at="2026-09-05",
+        source_url="https://nsfdc.nic.in/en/schemes-to-be-implemented-through-nbfc-mfis",
+        last_verified_at="2026-09-06",
         needs_manual_verification=False,
         verification_note="",
     ),
@@ -296,12 +371,12 @@ SCHEME_RULES: List[SchemeRule] = [
         category_id="c4000000-0000-0000-0000-000000000004",
         name="Udyam Nidhi Yojana (UNY)",
         scheme_type="micro_finance_mfi",
-        short_description="Micro-enterprise loans up to ₹5,00,000 through Cooperative Banks (13% p.a.) and SFBs (15% p.a.).",
+        short_description="Micro-enterprise loans up to ₹5,00,000 through Cooperative Societies and Cooperative Banks at 13% p.a.",
         full_description=(
-            "NSFDC provides loans under Udyam Nidhi Yojana for projects up to ₹5,00,000 through "
-            "Cooperative Societies, Cooperative Banks, and Small Finance Banks (SFBs). Loan up to 90% (max ₹4,50,000). "
-            "Interest to beneficiary: 13% p.a. (Cooperative Banks) / 15% p.a. (SFBs). NSFDC charges channel partners 5% p.a. "
-            "Repayment in quarterly/half-yearly instalments up to 5 years with 3 months moratorium."
+            "NSFDC provides loans under Udyam Nidhi Yojana for small/micro business activities for projects up to ₹5,00,000 "
+            "through Cooperative Societies and Cooperative Banks. NSFDC financing up to 90% of project cost (max ₹4,50,000). "
+            "Beneficiary interest rate: 13% p.a. (NSFDC charges Cooperative Society/Bank 5% p.a.). "
+            "Repayment in quarterly/half-yearly instalments up to 5 years including 3 months moratorium."
         ),
         issuing_body="National Scheduled Castes Finance and Development Corporation (NSFDC)",
         project_cost_min=0,
@@ -309,11 +384,12 @@ SCHEME_RULES: List[SchemeRule] = [
         project_cost_min_exclusive=False,
         max_loan_amount=450000,
         financing_pct=90.0,
-        max_annual_family_income=300000,
+        coverage_percent=90.0,
+        max_annual_family_income=500000,
         rate_beneficiary_min=13.0,
-        rate_beneficiary_max=15.0,
+        rate_beneficiary_max=13.0,
         rate_to_sca=5.0,
-        rate_note="Cooperative Banks/Societies charge 13% p.a.; Small Finance Banks charge 15% p.a. NSFDC charges 5% p.a.",
+        rate_note="Cooperative Societies and Cooperative Banks charge beneficiary 13% p.a.; NSFDC charges 5% p.a.",
         repayment_years_max=5,
         repayment_note="Quarterly or half-yearly instalments within 5 years.",
         moratorium_months=3,
@@ -321,11 +397,31 @@ SCHEME_RULES: List[SchemeRule] = [
         eligible_purposes=[
             "entrepreneurship", "business", "micro_business", "services", "trade", "agriculture"
         ],
+        business_categories=[
+            "Small Business", "Micro Business", "Cooperative Trade", "Services", "Cooperative Enterprises"
+        ],
+        eligible_channel_types=["Cooperative", "Cooperative Bank", "Cooperative Society"],
+        benefit_type="loan",
+        benefit_summary="Small/micro business loan up to ₹4,50,000 (up to 90% financing) via Cooperative Societies/Banks at 13% p.a.",
+        support_type_display="Cooperative Small Business Loan (13.0% p.a.)",
+        benefit_amount_display="Up to ₹4.50L",
+        has_financial_calculation=True,
+        application_channel_type="channel_partner",
+        application_channel_details={
+            "channel_category": "Cooperative Societies and Cooperative Banks",
+            "partner_types": ["Cooperative", "Cooperative Bank", "Cooperative Society"],
+            "channel_type": "Cooperative",
+            "instructions": "Apply through registered Cooperative Societies and Cooperative Banks empanelled with NSFDC.",
+        },
         source_name="NSFDC Official Website",
-        source_url="https://nsfdc.nic.in/scheme",
-        last_verified_at="2026-09-05",
-        needs_manual_verification=False,
-        verification_note="",
+        source_url="https://nsfdc.nic.in/en/udyam-nidhi-yojana",
+        last_verified_at="2026-09-06",
+        needs_manual_verification=True,
+        verification_note=(
+            "Primary nsfdc.nic.in source confirms 13% p.a. beneficiary rate (NSFDC charges 5% p.a.). "
+            "Some secondary publications cite 12% p.a. Confirmed 13% against primary official page "
+            "https://nsfdc.nic.in/en/udyam-nidhi-yojana and flagged needs_manual_verification: true for final cross-confirmation."
+        ),
     ),
 ]
 
@@ -338,7 +434,7 @@ RULE_BY_ID: Dict[str, SchemeRule] = {r.scheme_id: r for r in SCHEME_RULES}
 # ---------------------------------------------------------------------------
 
 SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
-    # 1. Micro Credit Finance
+    # 1. Micro Finance Scheme (MFS) / Micro Credit Finance
     "a1111111-1111-1111-1111-111111111111": [
         SchemeEligibilityRule(
             rule_id="r1-caste",
@@ -356,11 +452,11 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             scheme_id="a1111111-1111-1111-1111-111111111111",
             field_name="annual_family_income",
             operator="lte",
-            value_num=300000.0,
-            description="Annual family income must not exceed ₹3,00,000.",
+            value_num=500000.0,
+            description="Annual family income must not exceed ₹5,00,000.",
             is_hard_rule=True,
             rule_type="income_ceiling",
-            source_note="Standard NSFDC income ceiling: https://nsfdc.nic.in/scheme",
+            source_note="NSFDC credit schemes income ceiling: ₹5 Lakh (nsfdc.nic.in)",
         ),
         SchemeEligibilityRule(
             rule_id="r1-cost",
@@ -368,7 +464,7 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             field_name="project_cost",
             operator="lte",
             value_num=140000.0,
-            description="Unit project cost must not exceed ₹1,40,000 for Micro Credit Finance.",
+            description="Unit project cost must not exceed ₹1,40,000 for Micro Finance Scheme.",
             is_hard_rule=True,
             rule_type="project_cost",
             source_note="nsfdc.nic.in/en/micro-credit-finance",
@@ -407,11 +503,11 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             scheme_id="a2222222-2222-2222-2222-222222222222",
             field_name="annual_family_income",
             operator="lte",
-            value_num=300000.0,
-            description="Annual family income must not exceed ₹3,00,000.",
+            value_num=500000.0,
+            description="Annual family income must not exceed ₹5,00,000.",
             is_hard_rule=True,
             rule_type="income_ceiling",
-            source_note="Standard NSFDC income ceiling: https://nsfdc.nic.in/scheme",
+            source_note="NSFDC credit schemes income ceiling: ₹5 Lakh (nsfdc.nic.in)",
         ),
         SchemeEligibilityRule(
             rule_id="r2-cost-min",
@@ -419,7 +515,7 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             field_name="project_cost",
             operator="gt",
             value_num=140000.0,
-            description="Project cost must be greater than ₹1,40,000 (units up to ₹1,40,000 fall under Micro Credit Finance).",
+            description="Project cost must be greater than ₹1,40,000 (units up to ₹1,40,000 fall under Micro Finance Scheme).",
             is_hard_rule=True,
             rule_type="project_cost_min",
             source_note="nsfdc.nic.in/en/term-loan",
@@ -441,7 +537,7 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             field_name="purpose",
             operator="in",
             value_list=[
-                "entrepreneurship", "business", "agriculture", "industry", "services",
+                "entrepreneurship", "business", "manufacturing", "industry", "services",
                 "transport", "plantation", "construction", "trade", "startup"
             ],
             description="Purpose must be a qualifying business, service, transport, or agriculture enterprise.",
@@ -469,11 +565,11 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             scheme_id="a3333333-3333-3333-3333-333333333333",
             field_name="annual_family_income",
             operator="lte",
-            value_num=300000.0,
-            description="Annual family income must not exceed ₹3,00,000.",
+            value_num=500000.0,
+            description="Annual family income must not exceed ₹5,00,000.",
             is_hard_rule=True,
             rule_type="income_ceiling",
-            source_note="Standard NSFDC income ceiling: https://nsfdc.nic.in/scheme",
+            source_note="NSFDC credit schemes income ceiling: ₹5 Lakh (nsfdc.nic.in)",
         ),
         SchemeEligibilityRule(
             rule_id="r3-purpose",
@@ -521,7 +617,7 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
         ),
     ],
 
-    # 4. Aajeevika Micro-Finance Yojana
+    # 4. Aajeevika Micro-Finance Yojana (AMY)
     "a4444444-4444-4444-4444-444444444444": [
         SchemeEligibilityRule(
             rule_id="r4-caste",
@@ -539,11 +635,11 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             scheme_id="a4444444-4444-4444-4444-444444444444",
             field_name="annual_family_income",
             operator="lte",
-            value_num=300000.0,
-            description="Annual family income must not exceed ₹3,00,000.",
+            value_num=500000.0,
+            description="Annual family income must not exceed ₹5,00,000.",
             is_hard_rule=True,
             rule_type="income_ceiling",
-            source_note="Standard NSFDC income ceiling",
+            source_note="NSFDC credit schemes income ceiling: ₹5 Lakh (nsfdc.nic.in)",
         ),
         SchemeEligibilityRule(
             rule_id="r4-cost",
@@ -551,21 +647,21 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             field_name="project_cost",
             operator="lte",
             value_num=140000.0,
-            description="Project cost must not exceed ₹1,40,000.",
+            description="Project cost must not exceed ₹1,40,000 for Aajeevika Micro-Finance Yojana.",
             is_hard_rule=True,
             rule_type="project_cost",
-            source_note="nsfdc.nic.in/scheme",
+            source_note="nsfdc.nic.in/en/schemes-to-be-implemented-through-nbfc-mfis",
         ),
         SchemeEligibilityRule(
             rule_id="r4-purpose",
             scheme_id="a4444444-4444-4444-4444-444444444444",
             field_name="purpose",
             operator="in",
-            value_list=["business", "micro_business", "services", "trade"],
+            value_list=["business", "micro_business", "services", "trade", "entrepreneurship"],
             description="Purpose must be qualifying micro-enterprise or trade activity.",
             is_hard_rule=True,
             rule_type="purpose",
-            source_note="nsfdc.nic.in/scheme",
+            source_note="nsfdc.nic.in/en/schemes-to-be-implemented-through-nbfc-mfis",
         ),
     ],
 
@@ -587,11 +683,11 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             scheme_id="a5555555-5555-5555-5555-555555555555",
             field_name="annual_family_income",
             operator="lte",
-            value_num=300000.0,
-            description="Annual family income must not exceed ₹3,00,000.",
+            value_num=500000.0,
+            description="Annual family income must not exceed ₹5,00,000.",
             is_hard_rule=True,
             rule_type="income_ceiling",
-            source_note="Standard NSFDC income ceiling",
+            source_note="NSFDC credit schemes income ceiling: ₹5 Lakh (nsfdc.nic.in)",
         ),
         SchemeEligibilityRule(
             rule_id="r5-cost",
@@ -599,21 +695,21 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             field_name="project_cost",
             operator="lte",
             value_num=500000.0,
-            description="Project cost must not exceed ₹5,00,000.",
+            description="Project cost must not exceed ₹5,00,000 for Udyam Nidhi Yojana.",
             is_hard_rule=True,
             rule_type="project_cost",
-            source_note="nsfdc.nic.in/scheme",
+            source_note="nsfdc.nic.in/en/udyam-nidhi-yojana",
         ),
         SchemeEligibilityRule(
             rule_id="r5-purpose",
             scheme_id="a5555555-5555-5555-5555-555555555555",
             field_name="purpose",
             operator="in",
-            value_list=["business", "micro_business", "services", "trade", "agriculture"],
+            value_list=["business", "micro_business", "services", "trade", "agriculture", "entrepreneurship"],
             description="Purpose must be qualifying micro-enterprise or cooperative trade activity.",
             is_hard_rule=True,
             rule_type="purpose",
-            source_note="nsfdc.nic.in/scheme",
+            source_note="nsfdc.nic.in/en/udyam-nidhi-yojana",
         ),
     ],
 }
@@ -688,8 +784,14 @@ class EligibilityResult:
     benefit_amount_display: Optional[str] = None
     application_channel_type: str = "channel_partner"
     application_channel_details: Optional[Dict[str, Any]] = None
+    channel_type_display: str = ""
     source_url: str = ""
     source_name: str = ""
+
+    # Reconciled fields
+    coverage_percent: float = 90.0
+    business_categories: List[str] = field(default_factory=list)
+    eligible_channel_types: List[str] = field(default_factory=list)
 
     last_verified_at: str = ""
     needs_manual_verification: bool = False
@@ -1020,9 +1122,13 @@ def evaluate_scheme(
         if norm_purpose:
             if rule.scheme_type == "education_loan" and norm_purpose in ("education", "studies", "higher_education"):
                 score_purpose = 25
-            elif rule.scheme_type == "micro_finance" and norm_purpose in ("micro_business", "micro_credit", "trade", "handicraft", "services"):
+            elif rule.scheme_id == "a1111111-1111-1111-1111-111111111111" and norm_purpose in ("micro_business", "micro_credit", "trade", "handicraft", "services", "business", "entrepreneurship"):
                 score_purpose = 25
-            elif rule.scheme_type == "term_loan" and norm_purpose in ("business", "entrepreneurship", "industry", "transport", "agriculture", "construction", "plantation"):
+            elif rule.scheme_id == "a4444444-4444-4444-4444-444444444444" and norm_purpose in ("micro_business", "trade", "services", "business", "entrepreneurship"):
+                score_purpose = 24
+            elif rule.scheme_id == "a5555555-5555-5555-5555-555555555555" and norm_purpose in ("micro_business", "trade", "services", "agriculture", "business", "entrepreneurship"):
+                score_purpose = 23
+            elif rule.scheme_type == "term_loan" and norm_purpose in ("business", "entrepreneurship", "manufacturing", "industry", "services", "transport", "agriculture", "construction", "plantation"):
                 score_purpose = 25
             elif norm_purpose in rule.eligible_purposes:
                 score_purpose = 20
@@ -1030,12 +1136,22 @@ def evaluate_scheme(
         # 3. Financial Requirement & Natural Scale Match (Up to 20 pts)
         score_financial = 0
         if project_cost is not None:
-            if rule.scheme_type == "micro_finance":
+            if rule.scheme_id in ("a1111111-1111-1111-1111-111111111111", "a4444444-4444-4444-4444-444444444444"):
+                # Micro finance schemes (<= ₹1.40L)
                 if project_cost <= 140000:
                     score_financial = 20
                 else:
                     score_financial = 5
+            elif rule.scheme_id == "a5555555-5555-5555-5555-555555555555":
+                # Udyam Nidhi Yojana (projects up to ₹5.00L)
+                if 140000 < project_cost <= 500000:
+                    score_financial = 20
+                elif project_cost <= 140000:
+                    score_financial = 15
+                else:
+                    score_financial = 5
             elif rule.scheme_type == "term_loan":
+                # Term Loan (projects > ₹1.40L up to ₹50.00L)
                 if 140000 < project_cost <= 5000000:
                     score_financial = 20
                 elif project_cost <= 140000:
@@ -1051,21 +1167,37 @@ def evaluate_scheme(
         # 4. Applicant Profile & Community Match (Up to 10 pts)
         score_category = 10 if (sc_caste_declared or profile.get("caste_category") == "SC") else 0
 
-        # 5. Location Applicability (Up to 5 pts)
+        # 5. Location & Channel Applicability (Up to 5 pts)
         score_location = 5
 
-        # 6. Scheme-Specific Priority Conditions (Up to 5 pts)
-        score_priority = 0
-        if rule.scheme_type == "education_loan" and gender and gender.lower().strip() in ("female", "woman", "girl"):
-            score_priority = 5
-        elif profile.get("business_status") in ("new", "existing"):
-            score_priority = 5
-        elif profile.get("education_status") in ("graduate", "post_graduate", "12th_pass"):
-            score_priority = 3
+        # 6. Interest Rate & Concessionality Factor (Up to 5 pts)
+        # Beneficiaries benefit from lower cost of borrowing:
+        # <= 6.5% -> 5 pts (MFS @ 6.5%, ELS India @ 6.0%)
+        # <= 8.0% -> 4 pts (Term Loan @ 8.0%, ELS Abroad @ 7.0%)
+        # <= 13.0% -> 2 pts (UNY @ 13.0%)
+        # <= 15.0% -> 1 pt (AMY @ 15.0%)
+        score_rate = 0
+        if rule.rate_beneficiary_min <= 6.5:
+            score_rate = 5
+        elif rule.rate_beneficiary_min <= 8.0:
+            score_rate = 4
+        elif rule.rate_beneficiary_min <= 13.0:
+            score_rate = 2
+        else:
+            score_rate = 1
 
-        total_score = score_eligibility + score_purpose + score_financial + score_category + score_location + score_priority
+        # Specific Overlap Resolution Factor:
+        if rule.scheme_id == "a5555555-5555-5555-5555-555555555555" and project_cost and 140000 < project_cost <= 500000:
+            matching_factors.append("Scale & Channel Fit: Unit cost fits Udyam Nidhi Yojana's ₹5.00 Lakh small enterprise bracket, delivered through Cooperative Societies and Cooperative Banks.")
+        elif rule.scheme_type == "term_loan" and project_cost and 140000 < project_cost <= 500000:
+            matching_factors.append("Financial Advantage: Term Loan offers lower 8.0% interest rate and 7-year repayment tenure for medium viable enterprises.")
+        elif rule.scheme_id == "a1111111-1111-1111-1111-111111111111" and project_cost and project_cost <= 140000:
+            matching_factors.append("Financial Advantage: Micro Finance Scheme offers subsidized 6.5% interest rate via State Channelizing Agencies.")
+        elif rule.scheme_id == "a4444444-4444-4444-4444-444444444444" and project_cost and project_cost <= 140000:
+            matching_factors.append("Channel Flexibility: Aajeevika Micro-Finance Yojana offers prompt need-based credit up to ₹1.25 Lakh specifically through local NBFC-MFIs.")
+
+        total_score = score_eligibility + score_purpose + score_financial + score_category + score_location + score_rate
         score = max(70, min(100, total_score))
-
 
         cost_disp = f"₹{project_cost:,.0f}" if project_cost is not None else "your project"
         inc_disp = f"₹{annual_family_income:,.0f}" if annual_family_income is not None else "eligible income ceiling"
@@ -1112,6 +1244,14 @@ def evaluate_scheme(
         benefit_amount_display=rule.benefit_amount_display or (f"Up to ₹{recommended_loan:,.0f}" if recommended_loan else None),
         application_channel_type=rule.application_channel_type,
         application_channel_details=rule.application_channel_details,
+        channel_type_display=(
+            rule.application_channel_details.get("channel_category")
+            if (rule.application_channel_details and rule.application_channel_details.get("channel_category"))
+            else ", ".join(rule.eligible_channel_types)
+        ),
+        coverage_percent=rule.coverage_percent or float(rule.financing_pct),
+        business_categories=rule.business_categories or list(rule.eligible_purposes),
+        eligible_channel_types=rule.eligible_channel_types or ["SCA", "PSB", "RRB"],
         source_name=rule.source_name,
         source_url=rule.source_url,
 
@@ -1273,7 +1413,9 @@ def get_verified_schemes_data() -> List[Dict[str, Any]]:
             "benefit_summary": r.benefit_summary or r.short_description,
             "has_financial_calculation": r.has_financial_calculation,
             "support_type_display": r.support_type_display or f"{r.rate_beneficiary_min}% p.a.",
-            "benefit_amount_display": r.benefit_amount_display or f"Up to ₹{r.max_loan_amount:,.0f}",
+            "coverage_percent": r.coverage_percent or float(r.financing_pct),
+            "business_categories": r.business_categories or list(r.eligible_purposes),
+            "eligible_channel_types": r.eligible_channel_types or ["SCA", "PSB", "RRB"],
             "application_channel_type": r.application_channel_type,
             "application_channel_details": r.application_channel_details,
             "source_name": r.source_name,

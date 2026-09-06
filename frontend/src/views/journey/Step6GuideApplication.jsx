@@ -125,11 +125,11 @@ export default function Step6GuideApplication() {
     'Concessional credit financing up to 90% of viable project cost with subsidized interest rates under Ministry of Social Justice and Empowerment.';
 
   const isChannelPartner = (selectedScheme?.application_channel_type || 'channel_partner') === 'channel_partner';
-  const partnerName = selectedPartner?.name || 'M.P. Rajya Sahakari Anusuchit Jati Vitta Nigam (SCA)';
-  const partnerAddress = selectedPartner?.address || 'TT Nagar, Bhopal, Madhya Pradesh';
-  const partnerNodalOfficer = selectedPartner?.officer || 'District Executive Nodal Officer';
-  const partnerPhone = selectedPartner?.phone || '0755-2554101';
-  const partnerBadge = selectedPartner?.badge || 'Designated State Channelizing Agency (SCA)';
+  const partnerName = selectedPartner?.name || selectedPartner?.partner?.name || 'M.P. Rajya Sahakari Anusuchit Jati Vitta Nigam (SCA)';
+  const partnerAddress = selectedPartner?.address || selectedPartner?.partner?.address || 'TT Nagar, Bhopal, Madhya Pradesh';
+  const partnerNodalOfficer = selectedPartner?.contact_person || selectedPartner?.officer || selectedPartner?.partner?.contact_person || 'District Executive Nodal Officer';
+  const partnerPhone = selectedPartner?.phone || selectedPartner?.partner?.phone || '0755-2554101';
+  const partnerBadge = selectedPartner?.partner_type || selectedPartner?.type || selectedPartner?.badge || selectedPartner?.partner?.partner_type || 'Designated State Channelizing Agency (SCA)';
 
   const requestedAmt = journeyFormData?.amountFormatted || '₹3,00,000';
   const purposeName = journeyFormData?.purpose || 'Enterprise / Self-Employment';

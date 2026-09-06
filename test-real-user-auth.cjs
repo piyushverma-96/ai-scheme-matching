@@ -103,7 +103,7 @@ async function testRealUserAuth() {
         console.log("\n[Test 4] Testing Supabase Email + Password Sign Up...");
         const uniqueEmail = `evaluator.${Date.now()}@gmail.com`;
         const testPass = 'Password@123456';
-        const testName = 'Dr. Rajesh Sen';
+        const testName = 'Rajesh Sen';
 
         const signupSuccess = await evalJs(`
           (async () => {
@@ -198,13 +198,13 @@ async function testRealUserAuth() {
         // Test 8: Verify Dashboard displays real user's first name
         console.log("\n[Test 8] Verifying dynamic greeting and user info on Dashboard...");
         const updatedBodyText = await evalJs('document.body.innerText');
-        console.log("Page greeting line found:", updatedBodyText.includes('Good morning, Dr. Rajesh') || updatedBodyText.includes('Dr. Rajesh'));
-        if (!updatedBodyText.includes('Dr. Rajesh')) {
-          console.error("FAILED: Dashboard did not greet 'Dr. Rajesh'!");
+        console.log("Page greeting line found:", updatedBodyText.includes('Rajesh'));
+        if (!updatedBodyText.includes('Rajesh')) {
+          console.error("FAILED: Dashboard did not greet 'Rajesh'!");
           edge.kill();
           process.exit(1);
         }
-        console.log("PASSED: Dashboard dynamically greeted 'Dr. Rajesh'!");
+        console.log("PASSED: Dashboard dynamically greeted 'Rajesh'!");
 
         // Test 9: Verify clean empty states for new user
         console.log("\n[Test 9] Checking empty states for applications and saved schemes...");

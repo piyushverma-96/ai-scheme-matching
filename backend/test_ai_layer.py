@@ -93,7 +93,7 @@ def test_rag_retriever():
 # ---------------------------------------------------------------------------
 def test_api_understand_requirement_pipeline():
     payload = {
-        "query": "Mujhe 3 lakh ka business start karna hai aur meri family income 3.5 lakh hai."
+        "query": "Mujhe 3 lakh ka business start karna hai aur meri family income 6 lakh hai."
     }
     resp = client.post("/ai/understand-requirement", json=payload)
     assert resp.status_code == 200
@@ -101,14 +101,14 @@ def test_api_understand_requirement_pipeline():
 
     # Step 1: Extracted profile
     assert data["extracted_profile"]["loan_amount"] == 300000.0
-    assert data["extracted_profile"]["annual_income"] == 350000.0
+    assert data["extracted_profile"]["annual_income"] == 600000.0
 
     # Step 2: RAG Context
     assert len(data["retrieved_schemes_context"]) > 0
     assert "source_url" in data["retrieved_schemes_context"][0]
 
     # Step 3: Rule Engine Evaluation
-    # Since income is 3.5L (> 3.0L NSFDC ceiling), schemes evaluate deterministically as Does Not Match Current Criteria
+    # Since income is 6L (> 5.0L NSFDC ceiling), schemes evaluate deterministically as Does Not Match Current Criteria
     assert len(data["rule_engine_results"]) > 0
     for r in data["rule_engine_results"]:
         assert r["verdict"] == "Does Not Match Current Criteria"

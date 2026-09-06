@@ -17,7 +17,30 @@ import MapLibrePartnerMap from '../components/MapLibrePartnerMap';
 
 export default function PartnersView() {
   const { navigateTo } = useApp();
+  const [userLocation, setUserLocation] = useState({
+    lat: 23.2350,
+    lng: 77.4000,
+    city: 'Bhopal',
+  });
   const [selectedPartner, setSelectedPartner] = useState(PARTNERS_DATA[0]);
+
+  const handleLocationChange = ({ lat, lng, city }) => {
+    setUserLocation({ lat, lng, city });
+    if (lat && lng && PARTNERS_DATA.length > 0) {
+      let closest = PARTNERS_DATA[0];
+      let minD = Infinity;
+      PARTNERS_DATA.forEach((p) => {
+        const pLat = Number(p.latitude || p.lat || 0);
+        const pLng = Number(p.longitude || p.lng || 0);
+        const d = Math.hypot(pLat - lat, pLng - lng);
+        if (d < minD) {
+          minD = d;
+          closest = p;
+        }
+      });
+      setSelectedPartner(closest);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
@@ -41,6 +64,8 @@ export default function PartnersView() {
         partners={PARTNERS_DATA}
         selectedPartner={selectedPartner}
         onSelectPartner={setSelectedPartner}
+        userLocation={userLocation}
+        onLocationChange={handleLocationChange}
         height="clamp(340px, 50vh, 500px)"
       />
 

@@ -28,6 +28,13 @@ export function AppProvider({ children }) {
   // 6-Step Journey Canonical State
   const [journeyStep, setJourneyStep] = useState(1); // 1 to 6
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.__setJourneyStep = setJourneyStep;
+      window.__setCurrentView = setCurrentView;
+    }
+  }, []);
+
   const defaultJourneyData = {
     applicantName: '',
     dob: '',

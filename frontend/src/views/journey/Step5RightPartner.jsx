@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Building2,
   MapPin,
@@ -196,6 +196,7 @@ export default function Step5RightPartner({ onContinue }) {
   const [eligiblePartners, setEligiblePartners] = useState(FALLBACK_ELIGIBLE_PARTNERS);
   const [excludedPartners, setExcludedPartners] = useState(FALLBACK_EXCLUDED_PARTNERS);
   const [activePartner, setActivePartner] = useState(FALLBACK_ELIGIBLE_PARTNERS[0]);
+  const [routeRequestPartner, setRouteRequestPartner] = useState(null);
 
   // UI accordion & modal states
   const [showExcluded, setShowExcluded] = useState(true);
@@ -204,130 +205,189 @@ export default function Step5RightPartner({ onContinue }) {
   const [cityInput, setCityInput] = useState(userLocation.city);
   const [isEditingLocation, setIsEditingLocation] = useState(false);
 
+  // Keep a ref of selectedPartner to prevent unnecessary fetch triggers
+  const selectedPartnerRef = useRef(selectedPartner);
+  useEffect(() => {
+    selectedPartnerRef.current = selectedPartner;
+  }, [selectedPartner]);
+
   // Fetch partners from backend Geo-Spatial Partner Locator
-  const fetchPartners = useCallback(async (lat, lng, cityQuery) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await getNearbyPartners({
-        latitude: lat,
-        longitude: lng,
-        city: cityQuery,
-        scheme_id: selectedScheme?.id || 'nsfdc_term_loan',
-        scheme_name: selectedScheme?.name,
-      });
-
-      if (res.data) {
-        const data = res.data;
-
-        // Process eligible partners
-        const rawEligible = data.eligible_partners || data.ranked_partners || [];
-        const formattedEligible = rawEligible.map((item) => {
-          const p = item.partner || item;
-          return {
-            ...p,
-            id: p.id,
-            name: p.name,
-            partner_type: p.partner_type || 'Channel Partner',
-            type: p.partner_type || 'Channel Partner',
-            branch: p.address || p.city,
-            address: p.address,
-            pincode: p.pincode,
-            city: p.city,
-            state: p.state,
-            latitude: p.latitude,
-            longitude: p.longitude,
-            lat: p.latitude,
-            lng: p.longitude,
-            distance_km: item.distance_km != null ? item.distance_km : p.distance_km,
-            distance_text: `${item.distance_km != null ? item.distance_km : (p.distance_km || 1.0)} km away`,
-            driving_duration_mins: item.driving_duration_mins || 5.0,
-            status: p.status || 'Operational',
-            fund_utilization_percent: p.fund_utilization_percent,
-            fund_utilization_status: p.fund_utilization_status,
-            overdue_status: p.overdue_status,
-            npa_status: p.npa_status,
-            eligibility_status: p.eligibility_status || 'Eligible',
-            eligibility_reason: p.eligibility_reason,
-            last_verified_at: p.last_verified_at || '15/08/2026',
-            supported_schemes: p.supported_schemes || [selectedScheme?.name || 'NSFDC Scheme'],
-            contact_person: p.contact_person || 'Lead Nodal Officer',
-            phone: p.phone || '+91 755 2554101',
-            email: p.email || 'partner.desk@arthsetu.gov.in',
-            operating_hours: p.operating_hours || '10:00 AM – 4:00 PM (Mon-Sat)',
-            compatibility_factors: item.compatibility_factors || [
-              'Authorized Channel Partner empanelled with NSFDC',
-              'Branch is operational and actively accepting applications',
-              'Satisfies fund utilization & overdue safety criteria',
-            ],
-          };
+  const fetchPartners = useCallback(
+    async (lat, lng, cityQuery, forceResetSelection = false) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await getNearbyPartners({
+          latitude: lat,
+          longitude: lng,
+          city: cityQuery,
+          scheme_id: selectedScheme?.id || 'nsfdc_term_loan',
+          scheme_name: selectedScheme?.name,
         });
 
-        // Process excluded partners
-        const rawExcluded = data.excluded_partners || [];
-        const formattedExcluded = rawExcluded.map((ex) => ({
-          id: ex.id,
-          name: ex.name,
-          partner_type: ex.partner_type || 'Financial Institution',
-          distance_km: ex.distance_km,
-          distance_text: `${ex.distance_km || 0.5} km away`,
-          exclusion_reason: ex.exclusion_reason,
-          last_verified_at: ex.last_verified_at || '10/08/2026',
-        }));
+        if (res.data) {
+          const data = res.data;
 
-        if (formattedEligible.length > 0) {
-          setEligiblePartners(formattedEligible);
-          setRecommendedPartner(formattedEligible[0]);
-          setActivePartner(formattedEligible[0]);
-          if (!selectedPartner) {
-            setSelectedPartner(formattedEligible[0]);
+          // Process eligible partners
+          const rawEligible = data.eligible_partners || data.ranked_partners || [];
+          const formattedEligible = rawEligible.map((item) => {
+            const p = item.partner || item;
+            return {
+              ...p,
+              id: p.id,
+              name: p.name,
+              partner_type: p.partner_type || 'Channel Partner',
+              type: p.partner_type || 'Channel Partner',
+              branch: p.address || p.city,
+              address: p.address,
+              pincode: p.pincode,
+              city: p.city,
+              state: p.state,
+              latitude: p.latitude,
+              longitude: p.longitude,
+              lat: p.latitude,
+              lng: p.longitude,
+              distance_km: item.distance_km != null ? item.distance_km : p.distance_km,
+              distance_text: `${item.distance_km != null ? item.distance_km : (p.distance_km || 1.0)} km away`,
+              driving_duration_mins: item.driving_duration_mins || 5.0,
+              status: p.status || 'Operational',
+              fund_utilization_percent: p.fund_utilization_percent,
+              fund_utilization_status: p.fund_utilization_status,
+              overdue_status: p.overdue_status,
+              npa_status: p.npa_status,
+              eligibility_status: p.eligibility_status || 'Eligible',
+              eligibility_reason: p.eligibility_reason,
+              last_verified_at: p.last_verified_at || '15/08/2026',
+              supported_schemes: p.supported_schemes || [selectedScheme?.name || 'NSFDC Scheme'],
+              contact_person: p.contact_person || 'Lead Nodal Officer',
+              phone: p.phone || '+91 755 2554101',
+              email: p.email || 'partner.desk@arthsetu.gov.in',
+              operating_hours: p.operating_hours || '10:00 AM – 4:00 PM (Mon-Sat)',
+              compatibility_factors: item.compatibility_factors || [
+                'Authorized Channel Partner empanelled with NSFDC',
+                'Branch is operational and actively accepting applications',
+                'Satisfies fund utilization & overdue safety criteria',
+              ],
+            };
+          });
+
+          // Process excluded partners
+          const rawExcluded = data.excluded_partners || [];
+          const formattedExcluded = rawExcluded.map((ex) => ({
+            id: ex.id,
+            name: ex.name,
+            partner_type: ex.partner_type || 'Financial Institution',
+            distance_km: ex.distance_km,
+            distance_text: `${ex.distance_km || 0.5} km away`,
+            exclusion_reason: ex.exclusion_reason,
+            last_verified_at: ex.last_verified_at || '10/08/2026',
+          }));
+
+          if (formattedEligible.length > 0) {
+            setEligiblePartners(formattedEligible);
+            const topPartner = formattedEligible[0];
+            setRecommendedPartner(topPartner);
+
+            const currSelected = selectedPartnerRef.current;
+            const partnerStillEligible = currSelected && formattedEligible.some((p) => p.id === currSelected.id);
+
+            if (forceResetSelection || !partnerStillEligible) {
+              if (setSelectedPartner) setSelectedPartner(topPartner);
+              setActivePartner(topPartner);
+              setRouteRequestPartner(topPartner);
+            } else {
+              const matched = formattedEligible.find((p) => p.id === currSelected.id);
+              setActivePartner(matched || topPartner);
+            }
+          } else {
+            setEligiblePartners(FALLBACK_ELIGIBLE_PARTNERS);
+            setRecommendedPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
+            if (forceResetSelection || !selectedPartnerRef.current) {
+              if (setSelectedPartner) setSelectedPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
+              setActivePartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
+              setRouteRequestPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
+            }
           }
-        } else {
-          setEligiblePartners(FALLBACK_ELIGIBLE_PARTNERS);
-          setRecommendedPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
+
+          if (formattedExcluded.length > 0) {
+            setExcludedPartners(formattedExcluded);
+          } else {
+            setExcludedPartners(FALLBACK_EXCLUDED_PARTNERS);
+          }
+        }
+      } catch (err) {
+        console.warn('Backend partner locator fetch error, falling back to verified dataset:', err);
+        setEligiblePartners(FALLBACK_ELIGIBLE_PARTNERS);
+        setRecommendedPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
+        if (forceResetSelection || !selectedPartnerRef.current) {
+          if (setSelectedPartner) setSelectedPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
           setActivePartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
         }
-
-        if (formattedExcluded.length > 0) {
-          setExcludedPartners(formattedExcluded);
-        } else {
-          setExcludedPartners(FALLBACK_EXCLUDED_PARTNERS);
-        }
+        setExcludedPartners(FALLBACK_EXCLUDED_PARTNERS);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.warn('Backend partner locator fetch error, falling back to verified dataset:', err);
-      setEligiblePartners(FALLBACK_ELIGIBLE_PARTNERS);
-      setRecommendedPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
-      setActivePartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
-      setExcludedPartners(FALLBACK_EXCLUDED_PARTNERS);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedScheme, selectedPartner, setSelectedPartner]);
+    },
+    [selectedScheme, setSelectedPartner]
+  );
 
   // Initial fetch on mount or when scheme changes
   useEffect(() => {
     fetchPartners(userLocation.lat, userLocation.lng, userLocation.city);
   }, [fetchPartners, userLocation.lat, userLocation.lng, userLocation.city]);
 
-  // Handle location update
+  // Handle location update from map or search input
+  const handleLocationChange = useCallback(
+    ({ lat, lng, city }) => {
+      const cityName = city || 'Custom Location';
+      setUserLocation((prev) => ({
+        ...prev,
+        lat: lat ?? prev.lat,
+        lng: lng ?? prev.lng,
+        city: cityName,
+      }));
+      setCityInput(cityName);
+      fetchPartners(lat, lng, cityName, true);
+    },
+    [fetchPartners]
+  );
+
+  // Handle manual city input submit
   const handleLocationSubmit = (e) => {
     e.preventDefault();
     if (!cityInput.trim()) return;
-    setUserLocation((prev) => ({ ...prev, city: cityInput.trim() }));
+    const cleanCity = cityInput.trim();
+    setUserLocation((prev) => ({ ...prev, city: cleanCity }));
     setIsEditingLocation(false);
-    fetchPartners(null, null, cityInput.trim());
+    fetchPartners(null, null, cleanCity, true);
+  };
+
+  const isSelected = (partner) => {
+    if (!partner) return false;
+    const currentId = selectedPartner?.id || activePartner?.id;
+    return currentId === partner.id;
   };
 
   const handleSelect = (partner) => {
+    if (!partner) return;
     setActivePartner(partner);
     if (setSelectedPartner) {
       setSelectedPartner(partner);
     }
   };
 
+  const handleTriggerDirections = (partner) => {
+    if (!partner) return;
+    setActivePartner(partner);
+    setRouteRequestPartner({ ...partner, _ts: Date.now() });
+    const mapEl = document.getElementById('partner-map-section');
+    if (mapEl) {
+      mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   const handleProceed = () => {
-    const partnerToSave = activePartner || recommendedPartner || eligiblePartners[0];
+    const partnerToSave = selectedPartner || activePartner || recommendedPartner || eligiblePartners[0];
     if (setSelectedPartner) {
       setSelectedPartner(partnerToSave);
     }
@@ -553,22 +613,41 @@ export default function Step5RightPartner({ onContinue }) {
             <MapLibrePartnerMap
               partners={eligiblePartners}
               selectedPartner={activePartner}
+              routeRequestPartner={routeRequestPartner}
               onSelectPartner={handleSelect}
               onViewDetails={openDetails}
               selectedSchemeName={selectedScheme?.name}
+              userLocation={userLocation}
+              onLocationChange={handleLocationChange}
               height="500px"
             />
           </div>
 
           {/* ── 2. RECOMMENDED CHANNEL PARTNER CARD ────────────────────────────── */}
           {recommendedPartner && (
-            <div className="bg-white rounded-3xl border-2 border-[#0B3B60] p-6 sm:p-7 shadow-md space-y-5 relative overflow-hidden">
+            <div
+              className={`bg-white rounded-3xl p-6 sm:p-7 shadow-md space-y-5 relative overflow-hidden transition-all ${
+                isSelected(recommendedPartner)
+                  ? 'border-2 border-emerald-600 ring-2 ring-emerald-500/20'
+                  : 'border border-slate-300 hover:border-slate-400'
+              }`}
+            >
               {/* Top Badge Row */}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0B3B60] text-white text-xs font-bold tracking-wide shadow-2xs">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" />
-                    <span>{t('journey_step5.recommended_desk', 'Recommended Partner Desk')}</span>
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-2xs ${
+                      isSelected(recommendedPartner)
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-[#0B3B60] text-white'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>
+                      {isSelected(recommendedPartner)
+                        ? 'Recommended & Selected Desk ✓'
+                        : 'Recommended Partner Desk'}
+                    </span>
                   </span>
 
                   <span className="text-xs font-bold text-[#065F46] bg-[#D1FAE5] px-3 py-1 rounded-full border border-[#A7F3D0]">
@@ -586,14 +665,28 @@ export default function Step5RightPartner({ onContinue }) {
 
               {/* Main Info */}
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0 border border-[#DBEAFE]">
+                <div
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border transition-colors ${
+                    isSelected(recommendedPartner)
+                      ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
+                      : 'bg-[#EFF6FF] text-[#2563EB] border-[#DBEAFE]'
+                  }`}
+                >
                   <Building2 className="w-7 h-7 stroke-[2]" />
                 </div>
 
                 <div className="space-y-1.5 flex-1">
-                  <h3 className="text-lg sm:text-xl font-bold text-[#0B3B60]">
-                    {recommendedPartner.name}
-                  </h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-[#0B3B60]">
+                      {recommendedPartner.name}
+                    </h3>
+                    {isSelected(recommendedPartner) && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        <Check className="w-3 h-3 text-emerald-700 stroke-[3]" />
+                        <span>Active Application Desk</span>
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-[#475569] flex items-center gap-1.5">
                     <MapPin className="w-4 h-4 text-[#EF4444] shrink-0" />
                     <span>{recommendedPartner.address}</span>
@@ -644,6 +737,14 @@ export default function Step5RightPartner({ onContinue }) {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
+                    onClick={() => handleTriggerDirections(recommendedPartner)}
+                    className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#0B3B60] hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <Navigation className="w-3.5 h-3.5" />
+                    <span>Route</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => openDetails(recommendedPartner)}
                     className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#0B3B60] hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
                   >
@@ -652,9 +753,20 @@ export default function Step5RightPartner({ onContinue }) {
                   <button
                     type="button"
                     onClick={() => handleSelect(recommendedPartner)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#0B3B60] hover:bg-[#07263F] transition-all cursor-pointer"
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isSelected(recommendedPartner)
+                        ? 'bg-emerald-600 text-white cursor-default shadow-xs'
+                        : 'bg-white border border-[#0B3B60] text-[#0B3B60] hover:bg-[#0B3B60] hover:text-white'
+                    }`}
                   >
-                    {t('journey_step5.btn_select_partner', 'Select This Partner Desk')}
+                    {isSelected(recommendedPartner) ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>Selected Desk ✓</span>
+                      </>
+                    ) : (
+                      <span>Switch Back to Recommended Desk</span>
+                    )}
                   </button>
                 </div>
               </div>
@@ -664,78 +776,141 @@ export default function Step5RightPartner({ onContinue }) {
           {/* ── 3. ALL OTHER ELIGIBLE PARTNERS LIST ────────────────────────────── */}
           {eligiblePartners.length > 1 && (
             <div className="space-y-3">
-              <h3 className="text-sm sm:text-base font-bold text-[#0B3B60]">
-                {t('journey_step5.other_partners_title', 'Other Verified Eligible Partners')}
-              </h3>
-              <div className="grid grid-cols-1 gap-3">
-                {eligiblePartners.slice(1).map((partner) => (
-                  <div
-                    key={partner.id}
-                    onClick={() => handleSelect(partner)}
-                    className={`bg-white rounded-2xl border p-4 sm:p-5 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                      activePartner?.id === partner.id
-                        ? 'border-[#0B3B60] bg-[#EFF6FF]/40 ring-2 ring-[#0B3B60]/40'
-                        : 'border-[#E2E8F0] hover:border-[#0B3B60]/40'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0 mt-0.5">
-                        <Building2 className="w-5 h-5" />
-                      </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm sm:text-base font-bold text-[#0B3B60]">
+                  {t('journey_step5.other_partners_title', 'Other Verified Eligible Partners')} ({eligiblePartners.length - 1})
+                </h3>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  Select any partner below to route your application through their desk
+                </span>
+              </div>
 
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="text-sm font-bold text-[#0B3B60]">
-                            {partner.name}
-                          </h4>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                            {partner.partner_type || partner.type}
-                          </span>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                            {t('journey_step5.fund_utilization', 'Fund Utilization:')} {partner.fund_utilization_percent || 88}%
-                          </span>
+              <div className="grid grid-cols-1 gap-3">
+                {eligiblePartners.slice(1).map((partner) => {
+                  const partnerIsSelected = isSelected(partner);
+                  return (
+                    <div
+                      key={partner.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handleSelect(partner)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleSelect(partner);
+                        }
+                      }}
+                      className={`rounded-2xl border p-4 sm:p-5 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs hover:shadow-md ${
+                        partnerIsSelected
+                          ? 'border-2 border-emerald-600 bg-emerald-50/40 ring-2 ring-emerald-500/20'
+                          : 'border-[#E2E8F0] bg-white hover:border-[#0B3B60]/40'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3.5">
+                        <div
+                          className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                            partnerIsSelected
+                              ? 'bg-emerald-600 text-white shadow-xs'
+                              : 'bg-[#EFF6FF] text-[#2563EB]'
+                          }`}
+                        >
+                          <Building2 className="w-5 h-5" />
                         </div>
 
-                        <p className="text-xs text-[#64748B] flex items-center gap-1">
-                          <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{partner.address}</span>
-                        </p>
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h4 className="text-sm font-bold text-[#0B3B60]">
+                              {partner.name}
+                            </h4>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                              {partner.partner_type || partner.type}
+                            </span>
+                            {partnerIsSelected && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-600 text-white shadow-xs">
+                                <CheckCircle2 className="w-3 h-3 text-white" />
+                                <span>Currently Selected Desk</span>
+                              </span>
+                            )}
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                              {t('journey_step5.fund_utilization', 'Fund Utilization:')} {partner.fund_utilization_percent || 88}%
+                            </span>
+                          </div>
 
-                        <p className="text-[11px] text-[#065F46] font-medium">
-                          {t('journey_step5.status_label', 'Status:')} <strong>{partner.status || 'Operational'}</strong> · {partner.distance_text}
-                        </p>
+                          <p className="text-xs text-[#64748B] flex items-center gap-1">
+                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span>{partner.address}</span>
+                          </p>
+
+                          <div className="flex flex-wrap items-center gap-3 text-[11px] text-[#065F46] font-medium pt-0.5">
+                            <span>
+                              {t('journey_step5.status_label', 'Status:')} <strong>{partner.status || 'Operational'}</strong>
+                            </span>
+                            <span>·</span>
+                            <span className="flex items-center gap-1 text-[#2563EB]">
+                              <Navigation className="w-3 h-3" />
+                              <span>{partner.distance_text} (~{partner.driving_duration_mins || 5} mins drive)</span>
+                            </span>
+                            {partner.last_verified_at && (
+                              <>
+                                <span>·</span>
+                                <span className="text-slate-500">
+                                  Verified: {partner.last_verified_at}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTriggerDirections(partner);
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#0B3B60] hover:bg-slate-100 bg-slate-50 border border-slate-200 transition-colors cursor-pointer flex items-center gap-1"
+                        >
+                          <Navigation className="w-3.5 h-3.5" />
+                          <span>Route</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDetails(partner);
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#64748B] hover:text-[#0B3B60] bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+                        >
+                          {t('journey_step5.btn_details', 'Details')}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelect(partner);
+                          }}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            partnerIsSelected
+                              ? 'bg-emerald-600 text-white shadow-xs cursor-default'
+                              : 'bg-[#0B3B60] hover:bg-[#07263F] text-white shadow-xs'
+                          }`}
+                        >
+                          {partnerIsSelected ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                              <span>Selected Desk ✓</span>
+                            </>
+                          ) : (
+                            <span>Select This Partner Desk</span>
+                          )}
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openDetails(partner);
-                        }}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#64748B] hover:text-[#0B3B60] bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-                      >
-                        {t('journey_step5.btn_details', 'Details')}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelect(partner);
-                        }}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                          activePartner?.id === partner.id
-                            ? 'bg-[#0B3B60] text-white'
-                            : 'bg-white border border-[#0B3B60] text-[#0B3B60] hover:bg-[#0B3B60] hover:text-white'
-                        }`}
-                      >
-                        {activePartner?.id === partner.id ? t('journey_step5.btn_selected', 'Selected') : t('journey_step5.btn_select', 'Select')}
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -839,9 +1014,17 @@ export default function Step5RightPartner({ onContinue }) {
           <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full space-y-4 shadow-2xl border border-[#E2E8F0] animate-in zoom-in-95">
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-[10px] font-bold text-[#2563EB] bg-[#EFF6FF] px-2.5 py-1 rounded-full border border-[#BFDBFE]">
-                  {selectedDetailPartner.partner_type || selectedDetailPartner.type}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-[#2563EB] bg-[#EFF6FF] px-2.5 py-1 rounded-full border border-[#BFDBFE]">
+                    {selectedDetailPartner.partner_type || selectedDetailPartner.type}
+                  </span>
+                  {isSelected(selectedDetailPartner) && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-600 text-white shadow-xs">
+                      <CheckCircle2 className="w-3 h-3 text-white" />
+                      <span>Currently Selected Desk</span>
+                    </span>
+                  )}
+                </div>
                 <h3 className="text-base sm:text-lg font-bold text-[#0B3B60] mt-1.5">
                   {selectedDetailPartner.name}
                 </h3>
@@ -853,6 +1036,20 @@ export default function Step5RightPartner({ onContinue }) {
               >
                 ✕
               </button>
+            </div>
+
+            {/* Distance & Travel Duration Banner */}
+            <div className="p-3 bg-emerald-50/70 rounded-2xl border border-emerald-200 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-800">
+              <div className="flex items-center gap-1.5 font-bold">
+                <Navigation className="w-3.5 h-3.5 text-emerald-600" />
+                <span>{selectedDetailPartner.distance_text}</span>
+                <span>·</span>
+                <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                <span>~{selectedDetailPartner.driving_duration_mins || 5} mins drive</span>
+              </div>
+              <span className="text-[11px] font-semibold text-slate-500">
+                Verified: {selectedDetailPartner.last_verified_at || '15/08/2026'}
+              </span>
             </div>
 
             <div className="space-y-2.5 text-xs text-[#475569] divide-y divide-slate-100">
@@ -900,24 +1097,49 @@ export default function Step5RightPartner({ onContinue }) {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setDetailsModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
-              >
-                {t('journey_step5.btn_close', 'Close')}
-              </button>
+            <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => {
-                  handleSelect(selectedDetailPartner);
                   setDetailsModalOpen(false);
+                  handleTriggerDirections(selectedDetailPartner);
                 }}
-                className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#0B3B60] hover:bg-[#07263F] cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-[#0B3B60] bg-slate-100 hover:bg-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
-                {t('journey_step5.btn_select_this_partner', 'Select this Partner')}
+                <Navigation className="w-3.5 h-3.5 text-[#0B3B60]" />
+                <span>Get Directions on Map</span>
               </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDetailsModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 cursor-pointer"
+                >
+                  {t('journey_step5.btn_close', 'Close')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSelect(selectedDetailPartner);
+                    setDetailsModalOpen(false);
+                  }}
+                  className={`px-5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    isSelected(selectedDetailPartner)
+                      ? 'bg-emerald-600 text-white shadow-xs cursor-default'
+                      : 'bg-[#0B3B60] hover:bg-[#07263F] text-white shadow-xs'
+                  }`}
+                >
+                  {isSelected(selectedDetailPartner) ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>Selected Desk ✓</span>
+                    </>
+                  ) : (
+                    <span>Select This Partner Desk</span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

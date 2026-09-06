@@ -81,10 +81,13 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 export default function MapLibrePartnerMap({
   partners = [],
   selectedPartner = null,
+  routeRequestPartner = null,
   onSelectPartner,
   onViewDetails,
   selectedSchemeName = '',
   height = 'clamp(340px, 50vh, 500px)',
+  userLocation: initialUserLocation = null,
+  onLocationChange = null,
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -92,12 +95,29 @@ export default function MapLibrePartnerMap({
   const userMarkerRef = useRef(null);
 
   // States
-  const [userLocation, setUserLocation] = useState({
-    lat: 23.2350,
-    lng: 77.4000,
-    city: 'Bhopal',
-    status: 'prompt', // 'prompt' | 'granted' | 'denied' | 'error'
-  });
+  const [userLocation, setUserLocation] = useState(() => ({
+    lat: initialUserLocation?.lat ?? 23.2350,
+    lng: initialUserLocation?.lng ?? 77.4000,
+    city: initialUserLocation?.city ?? 'Bhopal',
+    status: initialUserLocation?.status ?? 'prompt',
+  }));
+
+  // Synchronize state when initialUserLocation prop updates from parent
+  useEffect(() => {
+    if (
+      initialUserLocation &&
+      (initialUserLocation.lat !== userLocation.lat ||
+        initialUserLocation.lng !== userLocation.lng ||
+        (initialUserLocation.city && initialUserLocation.city !== userLocation.city))
+    ) {
+      setUserLocation((prev) => ({
+        ...prev,
+        lat: initialUserLocation.lat,
+        lng: initialUserLocation.lng,
+        city: initialUserLocation.city || prev.city,
+      }));
+    }
+  }, [initialUserLocation?.lat, initialUserLocation?.lng, initialUserLocation?.city]);
   const [geoErrorMsg, setGeoErrorMsg] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -109,10 +129,19 @@ export default function MapLibrePartnerMap({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState(null);
 
-  // Update active partner when prop changes
+  // Update active partner and fly to partner on selection change
   useEffect(() => {
-    if (selectedPartner && selectedPartner.id !== activePartner?.id) {
+    if (selectedPartner) {
       setActivePartner(selectedPartner);
+      const pLng = Number(selectedPartner.lng || selectedPartner.longitude);
+      const pLat = Number(selectedPartner.lat || selectedPartner.latitude);
+      if (mapInstanceRef.current && pLng && pLat) {
+        mapInstanceRef.current.flyTo({
+          center: [pLng, pLat],
+          zoom: 13.8,
+          speed: 1.2,
+        });
+      }
     }
   }, [selectedPartner]);
 
@@ -408,13 +437,32 @@ export default function MapLibrePartnerMap({
     [onSelectPartner]
   );
 
-  // 6. Search location by city, area or pincode (Nominatim OSM Geocoding)
+  // 6. Search location by city, area or pincode (Nominatim OSM Geocoding + curated local dictionary)
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
     setSearchError(null);
+
+    const cityDict = {
+      bhopal: [77.4126, 23.2599, 'Bhopal, MP'],
+      indore: [75.8577, 22.7196, 'Indore, MP'],
+      jabalpur: [79.9864, 23.1815, 'Jabalpur, MP'],
+      gwalior: [78.1828, 26.2183, 'Gwalior, MP'],
+      ujjain: [75.7873, 23.1765, 'Ujjain, MP'],
+      rewa: [81.3000, 24.5362, 'Rewa, MP'],
+      sagar: [78.7378, 23.8388, 'Sagar, MP'],
+      satna: [80.8322, 24.5708, 'Satna, MP'],
+      delhi: [77.2090, 28.6139, 'New Delhi'],
+      mumbai: [72.8777, 19.0760, 'Mumbai, MH'],
+      '462001': [77.4080, 23.2680, 'Bhopal 462001'],
+      '462003': [77.4012, 23.2356, 'TT Nagar 462003'],
+      '462016': [77.4332, 23.2189, 'Habib Ganj 462016'],
+      '462041': [77.4651, 23.2625, 'Ayodhya Nagar 462041'],
+      '452001': [75.8777, 22.7196, 'Indore 452001'],
+      '482001': [79.9339, 23.1686, 'Jabalpur 482001'],
+    };
 
     try {
       // 1. Try OSM Nominatim Geocoding API directly
@@ -430,11 +478,12 @@ export default function MapLibrePartnerMap({
         const item = res.data[0];
         const newLat = parseFloat(item.lat);
         const newLng = parseFloat(item.lon);
+        const cityName = item.display_name?.split(',')[0]?.trim() || searchQuery;
 
         setUserLocation({
           lat: newLat,
           lng: newLng,
-          city: item.display_name?.split(',')[0] || searchQuery,
+          city: cityName,
           status: 'granted',
         });
         setGeoErrorMsg(null);
@@ -446,70 +495,113 @@ export default function MapLibrePartnerMap({
             speed: 1.3,
           });
         }
+
+        if (onLocationChange) {
+          onLocationChange({
+            lat: newLat,
+            lng: newLng,
+            city: cityName,
+            displayName: item.display_name,
+          });
+        }
       } else {
         // Fallback common Indian city dictionary
-        const cityDict = {
-          bhopal: [77.4126, 23.2599, 'Bhopal, MP'],
-          indore: [75.8577, 22.7196, 'Indore, MP'],
-          jabalpur: [79.9864, 23.1815, 'Jabalpur, MP'],
-          gwalior: [78.1828, 26.2183, 'Gwalior, MP'],
-          delhi: [77.2090, 28.6139, 'New Delhi'],
-          mumbai: [72.8777, 19.0760, 'Mumbai, MH'],
-          '462001': [77.4080, 23.2680, 'Bhopal 462001'],
-          '462003': [77.4012, 23.2356, 'TT Nagar 462003'],
-          '462016': [77.4332, 23.2189, 'Habib Ganj 462016'],
-          '462041': [77.4651, 23.2625, 'Ayodhya Nagar 462041'],
-        };
         const queryClean = searchQuery.toLowerCase().trim();
         const found = Object.entries(cityDict).find(([k]) => queryClean.includes(k));
 
         if (found) {
           const [lng, lat, name] = found[1];
-          setUserLocation({ lat, lng, city: name, status: 'granted' });
+          const cityName = name.split(',')[0].trim();
+          setUserLocation({ lat, lng, city: cityName, status: 'granted' });
           if (mapInstanceRef.current) {
             mapInstanceRef.current.flyTo({ center: [lng, lat], zoom: 13 });
+          }
+          if (onLocationChange) {
+            onLocationChange({
+              lat,
+              lng,
+              city: cityName,
+              displayName: name,
+            });
           }
         } else {
           setSearchError(`No location found for "${searchQuery}". Please try another city or pincode.`);
         }
       }
-} catch (err) {
-      console.warn('Geocoding search failed:', err);
-      setSearchError('Search service temporarily unavailable. Please try again.');
+    } catch (err) {
+      console.warn('Geocoding search network notice, falling back to local dictionary:', err.message);
+      const queryClean = searchQuery.toLowerCase().trim();
+      const found = Object.entries(cityDict).find(([k]) => queryClean.includes(k));
+
+      if (found) {
+        const [lng, lat, name] = found[1];
+        const cityName = name.split(',')[0].trim();
+        setUserLocation({ lat, lng, city: cityName, status: 'granted' });
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.flyTo({ center: [lng, lat], zoom: 13 });
+        }
+        if (onLocationChange) {
+          onLocationChange({
+            lat,
+            lng,
+            city: cityName,
+            displayName: name,
+          });
+        }
+      } else {
+        setSearchError('Search service temporarily unavailable. Please try again.');
+      }
     } finally {
       setIsSearching(false);
     }
   };
 
-  // 7. Calculate real driving route via backend proxy endpoint (ORS/HeiGIT)
-  const handleGetDirections = async () => {
-    if (!activePartner) return;
+  // Handle route request from external triggers (e.g. details modal or partner list)
+  useEffect(() => {
+    if (routeRequestPartner) {
+      setActivePartner(routeRequestPartner);
+      handleGetDirections(routeRequestPartner);
+    }
+  }, [routeRequestPartner]);
+
+  // 7. Calculate real driving route via backend proxy endpoint (ORS/OSRM) with direct failovers
+  const handleGetDirections = async (targetPartner = null) => {
+    const target = targetPartner || activePartner;
+    if (!target) return;
+    setActivePartner(target);
     setIsRouting(true);
     setRouteError(null);
 
     const startLng = Number(userLocation?.lng ?? 77.4000);
     const startLat = Number(userLocation?.lat ?? 23.2350);
-    const endLat = Number(activePartner?.lat ?? activePartner?.latitude ?? 23.2356);
-    const endLng = Number(activePartner?.lng ?? activePartner?.longitude ?? 77.4012);
+    const endLat = Number(target?.lat ?? target?.latitude ?? 23.2356);
+    const endLng = Number(target?.lng ?? target?.longitude ?? 77.4012);
 
     const straightDist = calculateDistance(startLat, startLng, endLat, endLng);
     const estDuration = Math.round((straightDist / 32) * 60 + 4);
 
+    let isLive = false;
+    let finalDistance = straightDist;
+    let finalDuration = estDuration;
+    let routeGeoJSON = null;
+
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-      let finalDistance = straightDist;
-      let finalDuration = estDuration;
-      let routeGeoJSON = null;
 
+      // ATTEMPT A: Call backend proxy endpoint (OSRM + ORS)
       try {
-        const res = await axios.post(`${apiUrl}/api/v1/partners/route`, {
-          start_lat: startLat,
-          start_lng: startLng,
-          end_lat: endLat,
-          end_lng: endLng,
-        });
+        const res = await axios.post(
+          `${apiUrl}/api/v1/partners/route`,
+          {
+            start_lat: startLat,
+            start_lng: startLng,
+            end_lat: endLat,
+            end_lng: endLng,
+          },
+          { timeout: 7000 }
+        );
 
-        if (res.data?.route_points?.length > 0) {
+        if (res.data?.route_points?.length > 2 && res.data.is_live_routing !== false) {
           finalDistance = res.data.distance_km;
           finalDuration = Math.round(res.data.duration_mins);
           // route_points are [lat, lng] -> MapLibre GeoJSON requires [lng, lat]
@@ -517,13 +609,54 @@ export default function MapLibrePartnerMap({
             type: 'LineString',
             coordinates: res.data.route_points.map((pt) => [pt[1], pt[0]]),
           };
+          isLive = true;
+        } else if (res.data?.route_points?.length > 0 && res.data.is_live_routing === false) {
+          finalDistance = res.data.distance_km;
+          finalDuration = Math.round(res.data.duration_mins);
         }
       } catch (proxyErr) {
-        console.warn('Backend route proxy notice, drawing direct path:', proxyErr.message);
+        console.warn('Backend route proxy notice, trying direct OSRM:', proxyErr.message);
       }
 
-      // Fallback straight-line polyline if proxy fails
-      if (!routeGeoJSON) {
+      // ATTEMPT B: If not live from backend proxy, attempt direct browser call to public OSRM
+      if (!isLive) {
+        try {
+          const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+          const clientRes = await axios.get(osrmUrl, { timeout: 6000 });
+          if (clientRes.data?.routes?.[0]?.geometry?.coordinates?.length > 2) {
+            const r = clientRes.data.routes[0];
+            finalDistance = Number((r.distance / 1000).toFixed(2));
+            finalDuration = Math.round(r.duration / 60);
+            routeGeoJSON = {
+              type: 'LineString',
+              coordinates: r.geometry.coordinates,
+            };
+            isLive = true;
+          }
+        } catch (clientErr) {
+          // Try secondary OSM Germany router
+          try {
+            const deUrl = `https://routing.openstreetmap.de/routed-car/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+            const deRes = await axios.get(deUrl, { timeout: 6000 });
+            if (deRes.data?.routes?.[0]?.geometry?.coordinates?.length > 2) {
+              const r = deRes.data.routes[0];
+              finalDistance = Number((r.distance / 1000).toFixed(2));
+              finalDuration = Math.round(r.duration / 60);
+              routeGeoJSON = {
+                type: 'LineString',
+                coordinates: r.geometry.coordinates,
+              };
+              isLive = true;
+            }
+          } catch (deErr) {
+            console.warn('Direct OSRM failover notice:', deErr.message);
+          }
+        }
+      }
+
+      // ATTEMPT C: Fallback straight-line polyline if all live routing fails
+      if (!isLive || !routeGeoJSON) {
+        isLive = false;
         routeGeoJSON = {
           type: 'LineString',
           coordinates: [
@@ -543,6 +676,25 @@ export default function MapLibrePartnerMap({
             type: 'Feature',
             geometry: routeGeoJSON,
           });
+        }
+
+        // Apply dashed style if route is fallback, solid glowing blue if live
+        if (mapInstanceRef.current.getLayer('route-line')) {
+          if (isLive) {
+            mapInstanceRef.current.setPaintProperty('route-line', 'line-dasharray', [1, 0]);
+            mapInstanceRef.current.setPaintProperty('route-line', 'line-color', '#2563EB');
+            mapInstanceRef.current.setPaintProperty('route-line', 'line-width', 4);
+            if (mapInstanceRef.current.getLayer('route-casing')) {
+              mapInstanceRef.current.setPaintProperty('route-casing', 'line-opacity', 0.9);
+            }
+          } else {
+            mapInstanceRef.current.setPaintProperty('route-line', 'line-dasharray', [2, 2]);
+            mapInstanceRef.current.setPaintProperty('route-line', 'line-color', '#D97706'); // Amber warning color
+            mapInstanceRef.current.setPaintProperty('route-line', 'line-width', 3);
+            if (mapInstanceRef.current.getLayer('route-casing')) {
+              mapInstanceRef.current.setPaintProperty('route-casing', 'line-opacity', 0);
+            }
+          }
         }
 
         // Fit Bounds to show both start and end with comfortable padding
@@ -567,7 +719,8 @@ export default function MapLibrePartnerMap({
       setRouteInfo({
         distanceKm: finalDistance,
         durationMins: finalDuration,
-        partnerName: activePartner.name,
+        partnerName: target.name,
+        isLiveRouting: isLive,
       });
     } catch (err) {
       console.error('Failed to get directions:', err);
@@ -702,18 +855,38 @@ export default function MapLibrePartnerMap({
 
         {/* 3. Live Route Summary Pill (Top Center when route active) */}
         {routeInfo && (
-          <div className="absolute top-3.5 left-1/2 -translate-x-1/2 z-10 bg-[#0B3B60]/95 backdrop-blur-md text-white px-4 py-2 rounded-2xl shadow-lg border border-white/20 flex items-center gap-3 text-xs animate-in slide-in-from-top-4 max-w-[calc(100vw-32px)]">
-            <RouteIcon className="w-4 h-4 text-emerald-400" />
+          <div
+            id="route-info-pill"
+            className={`absolute top-3.5 left-1/2 -translate-x-1/2 z-10 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border flex items-center gap-3 text-xs animate-in slide-in-from-top-4 max-w-[calc(100vw-32px)] transition-all ${
+              routeInfo.isLiveRouting
+                ? 'bg-[#0B3B60]/95 text-white border-white/20'
+                : 'bg-[#78350F]/95 text-amber-100 border-amber-400/40 shadow-amber-950/40'
+            }`}
+          >
+            {routeInfo.isLiveRouting ? (
+              <RouteIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-amber-300 shrink-0" />
+            )}
             <div className="flex items-center gap-2">
-              <span className="font-bold">{routeInfo.distanceKm} km</span>
-              <span className="text-white/60">·</span>
-              <span className="flex items-center gap-1 text-emerald-300 font-semibold">
-                <Clock className="w-3 h-3" />
-                <span>~{routeInfo.durationMins} mins drive</span>
-              </span>
+              {routeInfo.isLiveRouting ? (
+                <>
+                  <span className="font-bold text-white">{routeInfo.distanceKm} km</span>
+                  <span className="text-white/60">·</span>
+                  <span className="flex items-center gap-1 text-emerald-300 font-semibold">
+                    <Clock className="w-3 h-3" />
+                    <span>~{routeInfo.durationMins} mins drive</span>
+                  </span>
+                </>
+              ) : (
+                <span className="font-semibold text-amber-200">
+                  Approximate distance: {routeInfo.distanceKm} km — route unavailable
+                </span>
+              )}
             </div>
             <button
               type="button"
+              id="close-route-pill-btn"
               onClick={() => {
                 setRouteInfo(null);
                 if (mapInstanceRef.current) {
@@ -721,7 +894,8 @@ export default function MapLibrePartnerMap({
                   if (source) source.setData({ type: 'FeatureCollection', features: [] });
                 }
               }}
-              className="text-white/70 hover:text-white ml-1 p-0.5 cursor-pointer"
+              className="text-white/70 hover:text-white ml-1 p-0.5 cursor-pointer rounded-full hover:bg-white/10"
+              title="Close route"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -764,32 +938,52 @@ export default function MapLibrePartnerMap({
               )}
             </div>
 
-            {/* Action Buttons: View Details & Get Directions */}
-            <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+            {/* Action Buttons: View Details, Get Directions & Select Partner Desk */}
+            <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => onViewDetails && onViewDetails(activePartner)}
-                className="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0B3B60] font-bold text-xs transition-colors cursor-pointer text-center"
+                className="py-2 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0B3B60] font-bold text-[11px] transition-colors cursor-pointer text-center"
               >
                 View Details
               </button>
 
               <button
                 type="button"
-                onClick={handleGetDirections}
+                id="map-route-btn"
+                onClick={() => handleGetDirections(activePartner)}
                 disabled={isRouting}
-                className="flex-1 py-2 px-3 rounded-xl bg-[#0B3B60] hover:bg-[#07263F] text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                className="py-2 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0B3B60] font-bold text-[11px] transition-colors cursor-pointer flex items-center justify-center gap-1"
               >
                 {isRouting ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="w-3 h-3 animate-spin" />
                     <span>Routing…</span>
                   </>
                 ) : (
                   <>
-                    <Navigation className="w-3.5 h-3.5" />
-                    <span>Get Directions</span>
+                    <Navigation className="w-3 h-3" />
+                    <span>Route</span>
                   </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onSelectPartner && onSelectPartner(activePartner)}
+                className={`py-2 px-2 rounded-xl font-bold text-[11px] transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  selectedPartner?.id === activePartner?.id
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-[#0B3B60] hover:bg-[#07263F] text-white shadow-xs'
+                }`}
+              >
+                {selectedPartner?.id === activePartner?.id ? (
+                  <>
+                    <CheckCircle2 className="w-3 h-3 text-white" />
+                    <span>Selected ✓</span>
+                  </>
+                ) : (
+                  <span>Select Desk</span>
                 )}
               </button>
             </div>

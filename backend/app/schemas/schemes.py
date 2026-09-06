@@ -48,6 +48,11 @@ class SchemeOut(BaseModel):
     application_channel_type: str = "channel_partner"
     application_channel_details: Optional[Dict[str, Any]] = None
 
+    # Reconciled fields
+    coverage_percent: Optional[float] = None
+    business_categories: Optional[List[str]] = None
+    eligible_channel_types: Optional[List[str]] = None
+
     ministry: str = "Ministry of Social Justice and Empowerment"
     department: str = "Department of Social Justice and Empowerment"
     scheme_category: Optional[str] = None
@@ -106,6 +111,19 @@ class SchemeOut(BaseModel):
             if "rate_to_sca" not in d:
                 d["rate_to_sca"] = 2.5
 
+            # Reconciled fields
+            if "coverage_percent" not in d:
+                d["coverage_percent"] = float(d.get("financing_pct") or 90.0)
+            if "business_categories" not in d:
+                d["business_categories"] = d.get("sectors") or d.get("eligible_purposes") or []
+            if "eligible_channel_types" not in d:
+                ch_details = d.get("application_channel_details") or {}
+                d["eligible_channel_types"] = ch_details.get("partner_types") or (
+                    ["NBFC-MFI"] if d.get("id") == "a4444444-4444-4444-4444-444444444444"
+                    else (["Cooperative", "Cooperative Bank", "Cooperative Society"] if d.get("id") == "a5555555-5555-5555-5555-555555555555"
+                    else ["SCA", "PSB", "RRB"])
+                )
+
             if "eligible_purposes" not in d:
                 d["eligible_purposes"] = (
                     ["education", "studies", "higher_education"]
@@ -117,7 +135,7 @@ class SchemeOut(BaseModel):
             if "source_url" not in d:
                 d["source_url"] = "https://nsfdc.nic.in/scheme"
             if "last_verified_at" not in d:
-                d["last_verified_at"] = "2026-09-05"
+                d["last_verified_at"] = "2026-09-06"
             if "needs_manual_verification" not in d:
                 d["needs_manual_verification"] = False
             if "is_active" not in d:
@@ -235,6 +253,14 @@ class EligibilityCheckRequest(BaseModel):
         default=None,
         description="Applicant city, town, or village.",
     )
+    pincode: Optional[str] = Field(
+        default=None,
+        description="Applicant 6-digit postal PIN code (e.g. '462003').",
+    )
+    project_type: Optional[str] = Field(
+        default=None,
+        description="Project category / enterprise type.",
+    )
     business_type: Optional[str] = Field(
         default=None,
         description="Type or sector of business enterprise (e.g., 'Retail', 'Manufacturing', 'Services').",
@@ -324,6 +350,9 @@ class SchemeMatchResult(BaseModel):
     benefit_amount_display: Optional[str] = None
     application_channel_type: str = Field(default="channel_partner", description="Enum: 'channel_partner', 'government_portal', 'department_office', 'district_authority', 'other_official_channel'")
     application_channel_details: Optional[Dict[str, Any]] = None
+    coverage_percent: Optional[float] = 90.0
+    business_categories: List[str] = Field(default_factory=list)
+    eligible_channel_types: List[str] = Field(default_factory=list)
     application_mode: str = Field(default="channel_agency")
     official_application_url: str = Field(default="https://nsfdc.nic.in/scheme")
     required_documents: List[str] = Field(default_factory=list)

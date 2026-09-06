@@ -21,6 +21,7 @@ import AiAssistantView from './views/AiAssistantView';
 import ProfileView from './views/ProfileView';
 import HelpTrustView from './views/HelpTrustView';
 import LoginView from './views/LoginView';
+import AdminDashboardView from './views/AdminDashboardView';
 
 import CompleteProfileModal from './views/CompleteProfileModal';
 
@@ -66,6 +67,8 @@ export default function App() {
         return <LoginView initialTab="login" onLoginSuccess={() => navigateTo('home')} />;
       case 'signup':
         return <LoginView initialTab="signup" onLoginSuccess={() => navigateTo('home')} />;
+      case 'admin':
+        return <AdminDashboardView />;
       default:
         return <HomeView />;
     }

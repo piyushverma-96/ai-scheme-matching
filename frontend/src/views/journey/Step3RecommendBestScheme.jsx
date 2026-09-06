@@ -138,8 +138,8 @@ export default function Step3RecommendBestScheme({ onContinue }) {
       ? primaryScheme.matching_factors
       : [
           t('journey_step3.reason_purpose', `Purpose Match: Your need for '${purposeDisplay}' aligns with this scheme's target focus.`),
-          t('journey_step3.reason_income', `Income Criteria: Household income falls within the ₹3,00,000 statutory eligibility ceiling.`),
-          t('journey_step3.reason_amount', `Financial Scale: Your requirement of ${amountDisplay} fits within the scheme's statutory tier.`),
+          t('journey_step3.reason_income', `Income Criteria: Household income falls within the ₹5,00,000 statutory eligibility ceiling.`),
+          t('journey_step3.reason_amount', `Financial Scale: Your requirement fits within the scheme's statutory tier.`),
           t('journey_step3.reason_category', `Applicant Category: Scheduled Caste (SC) category is the designated beneficiary group.`),
           t('journey_step3.reason_location', `Location Coverage: Scheme is operational across ${stateDisplay} via State Channelizing Agencies (SCAs).`),
         ];
