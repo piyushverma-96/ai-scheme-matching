@@ -49,10 +49,10 @@ export default function AiAssistantModal() {
   return (
     <>
       {/* Floating trigger button on bottom-right matching reference image */}
-      <div className="fixed bottom-5 right-5 z-40">
+      <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-40">
         <button
           onClick={() => setAiAssistantOpen(!aiAssistantOpen)}
-          className="flex items-center gap-2 bg-white hover:bg-[#F7F9FB] text-[#0B3B60] border border-[#CBD5E1] px-4 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-base cursor-pointer font-semibold text-xs sm:text-sm group"
+          className="flex items-center gap-2 bg-white hover:bg-[#F7F9FB] text-[#0B3B60] border border-[#CBD5E1] px-4 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-base cursor-pointer font-semibold text-xs sm:text-sm group min-h-[44px]"
           aria-label="Open AI Help Assistant"
         >
           <div className="w-6 h-6 rounded-full bg-[#EAF1F6] group-hover:bg-[#0B3B60] group-hover:text-white transition-base flex items-center justify-center text-[#0B3B60]">
@@ -64,7 +64,7 @@ export default function AiAssistantModal() {
 
       {/* Assistant Modal Window */}
       {aiAssistantOpen && (
-        <div className="fixed bottom-20 right-4 sm:right-6 w-[92vw] sm:w-[380px] h-[500px] bg-white rounded-2xl shadow-2xl border border-[#CBD5E1] z-50 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-32px)] sm:w-[380px] max-w-[380px] h-[min(500px,calc(100vh-120px))] bg-white rounded-2xl shadow-2xl border border-[#CBD5E1] z-50 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* Header */}
           <div className="bg-[#0B3B60] text-white p-3.5 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -78,7 +78,7 @@ export default function AiAssistantModal() {
             </div>
             <button
               onClick={() => setAiAssistantOpen(false)}
-              className="p-1 rounded-md text-white/80 hover:text-white hover:bg-white/10 cursor-pointer"
+              className="p-2 rounded-md text-white/80 hover:text-white hover:bg-white/10 cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
             >
               <X className="w-4 h-4" />
             </button>

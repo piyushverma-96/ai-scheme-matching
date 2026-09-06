@@ -283,7 +283,7 @@ export default function AdminDashboardView() {
       </div>
 
       {/* 2. Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#E5E7EB] overflow-x-auto pb-1">
+      <div className="flex items-center gap-2 border-b border-[#E5E7EB] overflow-x-auto pb-1 max-w-full">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -291,7 +291,7 @@ export default function AdminDashboardView() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs sm:text-sm font-bold transition-base cursor-pointer whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs sm:text-sm font-bold transition-base cursor-pointer whitespace-nowrap min-h-[44px] ${
                 isActive
                   ? 'bg-white text-[#0B3B60] border-t-2 border-x border-[#E5E7EB] border-t-[#0B3B60] shadow-2xs'
                   : 'text-[#4A5568] hover:text-[#0B3B60] hover:bg-[#F7F9FB]'
@@ -314,7 +314,7 @@ export default function AdminDashboardView() {
           ) : analytics ? (
             <>
               {/* Stat Cards Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card padding="p-4 sm:p-5" className="border-l-4 border-l-[#0B3B60]">
                   <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider block">
                     Verified Schemes
@@ -853,7 +853,7 @@ export default function AdminDashboardView() {
       {/* ── MODAL: Update Prototype Application Status ─────────────────────── */}
       {selectedAppForStatus && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4 border border-[#E5E7EB]">
+          <div className="bg-white rounded-2xl max-w-lg w-full max-w-[calc(100vw-32px)] max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-xl space-y-4 border border-[#E5E7EB]">
             <div className="flex items-center justify-between border-b pb-3">
               <div>
                 <h3 className="font-serif font-bold text-lg text-[#0B3B60]">
@@ -942,7 +942,7 @@ export default function AdminDashboardView() {
       {/* ── MODAL: Add New Channel Partner Agency ───────────────────────────── */}
       {newPartnerModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4 border border-[#E5E7EB]">
+          <div className="bg-white rounded-2xl max-w-lg w-full max-w-[calc(100vw-32px)] max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-xl space-y-4 border border-[#E5E7EB]">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-serif font-bold text-lg text-[#0B3B60]">
                 Register Channelizing Partner Agency
@@ -968,7 +968,7 @@ export default function AdminDashboardView() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-[#0B3B60] block mb-1">Partner Type</label>
                   <select
@@ -1009,7 +1009,7 @@ export default function AdminDashboardView() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-[#0B3B60] block mb-1">Contact Phone</label>
                   <input

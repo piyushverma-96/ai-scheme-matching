@@ -22,10 +22,10 @@ export default function PartnersView() {
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* Top Header Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={() => navigateTo('home')}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer min-h-[44px] px-2"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Overview</span>
@@ -41,7 +41,7 @@ export default function PartnersView() {
         partners={PARTNERS_DATA}
         selectedPartner={selectedPartner}
         onSelectPartner={setSelectedPartner}
-        height="500px"
+        height="clamp(340px, 50vh, 500px)"
       />
 
       {/* Partner Cards Grid */}
@@ -97,7 +97,7 @@ export default function PartnersView() {
                     setSelectedPartner(partner);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="px-4 py-2 rounded-xl bg-white border border-[#0B3B60] hover:bg-[#EFF6FF] text-[#0B3B60] text-xs font-bold transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-white border border-[#0B3B60] hover:bg-[#EFF6FF] text-[#0B3B60] text-xs font-bold transition-colors cursor-pointer min-h-[40px] flex items-center justify-center"
                 >
                   View on Map
                 </button>

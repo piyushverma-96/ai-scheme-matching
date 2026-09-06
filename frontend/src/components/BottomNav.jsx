@@ -30,7 +30,7 @@ export default function BottomNav() {
             <button
               key={item.id}
               onClick={item.action}
-              className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all cursor-pointer min-h-[44px] min-w-[48px] ${
                 isActive
                   ? 'text-[#0B3B60] font-bold'
                   : 'text-[#64748B] hover:text-[#0B3B60] font-medium'

@@ -27,17 +27,17 @@ export default function SchemeDetailsView({ schemeId }) {
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigateTo('home')}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer min-h-[44px] px-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Scheme Details</span>
+          <span>Dashboard</span>
         </button>
       </div>
 
       {/* Scheme Main Header Card */}
-      <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
+      <div className="bg-white rounded-3xl border border-[#E2E8F0] p-5 sm:p-6 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+          <div className="flex items-start sm:items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center shrink-0">
               <Landmark className="w-6 h-6 stroke-[2]" />
             </div>
@@ -51,7 +51,7 @@ export default function SchemeDetailsView({ schemeId }) {
             </div>
           </div>
 
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-[#10B981] bg-[#E8F8F2] px-3 py-1 rounded-full shrink-0">
+          <span className="inline-flex items-center gap-1 text-xs font-bold text-[#10B981] bg-[#E8F8F2] px-3 py-1 rounded-full shrink-0 self-start sm:self-auto">
             {scheme.badge || `${scheme.match_percentage}% Match`}
           </span>
         </div>
@@ -88,7 +88,7 @@ export default function SchemeDetailsView({ schemeId }) {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-[#E2E8F0] gap-4 sm:gap-6 text-xs sm:text-sm">
+        <div className="flex border-b border-[#E2E8F0] gap-3 sm:gap-6 text-xs sm:text-sm overflow-x-auto pb-0.5 max-w-full">
           {[
             { id: 'overview', label: 'Overview' },
             { id: 'eligibility', label: 'Eligibility' },
@@ -98,7 +98,7 @@ export default function SchemeDetailsView({ schemeId }) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`pb-3 font-semibold transition-colors relative cursor-pointer ${
+              className={`pb-3 font-semibold transition-colors relative cursor-pointer shrink-0 min-h-[40px] flex items-center ${
                 activeTab === tab.id
                   ? 'text-[#0B3B60]'
                   : 'text-[#64748B] hover:text-[#0B3B60]'

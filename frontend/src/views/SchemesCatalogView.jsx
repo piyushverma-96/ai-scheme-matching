@@ -33,10 +33,10 @@ export default function SchemesCatalogView() {
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigateTo('home')}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer min-h-[44px] px-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>All Schemes</span>
+          <span>Dashboard</span>
         </button>
       </div>
 
@@ -63,7 +63,7 @@ export default function SchemesCatalogView() {
           />
         </div>
 
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1">
           {[
             { id: 'all', label: 'All' },
             { id: 'business', label: 'Business' },
@@ -72,7 +72,7 @@ export default function SchemesCatalogView() {
             <button
               key={item.id}
               onClick={() => setFilter(item.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer min-h-[40px] flex items-center shrink-0 ${
                 filter === item.id
                   ? 'bg-[#0B3B60] text-white'
                   : 'bg-white text-[#64748B] border border-[#E2E8F0] hover:bg-[#F8FAFC]'

@@ -30,10 +30,10 @@ export default function OnboardingModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-[#E2E8F0] relative space-y-6">
+      <div className="bg-white rounded-3xl max-w-md w-full max-w-[calc(100vw-32px)] p-5 sm:p-8 shadow-2xl border border-[#E2E8F0] relative space-y-6 max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
+          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 p-2 min-w-[40px] min-h-[40px] flex items-center justify-center cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>

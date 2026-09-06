@@ -142,16 +142,16 @@ export default function DocumentsView() {
       />
 
       {/* Top Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={() => navigateTo('home')}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer min-h-[44px] px-2"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Dashboard</span>
         </button>
 
-        <span className="text-xs font-bold text-[#0E6655] bg-[#E8F8F2] px-3 py-1 rounded-full border border-[#10B981]/30">
+        <span className="text-xs font-bold text-[#0E6655] bg-[#E8F8F2] px-3 py-1.5 rounded-full border border-[#10B981]/30 max-w-full truncate">
           Target Scheme: {selectedScheme?.name || 'NSFDC Scheme'}
         </span>
       </div>
@@ -232,13 +232,13 @@ export default function DocumentsView() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0">
+                  <div className="flex flex-wrap items-center gap-2 shrink-0 pt-2 sm:pt-0">
                     {isUploaded ? (
                       <>
                         <button
                           type="button"
                           onClick={() => handleViewDoc(uploadedDoc)}
-                          className="px-3 py-1.5 rounded-xl border border-[#CBD5E1] hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                          className="px-3 py-2 rounded-xl border border-[#CBD5E1] hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer min-h-[40px]"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>View</span>
@@ -247,7 +247,7 @@ export default function DocumentsView() {
                           type="button"
                           disabled={isBusy}
                           onClick={() => handleUploadClick(item.category)}
-                          className="px-3 py-1.5 rounded-xl border border-[#0E6655] text-[#0E6655] hover:bg-[#E8F8F2] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                          className="px-3 py-2 rounded-xl border border-[#0E6655] text-[#0E6655] hover:bg-[#E8F8F2] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer min-h-[40px]"
                         >
                           <RefreshCw className={`w-3.5 h-3.5 ${isBusy ? 'animate-spin' : ''}`} />
                           <span>{isBusy ? 'Uploading...' : 'Replace'}</span>
@@ -255,7 +255,7 @@ export default function DocumentsView() {
                         <button
                           type="button"
                           onClick={() => handleDelete(uploadedDoc)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition-colors cursor-pointer"
+                          className="p-2 text-slate-400 hover:text-red-600 rounded-lg transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
                           title="Delete Document"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -266,7 +266,7 @@ export default function DocumentsView() {
                         type="button"
                         disabled={isBusy}
                         onClick={() => handleUploadClick(item.category)}
-                        className="px-4 py-2 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer disabled:opacity-60"
+                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer disabled:opacity-60 min-h-[44px]"
                       >
                         <UploadCloud className={`w-4 h-4 ${isBusy ? 'animate-bounce' : ''}`} />
                         <span>{isBusy ? 'Uploading...' : 'Upload'}</span>

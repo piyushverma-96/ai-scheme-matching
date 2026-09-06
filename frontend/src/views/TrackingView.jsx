@@ -80,28 +80,28 @@ export default function TrackingView() {
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* Top Header Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={() => navigateTo('home')}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer min-h-[44px] px-2"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Dashboard</span>
         </button>
 
-        <span className="text-xs font-bold text-[#0E6655] bg-[#E8F8F2] px-3 py-1 rounded-full border border-[#10B981]/30">
+        <span className="text-xs font-bold text-[#0E6655] bg-[#E8F8F2] px-3 py-1.5 rounded-full border border-[#10B981]/30">
           {userApplications.length} Application{userApplications.length > 1 ? 's' : ''} on Record
         </span>
       </div>
 
       {/* Selector if multiple applications */}
       {userApplications.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 max-w-full">
           {userApplications.map((app, idx) => (
             <button
               key={app.id}
               onClick={() => setSelectedAppIndex(idx)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors cursor-pointer min-h-[40px] flex items-center shrink-0 ${
                 idx === selectedAppIndex
                   ? 'bg-[#0B3B60] text-white'
                   : 'bg-white border border-[#E2E8F0] text-slate-600 hover:bg-slate-50'

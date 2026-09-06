@@ -251,7 +251,7 @@ export default function EligibilityTesterView() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 px-4 bg-[#0B3B60] hover:bg-[#082942] text-white text-xs sm:text-sm font-semibold rounded-xl transition-base shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full py-3 px-4 bg-[#0B3B60] hover:bg-[#082942] text-white text-xs sm:text-sm font-semibold rounded-xl transition-base shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 min-h-[44px]"
               >
                 {loading ? (
                   <>

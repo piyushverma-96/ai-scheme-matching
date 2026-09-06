@@ -40,29 +40,29 @@ export default function ProductJourneyContainer() {
     <div className="min-h-screen bg-slate-50/70 pb-20">
       {/* Top Banner / Breadcrumb */}
       <div className="bg-white border-b border-slate-200 shadow-2xs">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2">
           <button
             type="button"
             onClick={() => setView('home')}
-            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors bg-slate-100/80 hover:bg-slate-200/80 px-3 py-1.5 rounded-lg cursor-pointer"
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors bg-slate-100/80 hover:bg-slate-200/80 px-3 py-1.5 rounded-lg cursor-pointer min-h-[36px]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Exit to Dashboard
+            <span>Dashboard</span>
           </button>
 
-          <div className="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <div className="hidden md:flex items-center gap-2 text-xs font-semibold text-slate-500">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>Technical Approach: 6-Stage Verified Delivery Pipeline</span>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             <span className="font-semibold text-slate-700">Official Portal</span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 pt-4 sm:pt-8 space-y-5 sm:space-y-6">
         {/* Global 6-Stage Progress Stepper */}
         <SixStepProgressStepper 
           currentStep={journeyStep} 

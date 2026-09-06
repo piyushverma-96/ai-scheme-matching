@@ -54,8 +54,8 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-8 max-w-xl w-full shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto">
-        <div className="flex items-start justify-between">
+      <div className="bg-white rounded-3xl border border-[#E2E8F0] p-5 sm:p-8 max-w-xl w-full max-w-[calc(100vw-32px)] shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-[#E8F8F2] text-[#10B981] flex items-center justify-center shrink-0 shadow-2xs">
               <UserCheck className="w-6 h-6 stroke-[2.2]" />
@@ -73,7 +73,7 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="text-[#94A3B8] hover:text-[#1E293B] p-1 rounded-lg transition-colors cursor-pointer"
+              className="text-[#94A3B8] hover:text-[#1E293B] p-2 rounded-lg transition-colors cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
             >
               <X className="w-5 h-5" />
             </button>

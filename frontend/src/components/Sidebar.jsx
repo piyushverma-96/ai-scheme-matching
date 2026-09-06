@@ -119,7 +119,7 @@ export default function Sidebar() {
             <Logo size="sm" showTagline={false} />
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-1.5 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-slate-100 cursor-pointer"
+              className="p-2 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-slate-100 cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
               aria-label="Close menu"
             >
               <X className="w-5 h-5" />
@@ -149,7 +149,7 @@ export default function Sidebar() {
                     item.action();
                     setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer min-h-[44px] ${
                     isActive
                       ? 'bg-[#0E6655] text-white shadow-xs font-bold'
                       : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0B3B60]'

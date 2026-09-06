@@ -71,10 +71,10 @@ export default function TrackApplicationModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-[#E5E7EB] relative my-auto max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-w-[calc(100vw-24px)] p-5 sm:p-6 shadow-2xl border border-[#E5E7EB] relative my-auto max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-[#6B7280] hover:text-[#1C1C1C] p-1.5 rounded-lg hover:bg-gray-100 transition-base cursor-pointer"
+          className="absolute right-3 top-3 text-[#6B7280] hover:text-[#1C1C1C] p-2 rounded-lg hover:bg-gray-100 transition-base cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
           aria-label="Close"
         >
           <X className="w-5 h-5" />

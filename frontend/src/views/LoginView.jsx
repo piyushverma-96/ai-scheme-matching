@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Lock, Mail, User, ArrowRight, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
 import Logo from '../components/Logo';
 import { useApp } from '../context/AppContext';
 import supabase from '../supabaseClient';
 
-export default function LoginView({ onLoginSuccess }) {
+export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
   const { navigateTo } = useApp();
-  const [tab, setTab] = useState('login'); // 'login' | 'signup'
+  const [tab, setTab] = useState(initialTab); // 'login' | 'signup'
+
+  useEffect(() => {
+    if (initialTab) {
+      setTab(initialTab);
+    }
+  }, [initialTab]);
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
@@ -96,7 +102,7 @@ export default function LoginView({ onLoginSuccess }) {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-8 max-w-md w-full shadow-lg space-y-5 animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-3xl border border-[#E2E8F0] p-5 sm:p-8 max-w-md w-full max-w-[calc(100vw-32px)] shadow-lg space-y-5 animate-in fade-in zoom-in-95 duration-200">
         {/* Top Logo */}
         <div className="text-center flex flex-col items-center justify-center pt-2">
           <Logo size="lg" />
@@ -114,7 +120,7 @@ export default function LoginView({ onLoginSuccess }) {
               setError('');
               setSuccessMsg('');
             }}
-            className={`flex-1 pb-3 text-center font-bold transition-colors relative cursor-pointer ${
+            className={`flex-1 pb-3 pt-2 text-center font-bold transition-colors relative cursor-pointer min-h-[44px] flex items-center justify-center ${
               tab === 'login' ? 'text-[#0B3B60]' : 'text-[#64748B] hover:text-[#0B3B60]'
             }`}
           >
@@ -131,7 +137,7 @@ export default function LoginView({ onLoginSuccess }) {
               setError('');
               setSuccessMsg('');
             }}
-            className={`flex-1 pb-3 text-center font-bold transition-colors relative cursor-pointer ${
+            className={`flex-1 pb-3 pt-2 text-center font-bold transition-colors relative cursor-pointer min-h-[44px] flex items-center justify-center ${
               tab === 'signup' ? 'text-[#0B3B60]' : 'text-[#64748B] hover:text-[#0B3B60]'
             }`}
           >

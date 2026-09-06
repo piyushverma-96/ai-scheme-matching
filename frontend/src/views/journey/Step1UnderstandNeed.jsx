@@ -860,11 +860,11 @@ export default function Step1UnderstandNeed({ onComplete }) {
                   <label className="block text-xs font-bold text-[#334155]">
                     Business Status <span className="text-[#DC2626]">*</span>
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setBusinessStatus('new')}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
+                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center min-h-[44px] ${
                         businessStatus === 'new'
                           ? 'bg-[#0B3B60] text-white border-[#0B3B60] shadow-2xs'
                           : 'bg-white text-[#475569] border-[#CBD5E1] hover:bg-slate-50'
@@ -875,7 +875,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                     <button
                       type="button"
                       onClick={() => setBusinessStatus('existing')}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
+                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center min-h-[44px] ${
                         businessStatus === 'existing'
                           ? 'bg-[#0B3B60] text-white border-[#0B3B60] shadow-2xs'
                           : 'bg-white text-[#475569] border-[#CBD5E1] hover:bg-slate-50'
@@ -951,11 +951,11 @@ export default function Step1UnderstandNeed({ onComplete }) {
                   <label className="block text-xs font-bold text-[#334155]">
                     Study Location <span className="text-[#DC2626]">*</span>
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setStudyLocation('india')}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
+                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center min-h-[44px] ${
                         studyLocation === 'india'
                           ? 'bg-[#0B3B60] text-white border-[#0B3B60]'
                           : 'bg-white text-[#475569] border-[#CBD5E1]'
@@ -966,7 +966,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
                     <button
                       type="button"
                       onClick={() => setStudyLocation('abroad')}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
+                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center min-h-[44px] ${
                         studyLocation === 'abroad'
                           ? 'bg-[#0B3B60] text-white border-[#0B3B60]'
                           : 'bg-white text-[#475569] border-[#CBD5E1]'
@@ -1340,11 +1340,11 @@ export default function Step1UnderstandNeed({ onComplete }) {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto shrink-0">
             <button
               type="button"
               onClick={handleResetForm}
-              className="px-4 py-3 rounded-2xl border border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] text-[#475569] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              className="w-full sm:w-auto px-4 py-3 rounded-2xl border border-[#CBD5E1] bg-white hover:bg-[#F8FAFC] text-[#475569] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[44px]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset</span>
@@ -1353,7 +1353,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-3.5 rounded-2xl bg-[#0B3B60] hover:bg-[#07263F] disabled:opacity-50 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-[#0B3B60] hover:bg-[#07263F] disabled:opacity-50 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
             >
               {isSubmitting ? (
                 <>

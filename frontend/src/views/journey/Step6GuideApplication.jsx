@@ -404,7 +404,7 @@ export default function Step6GuideApplication() {
                         {isUploaded && <Check className="w-4 h-4 stroke-[3]" />}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <h4 className="text-xs sm:text-sm font-bold text-[#1E293B]">{doc.name}</h4>
                           {doc.required ? (
                             <span className="text-[10px] font-bold text-[#DC2626] bg-[#FEF2F2] px-1.5 py-0.5 rounded border border-[#DC2626]/20">Mandatory</span>
@@ -546,11 +546,11 @@ export default function Step6GuideApplication() {
               )}
             </div>
 
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
               <button
                 type="button"
                 onClick={prevJourneyStep}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-semibold text-[#475569] cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-semibold text-[#475569] cursor-pointer min-h-[44px]"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back to Channel Selection</span>
@@ -560,7 +560,7 @@ export default function Step6GuideApplication() {
                 type="button"
                 onClick={handleSubmitApplication}
                 disabled={!isReadyToSubmit || isSubmitting}
-                className={`w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all ${
+                className={`w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all min-h-[44px] ${
                   isReadyToSubmit && !isSubmitting
                     ? 'bg-[#0E6655] hover:bg-[#0B5345] text-white cursor-pointer shadow-sm hover:shadow-md'
                     : 'bg-[#CBD5E1] text-white cursor-not-allowed'
@@ -681,11 +681,11 @@ export default function Step6GuideApplication() {
             </div>
 
             {/* Bottom Actions */}
-            <div className="pt-4 border-t border-[#F1F5F9] flex flex-wrap items-center justify-between gap-3">
+            <div className="pt-4 border-t border-[#F1F5F9] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => navigateTo('home')}
-                className="px-5 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-bold text-[#475569] cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-[#E2E8F0] hover:bg-[#F8FAFC] text-xs font-bold text-[#475569] cursor-pointer min-h-[44px] flex items-center justify-center"
               >
                 Return to Dashboard
               </button>
@@ -696,7 +696,7 @@ export default function Step6GuideApplication() {
                   setIsSubmitted(false);
                   navigateTo('journey');
                 }}
-                className="px-5 py-2.5 rounded-xl bg-[#0B3B60] text-white hover:bg-[#07263F] text-xs font-bold shadow-xs cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0B3B60] text-white hover:bg-[#07263F] text-xs font-bold shadow-xs cursor-pointer min-h-[44px] flex items-center justify-center"
               >
                 Start New Scheme Evaluation
               </button>

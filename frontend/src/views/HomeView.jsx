@@ -130,11 +130,11 @@ export default function HomeView() {
               official 6-step application process for verified government support.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => startJourney(currentStepNum)}
-                className="px-5 py-2.5 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >
                 <span>{currentStepNum > 1 ? 'Continue Journey' : 'Start My Journey'}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -143,7 +143,7 @@ export default function HomeView() {
               <button
                 type="button"
                 onClick={() => setHowItWorksOpen(true)}
-                className="px-4 py-2.5 rounded-xl border border-[#CBD5E1] hover:bg-slate-50 text-[#0B3B60] font-semibold text-xs sm:text-sm transition-colors flex items-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-[#CBD5E1] hover:bg-slate-50 text-[#0B3B60] font-semibold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >
                 <Play className="w-3.5 h-3.5 fill-[#0B3B60] text-[#0B3B60]" />
                 <span>How It Works</span>
@@ -208,7 +208,7 @@ export default function HomeView() {
           <button
             type="button"
             onClick={() => startJourney(currentStepNum)}
-            className="w-full py-2.5 rounded-xl border border-[#0E6655] text-[#0E6655] hover:bg-[#E8F8F2] font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer mt-2"
+            className="w-full py-2.5 rounded-xl border border-[#0E6655] text-[#0E6655] hover:bg-[#E8F8F2] font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer mt-2 min-h-[44px]"
           >
             <span>Continue Journey</span>
             <ArrowRight className="w-4 h-4" />
@@ -386,7 +386,7 @@ export default function HomeView() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-1 pt-1.5 border-t border-slate-100 text-[10px]">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1.5 border-t border-slate-100 text-[10px]">
                       <div>
                         <span className="text-slate-400 block">Submitted</span>
                         <span className="font-semibold text-slate-700">
@@ -400,7 +400,7 @@ export default function HomeView() {
                         <span className="text-slate-400 block">Current Step</span>
                         <span className="font-semibold text-slate-700">{app.status}</span>
                       </div>
-                      <div className="text-right">
+                      <div className="col-span-2 sm:col-span-1 text-left sm:text-right">
                         <span className="text-slate-400 block">Partner</span>
                         <span className="font-semibold text-slate-700 truncate block">
                           {app.partner_name || 'Lead Partner'}
@@ -504,7 +504,7 @@ export default function HomeView() {
             <button
               type="button"
               onClick={() => setAiAssistantOpen(true)}
-              className="px-4 py-2.5 bg-[#0E6655] hover:bg-[#0B5345] text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2.5 bg-[#0E6655] hover:bg-[#0B5345] text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer min-h-[44px]"
             >
               <span>Ask Now</span>
               <MessageSquare className="w-3.5 h-3.5" />

@@ -25,8 +25,8 @@ export default function SixStepProgressStepper({ currentStep = 1, onStepClick })
 
   return (
     <div className="w-full bg-white rounded-3xl border border-[#E2E8F0] p-4 sm:p-5 shadow-xs mb-6">
-      {/* Mobile Compact Progress Bar (< 640px) */}
-      <div className="block sm:hidden space-y-2">
+      {/* Mobile Compact Progress Bar (< 768px) */}
+      <div className="block md:hidden space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="font-bold text-[#0B3B60]">
             Step {currentStep} of 6: <span className="text-[#1E293B]">{SIX_STAGES[currentStep - 1]?.title}</span>
@@ -43,8 +43,8 @@ export default function SixStepProgressStepper({ currentStep = 1, onStepClick })
         </div>
       </div>
 
-      {/* Desktop & Tablet Full 6-Stage Stepper (>= 640px) */}
-      <nav aria-label="6-Step Product Journey" className="hidden sm:block">
+      {/* Desktop & Tablet Full 6-Stage Stepper (>= 768px) */}
+      <nav aria-label="6-Step Product Journey" className="hidden md:block">
         <ol className="flex items-center justify-between relative">
           {SIX_STAGES.map((stage, idx) => {
             const stepNum = stage.id;

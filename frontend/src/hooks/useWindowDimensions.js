@@ -1,29 +1,30 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Custom responsive window dimensions hook.
- * Breakpoints:
- * - Phone / Mobile: < 640px (sm)
- * - Tablet: 640px - 1023px (md)
- * - Desktop: >= 1024px (lg)
+ * Standardized responsive window dimensions hook.
+ * Unified Breakpoints:
+ * - Mobile: < 768px
+ * - Tablet: 768px - 1024px
+ * - Desktop: > 1024px
  */
 export default function useWindowDimensions() {
-  const [dimensions, setDimensions] = useState(() => ({
-    width: typeof window !== 'undefined' ? window.innerWidth : 1200,
-    height: typeof window !== 'undefined' ? window.innerHeight : 800,
-    isMobile: typeof window !== 'undefined' ? window.innerWidth < 640 : false,
-    isTablet:
-      typeof window !== 'undefined'
-        ? window.innerWidth >= 640 && window.innerWidth < 1024
-        : false,
-    isDesktop: typeof window !== 'undefined' ? window.innerWidth >= 1024 : true,
-    deviceType:
-      typeof window === 'undefined' || window.innerWidth >= 1024
-        ? 'desktop'
-        : window.innerWidth >= 640
-        ? 'tablet'
-        : 'mobile',
-  }));
+  const [dimensions, setDimensions] = useState(() => {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const h = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const isMobile = w < 768;
+    const isTablet = w >= 768 && w <= 1024;
+    const isDesktop = w > 1024;
+    const deviceType = isDesktop ? 'desktop' : isTablet ? 'tablet' : 'mobile';
+
+    return {
+      width: w,
+      height: h,
+      isMobile,
+      isTablet,
+      isDesktop,
+      deviceType,
+    };
+  });
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -31,9 +32,9 @@ export default function useWindowDimensions() {
     const handleResize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const isMobile = w < 640;
-      const isTablet = w >= 640 && w < 1024;
-      const isDesktop = w >= 1024;
+      const isMobile = w < 768;
+      const isTablet = w >= 768 && w <= 1024;
+      const isDesktop = w > 1024;
       const deviceType = isDesktop ? 'desktop' : isTablet ? 'tablet' : 'mobile';
 
       setDimensions({

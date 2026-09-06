@@ -77,10 +77,10 @@ export default function ProfileView() {
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* Top Header Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <button
           onClick={() => navigateTo('home')}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer min-h-[44px] px-2"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Dashboard</span>
@@ -88,7 +88,7 @@ export default function ProfileView() {
 
         <button
           onClick={() => setCompleteProfileOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#0E6655] text-[#0E6655] hover:bg-[#E8F8F2] text-xs font-bold transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[#0E6655] text-[#0E6655] hover:bg-[#E8F8F2] text-xs font-bold transition-colors cursor-pointer min-h-[44px]"
         >
           <Edit3 className="w-3.5 h-3.5" />
           <span>Edit Profile</span>
@@ -96,8 +96,8 @@ export default function ProfileView() {
       </div>
 
       {/* User Avatar Card */}
-      <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+      <div className="bg-white rounded-3xl border border-[#E2E8F0] p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-[#0B3B60] text-white font-bold text-xl flex items-center justify-center shadow-xs shrink-0 border border-[#0B3B60]/20">
             {initialLetter}
           </div>
@@ -106,10 +106,10 @@ export default function ProfileView() {
               {fullName}
             </h2>
             <p className="text-xs text-[#64748B] flex items-center gap-1.5 mt-0.5">
-              <Mail className="w-3.5 h-3.5 text-gray-400" />
-              <span>{email}</span>
+              <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <span className="break-all">{email}</span>
             </p>
-            <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex flex-wrap items-center gap-2 mt-1.5">
               <span className="inline-block text-[10px] font-bold text-[#0E6655] bg-[#E8F8F2] px-2.5 py-0.5 rounded-full border border-[#10B981]/30">
                 Scheduled Caste (SC) Beneficiary
               </span>
@@ -254,7 +254,7 @@ export default function ProfileView() {
 
       {/* Security & Logout Section */}
       <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-0.5">
             <h4 className="text-xs sm:text-sm font-bold text-[#1E293B]">Account Session</h4>
             <p className="text-[11px] text-[#64748B]">
@@ -264,7 +264,7 @@ export default function ProfileView() {
 
           <button
             onClick={logout}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#EF4444] text-[#EF4444] hover:bg-[#FEF2F2] font-bold text-xs transition-colors cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#EF4444] text-[#EF4444] hover:bg-[#FEF2F2] font-bold text-xs transition-colors cursor-pointer min-h-[44px]"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>

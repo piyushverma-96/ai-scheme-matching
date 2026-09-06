@@ -63,7 +63,9 @@ export default function App() {
       case 'help_trust':
         return <HelpTrustView />;
       case 'login':
-        return <LoginView onLoginSuccess={() => navigateTo('home')} />;
+        return <LoginView initialTab="login" onLoginSuccess={() => navigateTo('home')} />;
+      case 'signup':
+        return <LoginView initialTab="signup" onLoginSuccess={() => navigateTo('home')} />;
       default:
         return <HomeView />;
     }
@@ -72,7 +74,7 @@ export default function App() {
   const isJourneyMode = currentView === 'journey' || currentView === 'wizard' || currentView === 'find_scheme';
 
   return (
-    <div className="min-h-dvh flex flex-col bg-[#F8FAFC] pb-16 lg:pb-0 font-sans text-[#1E293B] overflow-x-hidden">
+    <div className="min-h-dvh flex flex-col bg-[#F8FAFC] pb-16 lg:pb-0 font-sans text-[#1E293B] overflow-x-hidden w-full max-w-[100vw]">
       {/* Top Application Header */}
       <Header />
 

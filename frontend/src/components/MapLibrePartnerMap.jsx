@@ -84,7 +84,7 @@ export default function MapLibrePartnerMap({
   onSelectPartner,
   onViewDetails,
   selectedSchemeName = '',
-  height = '500px',
+  height = 'clamp(340px, 50vh, 500px)',
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -662,7 +662,7 @@ export default function MapLibrePartnerMap({
         <div ref={mapContainerRef} className="w-full h-full" />
 
         {/* 1. Floating Search Bar Top Left */}
-        <div className="absolute top-3.5 left-3.5 right-14 sm:right-auto sm:w-80 z-10">
+        <div className="absolute top-3.5 left-3.5 right-14 sm:right-auto sm:w-80 max-w-[calc(100%-60px)] z-10">
           <form onSubmit={handleSearch} className="relative shadow-md rounded-2xl">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -675,7 +675,7 @@ export default function MapLibrePartnerMap({
             <button
               type="submit"
               disabled={isSearching}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-[#0B3B60] hover:bg-[#07263F] text-white text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-[#0B3B60] hover:bg-[#07263F] text-white text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1 min-h-[36px]"
             >
               {isSearching ? <Loader2 className="w-3 h-3 animate-spin" /> : <span>Find</span>}
             </button>
@@ -702,7 +702,7 @@ export default function MapLibrePartnerMap({
 
         {/* 3. Live Route Summary Pill (Top Center when route active) */}
         {routeInfo && (
-          <div className="absolute top-3.5 left-1/2 -translate-x-1/2 z-10 bg-[#0B3B60]/95 backdrop-blur-md text-white px-4 py-2 rounded-2xl shadow-lg border border-white/20 flex items-center gap-3 text-xs animate-in slide-in-from-top-4">
+          <div className="absolute top-3.5 left-1/2 -translate-x-1/2 z-10 bg-[#0B3B60]/95 backdrop-blur-md text-white px-4 py-2 rounded-2xl shadow-lg border border-white/20 flex items-center gap-3 text-xs animate-in slide-in-from-top-4 max-w-[calc(100vw-32px)]">
             <RouteIcon className="w-4 h-4 text-emerald-400" />
             <div className="flex items-center gap-2">
               <span className="font-bold">{routeInfo.distanceKm} km</span>
@@ -730,7 +730,7 @@ export default function MapLibrePartnerMap({
 
         {/* 4. Subtle Bottom Sheet / Partner Panel */}
         {activePartner && (
-          <div className="absolute bottom-3.5 left-3.5 right-3.5 sm:left-auto sm:right-3.5 sm:w-96 z-10 bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-xl space-y-3.5 transition-all">
+          <div className="absolute bottom-3.5 left-3.5 right-3.5 sm:left-auto sm:right-3.5 sm:w-96 max-w-[calc(100vw-28px)] z-10 bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-xl space-y-3.5 transition-all">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <span

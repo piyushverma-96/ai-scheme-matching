@@ -5,10 +5,20 @@ import { POPULAR_SCHEMES_DATA } from '../components/PopularSchemes';
 import Card from '../components/Card';
 
 export default function CompareView() {
-  const { startWizard } = useApp();
+  const { startWizard, navigateTo } = useApp();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
+      {/* Top Header Navigation */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => navigateTo('home')}
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0B3B60] hover:text-[#2563EB] transition-colors cursor-pointer min-h-[44px] px-2"
+        >
+          <span>← Dashboard</span>
+        </button>
+      </div>
+
       <div>
         <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#0B3B60]">
           Compare Government Schemes
@@ -16,9 +26,12 @@ export default function CompareView() {
         <p className="text-xs sm:text-sm text-[#6B7280] mt-1">
           Side-by-side comparison of interest rates, loan ceilings, and repayment terms
         </p>
+        <span className="text-[11px] text-[#0E6655] font-semibold sm:hidden block mt-1">
+          ⇄ Swipe horizontally to compare all schemes
+        </span>
       </div>
 
-      <div className="overflow-x-auto bg-white rounded-2xl border border-[#E5E7EB] shadow-xs">
+      <div className="overflow-x-auto bg-white rounded-2xl border border-[#E5E7EB] shadow-xs max-w-full">
         <table className="w-full text-xs text-left">
           <thead className="bg-[#0B3B60] text-white">
             <tr>

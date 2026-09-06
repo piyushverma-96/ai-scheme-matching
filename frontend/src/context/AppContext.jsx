@@ -498,7 +498,7 @@ export function AppProvider({ children }) {
     setSavedSchemeIds([]);
     setUserDocuments([]);
     setJourneyStep(1);
-    setCurrentView('login');
+    setCurrentView('home');
   };
 
   // ── 9. Navigation Helpers ────────────────────────────────────────────────
