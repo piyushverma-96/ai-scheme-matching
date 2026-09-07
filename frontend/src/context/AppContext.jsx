@@ -123,18 +123,7 @@ export function AppProvider({ children }) {
     moratoriumMonths: 6,
   });
 
-  const [selectedPartner, setSelectedPartner] = useState({
-    id: 'sbi-ttnagar',
-    name: 'State Bank of India — TT Nagar Nodal Branch',
-    branchCode: 'SBIN0001308',
-    address: 'Plot 12, Main Road, TT Nagar, Bhopal, MP 462003',
-    distance: '0.8 km',
-    score: 98,
-    badge: 'Empanelled Lead Partner',
-    officer: 'Mr. Arvind Sharma',
-    phone: '+91 755 2554101',
-    supportedSchemes: ['NSFDC Term Loan Scheme', 'Micro Credit Finance', 'Educational Loan Scheme (ELS)'],
-  });
+  const [selectedPartner, setSelectedPartner] = useState(null);
 
   // AI Assistant & Recommendation State
   const [aiInputText, setAiInputText] = useState('');

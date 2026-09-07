@@ -18,13 +18,14 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../context/AppContext';
 import { SCHEMES_DATA, getLocalizedScheme } from '../../data/mockData';
-import { checkEligibility } from '../../api';
+import { matchSchemes } from '../../api';
 
 export default function Step2EligibleSchemes({ onContinue }) {
   const { t, i18n } = useTranslation();
   const {
     nextJourneyStep,
     prevJourneyStep,
+    selectedScheme,
     setSelectedScheme,
     journeyFormData,
     recommendResult,
@@ -32,6 +33,7 @@ export default function Step2EligibleSchemes({ onContinue }) {
   } = useApp();
 
   const [loading, setLoading] = useState(false);
+  const [chosenSchemeId, setChosenSchemeId] = useState(null);
 
   // Derive canonical search payload from journeyFormData
   const canonicalPayload = {
@@ -76,7 +78,7 @@ export default function Step2EligibleSchemes({ onContinue }) {
       }
       setLoading(true);
       try {
-        const resp = await checkEligibility(canonicalPayload);
+        const resp = await matchSchemes(canonicalPayload);
         if (isMounted && resp.data) {
           setRecommendResult(resp.data);
         }
@@ -92,9 +94,61 @@ export default function Step2EligibleSchemes({ onContinue }) {
     };
   }, []);
 
+  const rawResults = recommendResult?.results || [];
+  const matchedList = rawResults.filter((r) => r.matched || r.eligible || r.partially_eligible);
+  const candidateSchemes = rawResults.length > 0 ? matchedList : SCHEMES_DATA;
+  const isIncomeDisqualified = rawResults.length > 0 && matchedList.length === 0;
+
+  // Sync initial selection
+  useEffect(() => {
+    if (candidateSchemes.length > 0 && !chosenSchemeId) {
+      const activeId =
+        selectedScheme?.scheme_id ||
+        selectedScheme?.id ||
+        candidateSchemes[0]?.scheme_id ||
+        candidateSchemes[0]?.id;
+      setChosenSchemeId(activeId);
+    }
+  }, [candidateSchemes, chosenSchemeId, selectedScheme]);
+
+  const normalizeScheme = (scheme) => {
+    if (!scheme) return null;
+    const id = scheme.scheme_id || scheme.id;
+    const name = scheme.scheme_name || scheme.name;
+    return {
+      ...scheme,
+      id,
+      scheme_id: id,
+      name,
+      scheme_name: name,
+      fullName: scheme.fullName || scheme.full_description || name,
+      category: scheme.category || scheme.scheme_type || 'National Scheduled Castes Finance & Development Corp',
+      maxLimit: scheme.max_loan_amount_display || scheme.loan_amount_display || '₹50 Lakh',
+      maxLimitVal: scheme.max_loan_amount_val || scheme.max_loan_amount || 5000000,
+      max_loan_amount: scheme.max_loan_amount_val || scheme.max_loan_amount || 5000000,
+      interestRate: scheme.interest_rate_display || '8.0% p.a.',
+      interestRateVal: scheme.interest_rate_val || 8.0,
+      rate_beneficiary_min: scheme.rate_beneficiary_min || scheme.interest_rate_val || 8.0,
+      rate_val: scheme.rate_val || scheme.interest_rate_val || 8.0,
+      subsidy: scheme.subsidy_display || '90% Project Cost Financing',
+      subsidyVal: scheme.subsidy_val || scheme.financing_pct || 90,
+      financing_pct: scheme.financing_pct || scheme.subsidy_val || 90,
+      tenure: scheme.repayment_period || 'Up to 7 Years',
+      repayment_period: scheme.repayment_period || 'Up to 7 Years',
+      moratorium: scheme.moratorium_period || '6 Months Moratorium',
+      moratorium_period: scheme.moratorium_period || '6 Months Moratorium',
+      short_description: scheme.short_description || scheme.description,
+      description: scheme.full_description || scheme.description || scheme.short_description,
+      source_url: scheme.source_url || 'https://nsfdc.nic.in/scheme',
+      channel_type_display: scheme.channel_type_display || 'State Channelizing Agencies (SCA) / Empanelled Banks',
+      application_channel_type: scheme.application_channel_type || 'channel_partner',
+    };
+  };
+
   const handleSelectAndProceed = (scheme) => {
-    if (setSelectedScheme) {
-      setSelectedScheme(scheme);
+    const normalized = normalizeScheme(scheme);
+    if (setSelectedScheme && normalized) {
+      setSelectedScheme(normalized);
     }
     if (onContinue) {
       onContinue();
@@ -104,15 +158,12 @@ export default function Step2EligibleSchemes({ onContinue }) {
   };
 
   const amountStr = journeyFormData?.amountFormatted || '₹3,00,000';
-  const rawResults = recommendResult?.results || [];
-  const matchedList = rawResults.filter((r) => r.matched || r.eligible || r.partially_eligible);
-  const candidateSchemes = rawResults.length > 0 ? matchedList : SCHEMES_DATA;
-  const isIncomeDisqualified = rawResults.length > 0 && matchedList.length === 0;
 
   const getSchemeIcon = (scheme, idx) => {
-    const code = (scheme.scheme_code || scheme.id || '').toUpperCase();
+    const code = (scheme.scheme_code || scheme.scheme_type || scheme.id || scheme.name || '').toUpperCase();
     if (code.includes('EDU') || code.includes('ELS')) return GraduationCap;
-    if (code.includes('AMY') || code.includes('MFS')) return Store;
+    if (code.includes('AMY') || code.includes('AAJEEVIKA') || code.includes('MICRO') || code.includes('MFS')) return Store;
+    if (code.includes('UDYAM') || code.includes('UNY') || code.includes('COOPERATIVE')) return Building2;
     if (idx % 2 === 0) return Landmark;
     return Briefcase;
   };
@@ -219,12 +270,21 @@ export default function Step2EligibleSchemes({ onContinue }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           {candidateSchemes.map((scheme, idx) => {
             const item = getLocalizedScheme(scheme, i18n.language);
+            const schemeId = item.scheme_id || item.id || `scheme-${idx}`;
+            const isSelected = chosenSchemeId === schemeId;
             const IconComponent = getSchemeIcon(item, idx);
+            const displayName = item.scheme_name || item.name;
+            const displayFullName = item.fullName || item.full_description || displayName;
+            const displayLoanAmount = item.max_loan_amount_display || item.loan_amount_short || item.loan_amount_display || 'Up to ₹50 Lakh';
+            const displayRate = item.interest_rate_display || (item.rate_beneficiary_min ? `${item.rate_beneficiary_min}% p.a.` : '8.00% p.a.');
+            const displayTenure = item.repayment_period || 'Up to 7 Years';
+
             const isManualVerification =
               item.needs_manual_verification ||
               item.data_confidence_label === 'Pending Live Verification' ||
               (item.scheme_code || '').toUpperCase().includes('UNY') ||
-              (item.scheme_code || '').toUpperCase().includes('ELS');
+              (item.scheme_code || '').toUpperCase().includes('ELS') ||
+              (item.id || '').toLowerCase().includes('udyam');
 
             const channelBadgeText =
               item.channel_type_display ||
@@ -234,8 +294,13 @@ export default function Step2EligibleSchemes({ onContinue }) {
 
             return (
               <div
-                key={item.id || item.scheme_id || idx}
-                className="bg-white rounded-3xl border border-[#E2E8F0] p-5 sm:p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+                key={schemeId}
+                onClick={() => setChosenSchemeId(schemeId)}
+                className={`rounded-3xl p-5 sm:p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between cursor-pointer ${
+                  isSelected
+                    ? 'bg-white border-2 border-[#0B3B60] ring-4 ring-[#0B3B60]/10 shadow-sm'
+                    : 'bg-white border border-[#E2E8F0] hover:border-slate-300'
+                }`}
               >
                 <div className="space-y-4">
                   {/* Header */}
@@ -243,7 +308,9 @@ export default function Step2EligibleSchemes({ onContinue }) {
                     <div className="flex items-center gap-3">
                       <div
                         className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
-                          idx % 2 === 0
+                          isSelected
+                            ? 'bg-[#0B3B60] text-white'
+                            : idx % 2 === 0
                             ? 'bg-[#E8F8F2] text-[#10B981]'
                             : 'bg-[#EFF6FF] text-[#2563EB]'
                         }`}
@@ -252,17 +319,25 @@ export default function Step2EligibleSchemes({ onContinue }) {
                       </div>
                       <div>
                         <h4 className="text-sm sm:text-base font-bold text-[#0B3B60] leading-tight">
-                          {item.name}
+                          {displayName}
                         </h4>
                         <p className="text-[11px] text-[#64748B] mt-0.5 line-clamp-1">
-                          {item.fullName}
+                          {displayFullName}
                         </p>
                       </div>
                     </div>
 
-                    <span className="text-[10px] font-bold text-[#10B981] bg-[#E8F8F2] px-2.5 py-1 rounded-full shrink-0 border border-[#10B981]/20">
-                      {t('journey_step3.badge_potentially_eligible', 'Potentially Eligible')}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isSelected && (
+                        <span className="text-[10px] font-bold text-white bg-[#0B3B60] px-2.5 py-1 rounded-full flex items-center gap-1">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          <span>Selected</span>
+                        </span>
+                      )}
+                      <span className="text-[10px] font-bold text-[#10B981] bg-[#E8F8F2] px-2.5 py-1 rounded-full border border-[#10B981]/20">
+                        {t('journey_step3.badge_potentially_eligible', 'Potentially Eligible')}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Channel Partner Routing & Verification Pill */}
@@ -287,7 +362,7 @@ export default function Step2EligibleSchemes({ onContinue }) {
 
                   {/* Description */}
                   <p className="text-xs text-[#64748B] leading-relaxed line-clamp-2">
-                    {item.short_description}
+                    {item.short_description || item.description}
                   </p>
 
                   {/* Statutory Eligibility Breakdown */}
@@ -305,7 +380,7 @@ export default function Step2EligibleSchemes({ onContinue }) {
                     </div>
                     <div className="flex items-center gap-2 text-[#065F46]">
                       <Check className="w-3.5 h-3.5 text-[#10B981] stroke-[3]" />
-                      <span>Requested project scale fits within scheme limits ({item.loan_amount_short})</span>
+                      <span>Requested project scale fits within scheme limits ({displayLoanAmount})</span>
                     </div>
                   </div>
 
@@ -315,13 +390,13 @@ export default function Step2EligibleSchemes({ onContinue }) {
                       <span className="text-[10px] text-[#64748B] block font-medium">
                         {t('journey_step2.interest_rate', 'Beneficiary Interest Rate')}
                       </span>
-                      <span className="font-bold text-[#1E293B] font-mono">{item.interest_rate_display}</span>
+                      <span className="font-bold text-[#1E293B] font-mono">{displayRate}</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-[#64748B] block font-medium">
                         {t('journey_step2.repayment_tenure', 'Repayment Tenure')}
                       </span>
-                      <span className="font-bold text-[#1E293B]">{item.repayment_period}</span>
+                      <span className="font-bold text-[#1E293B]">{displayTenure}</span>
                     </div>
                   </div>
 
@@ -332,6 +407,7 @@ export default function Step2EligibleSchemes({ onContinue }) {
                         href={item.source_url}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
                         className="inline-flex items-center gap-1 hover:underline font-medium"
                       >
                         <span>Official NSFDC Scheme Source</span>
@@ -345,10 +421,18 @@ export default function Step2EligibleSchemes({ onContinue }) {
                 <div className="pt-4 mt-4 border-t border-[#F1F5F9]">
                   <button
                     type="button"
-                    onClick={() => handleSelectAndProceed(scheme)}
-                    className="w-full py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] border border-[#0B3B60] text-[#0B3B60] hover:text-[#07263F] text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setChosenSchemeId(schemeId);
+                      handleSelectAndProceed(scheme);
+                    }}
+                    className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-[#0B3B60] text-white hover:bg-[#07263F] shadow-2xs'
+                        : 'bg-white hover:bg-[#F8FAFC] border border-[#0B3B60] text-[#0B3B60]'
+                    }`}
                   >
-                    <span>{t('journey_step2.btn_select', 'Select & Proceed')}</span>
+                    <span>{isSelected ? t('journey_step2.btn_proceed_chosen', 'Proceed with Selected Scheme') : t('journey_step2.btn_select', 'Select & Proceed')}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -383,7 +467,12 @@ export default function Step2EligibleSchemes({ onContinue }) {
         {!isIncomeDisqualified && candidateSchemes.length > 0 && (
           <button
             type="button"
-            onClick={() => handleSelectAndProceed(candidateSchemes[0])}
+            onClick={() => {
+              const selected = candidateSchemes.find(
+                (s) => (s.scheme_id || s.id) === chosenSchemeId
+              ) || candidateSchemes[0];
+              handleSelectAndProceed(selected);
+            }}
             className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#0B3B60] hover:bg-[#07263F] text-white font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer min-h-[44px]"
           >
             <span>{t('journey_step2.btn_continue', 'Continue to Best Scheme Recommendation')}</span>

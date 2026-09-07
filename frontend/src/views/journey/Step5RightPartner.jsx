@@ -29,7 +29,7 @@ import { getNearbyPartners } from '../../api';
 import MapLibrePartnerMap from '../../components/MapLibrePartnerMap';
 import { getLocalizedScheme } from '../../data/mockData';
 
-// Default Fallback Partners for instant offline rendering
+// Default Fallback Partners for verified channel reference
 const FALLBACK_ELIGIBLE_PARTNERS = [
   {
     id: 'b1000000-0000-0000-0000-000000000002',
@@ -49,12 +49,12 @@ const FALLBACK_ELIGIBLE_PARTNERS = [
     distance_km: 0.14,
     distance_text: '0.14 km away',
     driving_duration_mins: 3.0,
-    fund_utilization_percent: 92.5,
-    fund_utilization_status: 'Satisfactory (92.5%)',
-    overdue_status: 'Current / No Overdues',
-    npa_status: 'Standard Asset',
+    fund_utilization_percent: null,
+    fund_utilization_status: 'Partner eligibility status unavailable for live verification',
+    overdue_status: 'Partner eligibility status unavailable for live verification',
+    npa_status: 'Partner eligibility status unavailable for live verification',
     eligibility_status: 'Eligible',
-    eligibility_reason: 'Lead Public Sector Bank branch empanelled for all 3 NSFDC credit schemes with 92.5% fund utilization and zero overdue defaults.',
+    eligibility_reason: 'Lead Public Sector Bank branch empanelled for NSFDC credit schemes.',
     last_verified_at: '15/08/2026',
     supported_schemes: ['NSFDC Term Loan Scheme', 'Micro Credit Finance', 'Educational Loan Scheme (ELS)'],
     contact_person: 'Mr. Arvind Sharma (Lead District Manager Desk)',
@@ -65,9 +65,7 @@ const FALLBACK_ELIGIBLE_PARTNERS = [
       'Authorized Channel Partner empanelled with NSFDC',
       'Branch is operational and actively accepting beneficiary applications',
       'Supports requested NSFDC loan scheme',
-      'Satisfactory fund utilization: 92.5% (Threshold >= 40%)',
-      'Clean track record: Zero prohibited overdue defaults',
-      'Standard Asset classification verified under banking inspection',
+      'Partner eligibility status unavailable for live verification',
       'Closest verified eligible branch to your location',
     ],
   },
@@ -89,10 +87,10 @@ const FALLBACK_ELIGIBLE_PARTNERS = [
     distance_km: 1.5,
     distance_text: '1.5 km away',
     driving_duration_mins: 7.0,
-    fund_utilization_percent: 88.0,
-    fund_utilization_status: 'Satisfactory (88.0%)',
-    overdue_status: 'Current / No Overdues',
-    npa_status: 'Standard Asset',
+    fund_utilization_percent: null,
+    fund_utilization_status: 'Partner eligibility status unavailable for live verification',
+    overdue_status: 'Partner eligibility status unavailable for live verification',
+    npa_status: 'Partner eligibility status unavailable for live verification',
     eligibility_status: 'Eligible',
     eligibility_reason: 'Designated State Channelizing Agency for Madhya Pradesh under Ministry of Social Justice. Direct nodal coordinator.',
     last_verified_at: '15/08/2026',
@@ -105,8 +103,7 @@ const FALLBACK_ELIGIBLE_PARTNERS = [
       'Designated State Channelizing Agency (SCA) for Madhya Pradesh',
       'Branch is operational and actively accepting beneficiary applications',
       'Supports requested NSFDC loan scheme',
-      'Satisfactory fund utilization: 88.0%',
-      'Clean track record: Zero prohibited overdue defaults',
+      'Partner eligibility status unavailable for live verification',
     ],
   },
   {
@@ -127,10 +124,10 @@ const FALLBACK_ELIGIBLE_PARTNERS = [
     distance_km: 3.8,
     distance_text: '3.8 km away',
     driving_duration_mins: 11.0,
-    fund_utilization_percent: 81.0,
-    fund_utilization_status: 'Satisfactory (81.0%)',
-    overdue_status: 'Current / No Overdues',
-    npa_status: 'Standard Asset',
+    fund_utilization_percent: null,
+    fund_utilization_status: 'Partner eligibility status unavailable for live verification',
+    overdue_status: 'Partner eligibility status unavailable for live verification',
+    npa_status: 'Partner eligibility status unavailable for live verification',
     eligibility_status: 'Eligible',
     eligibility_reason: 'Active empanelled public sector bank supporting Term Loan and ELS education credit.',
     last_verified_at: '15/08/2026',
@@ -143,6 +140,7 @@ const FALLBACK_ELIGIBLE_PARTNERS = [
       'Authorized Channel Partner empanelled with NSFDC',
       'Operational and accepting applications',
       'Supports requested NSFDC loan scheme',
+      'Partner eligibility status unavailable for live verification',
     ],
   },
 ];
@@ -192,10 +190,10 @@ export default function Step5RightPartner({ onContinue }) {
   // Dynamic API partner states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [recommendedPartner, setRecommendedPartner] = useState(FALLBACK_ELIGIBLE_PARTNERS[0]);
-  const [eligiblePartners, setEligiblePartners] = useState(FALLBACK_ELIGIBLE_PARTNERS);
-  const [excludedPartners, setExcludedPartners] = useState(FALLBACK_EXCLUDED_PARTNERS);
-  const [activePartner, setActivePartner] = useState(FALLBACK_ELIGIBLE_PARTNERS[0]);
+  const [recommendedPartner, setRecommendedPartner] = useState(null);
+  const [eligiblePartners, setEligiblePartners] = useState([]);
+  const [excludedPartners, setExcludedPartners] = useState([]);
+  const [activePartner, setActivePartner] = useState(null);
   const [routeRequestPartner, setRouteRequestPartner] = useState(null);
 
   // UI accordion & modal states
@@ -266,7 +264,7 @@ export default function Step5RightPartner({ onContinue }) {
               compatibility_factors: item.compatibility_factors || [
                 'Authorized Channel Partner empanelled with NSFDC',
                 'Branch is operational and actively accepting applications',
-                'Satisfies fund utilization & overdue safety criteria',
+                'Partner eligibility status unavailable for live verification',
               ],
             };
           });
@@ -300,30 +298,32 @@ export default function Step5RightPartner({ onContinue }) {
               setActivePartner(matched || topPartner);
             }
           } else {
-            setEligiblePartners(FALLBACK_ELIGIBLE_PARTNERS);
-            setRecommendedPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
+            // Fallback when no verified partner is found in directory for this area
+            setEligiblePartners([]);
+            setRecommendedPartner(null);
             if (forceResetSelection || !selectedPartnerRef.current) {
-              if (setSelectedPartner) setSelectedPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
-              setActivePartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
-              setRouteRequestPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
+              if (setSelectedPartner) setSelectedPartner(null);
+              setActivePartner(null);
+              setRouteRequestPartner(null);
             }
           }
 
           if (formattedExcluded.length > 0) {
             setExcludedPartners(formattedExcluded);
           } else {
-            setExcludedPartners(FALLBACK_EXCLUDED_PARTNERS);
+            setExcludedPartners([]);
           }
         }
       } catch (err) {
-        console.warn('Backend partner locator fetch error, falling back to verified dataset:', err);
-        setEligiblePartners(FALLBACK_ELIGIBLE_PARTNERS);
-        setRecommendedPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
+        console.warn('Backend partner locator fetch error:', err);
+        setEligiblePartners([]);
+        setRecommendedPartner(null);
         if (forceResetSelection || !selectedPartnerRef.current) {
-          if (setSelectedPartner) setSelectedPartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
-          setActivePartner(FALLBACK_ELIGIBLE_PARTNERS[0]);
+          if (setSelectedPartner) setSelectedPartner(null);
+          setActivePartner(null);
+          setRouteRequestPartner(null);
         }
-        setExcludedPartners(FALLBACK_EXCLUDED_PARTNERS);
+        setExcludedPartners([]);
       } finally {
         setLoading(false);
       }
@@ -387,7 +387,20 @@ export default function Step5RightPartner({ onContinue }) {
   };
 
   const handleProceed = () => {
-    const partnerToSave = selectedPartner || activePartner || recommendedPartner || eligiblePartners[0];
+    const partnerToSave =
+      selectedPartner ||
+      activePartner ||
+      recommendedPartner ||
+      eligiblePartners[0] || {
+        id: 'sca-central-nodal',
+        name: 'Designated State Channelizing Agency (SCA) / PM-SURAJ Desk',
+        partner_type: 'SCA',
+        type: 'State Channelizing Agency',
+        address: `State Channelizing Agency Desk, ${userLocation.city || 'Madhya Pradesh'}`,
+        city: userLocation.city || 'Bhopal',
+        state: 'Madhya Pradesh',
+        status: 'Operational',
+      };
     if (setSelectedPartner) {
       setSelectedPartner(partnerToSave);
     }
@@ -581,7 +594,7 @@ export default function Step5RightPartner({ onContinue }) {
                 <span>{t('journey_step5.gate_engine_title', 'Deterministic Multi-Gate Eligibility Engine (Filter First → Rank Second)')}</span>
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#DCFCE7] text-[#15803D] border border-[#86EFAC]">
-                {t('journey_step5.zero_npa_guarantee', 'Zero High-NPA / Overdue Guarantee')}
+                {t('journey_step5.channel_compliance_guarantee', 'Official Channel Partner Verification')}
               </span>
             </div>
 
@@ -595,11 +608,11 @@ export default function Step5RightPartner({ onContinue }) {
               </span>
               <span className="text-[#16A34A]">→</span>
               <span className="bg-white px-2.5 py-1 rounded-lg border border-[#BBF7D0] text-[#166534] font-bold">
-                {t('journey_step5.gate_3', '3. Fund Utilization (≥40%)')}
+                {t('journey_step5.gate_3', '3. Empanelled Channel')}
               </span>
               <span className="text-[#16A34A]">→</span>
               <span className="bg-white px-2.5 py-1 rounded-lg border border-[#BBF7D0] text-[#166534] font-bold">
-                {t('journey_step5.gate_4', '4. Overdue & NPA Clearance')}
+                {t('journey_step5.gate_4', '4. Live Verification')}
               </span>
               <span className="text-[#16A34A]">→</span>
               <span className="bg-[#15803D] text-white px-2.5 py-1 rounded-lg font-bold shadow-2xs">
@@ -608,124 +621,169 @@ export default function Step5RightPartner({ onContinue }) {
             </div>
           </div>
 
-          {/* ── 1. REAL INTERACTIVE MAPLIBRE GL MAP ────────────────────────────── */}
-          <div id="partner-map-section" className="space-y-3">
-            <MapLibrePartnerMap
-              partners={eligiblePartners}
-              selectedPartner={activePartner}
-              routeRequestPartner={routeRequestPartner}
-              onSelectPartner={handleSelect}
-              onViewDetails={openDetails}
-              selectedSchemeName={selectedScheme?.name}
-              userLocation={userLocation}
-              onLocationChange={handleLocationChange}
-              height="500px"
-            />
-          </div>
-
-          {/* ── 2. RECOMMENDED CHANNEL PARTNER CARD ────────────────────────────── */}
-          {recommendedPartner && (
-            <div
-              className={`bg-white rounded-3xl p-6 sm:p-7 shadow-md space-y-5 relative overflow-hidden transition-all ${
-                isSelected(recommendedPartner)
-                  ? 'border-2 border-emerald-600 ring-2 ring-emerald-500/20'
-                  : 'border border-slate-300 hover:border-slate-400'
-              }`}
-            >
-              {/* Top Badge Row */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-2xs ${
-                      isSelected(recommendedPartner)
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-[#0B3B60] text-white'
-                    }`}
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>
-                      {isSelected(recommendedPartner)
-                        ? 'Recommended & Selected Desk ✓'
-                        : 'Recommended Partner Desk'}
-                    </span>
-                  </span>
-
-                  <span className="text-xs font-bold text-[#065F46] bg-[#D1FAE5] px-3 py-1 rounded-full border border-[#A7F3D0]">
-                    {recommendedPartner.partner_type || recommendedPartner.type}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 text-xs font-bold text-[#10B981]">
-                  <span className="bg-[#E8F8F2] px-3 py-1 rounded-full border border-[#10B981]/30 flex items-center gap-1.5">
-                    <Navigation className="w-3.5 h-3.5 text-[#10B981]" />
-                    <span>{recommendedPartner.distance_text}</span>
-                  </span>
-                </div>
+          {/* Fallback Notice when 0 verified partners exist in directory */}
+          {!loading && eligiblePartners.length === 0 ? (
+            <div className="bg-amber-50/80 border-2 border-amber-300 rounded-3xl p-6 sm:p-8 space-y-5 text-center shadow-xs">
+              <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+                <AlertTriangle className="w-7 h-7 stroke-[2]" />
               </div>
 
-              {/* Main Info */}
-              <div className="flex items-start gap-4">
+              <div className="space-y-2 max-w-xl mx-auto">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-300">
+                  <span>Directory Status: Pending Verification</span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-amber-900">
+                  Partner directory pending verification
+                </h3>
+                <p className="text-xs sm:text-sm text-amber-800 leading-relaxed">
+                  No verified channel partner branch is currently registered in our live directory for {userLocation.city || 'your area'} for this scheme.
+                  Under Ministry of Social Justice &amp; Empowerment guidelines, applicants can directly submit their credit application via the official PM-SURAJ national portal or contact their State Channelizing Agency (SCA) nodal office.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <a
+                  href="https://pmsuraj.dosje.gov.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#0B3B60] hover:bg-[#07263F] text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                >
+                  <span>Apply on PM-SURAJ National Portal</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://nsfdc.nic.in/en/state-channelising-agencies"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold text-xs shadow-xs transition-all cursor-pointer"
+                >
+                  <span>View State Channelizing Agencies (SCA) Directory</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+
+              <div className="pt-3 border-t border-amber-200/60 max-w-md mx-auto text-[11px] text-amber-700">
+                <span>You can continue to Step 6 to review standard document checklists and application guidance for State Channelizing Agencies.</span>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* ── 1. REAL INTERACTIVE MAPLIBRE GL MAP ────────────────────────────── */}
+              <div id="partner-map-section" className="space-y-3">
+                <MapLibrePartnerMap
+                  partners={eligiblePartners}
+                  selectedPartner={activePartner}
+                  routeRequestPartner={routeRequestPartner}
+                  onSelectPartner={handleSelect}
+                  onViewDetails={openDetails}
+                  selectedSchemeName={selectedScheme?.name}
+                  userLocation={userLocation}
+                  onLocationChange={handleLocationChange}
+                  height="500px"
+                />
+              </div>
+
+              {/* ── 2. RECOMMENDED CHANNEL PARTNER CARD ────────────────────────────── */}
+              {recommendedPartner && (
                 <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border transition-colors ${
+                  className={`bg-white rounded-3xl p-6 sm:p-7 shadow-md space-y-5 relative overflow-hidden transition-all ${
                     isSelected(recommendedPartner)
-                      ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
-                      : 'bg-[#EFF6FF] text-[#2563EB] border-[#DBEAFE]'
+                      ? 'border-2 border-emerald-600 ring-2 ring-emerald-500/20'
+                      : 'border border-slate-300 hover:border-slate-400'
                   }`}
                 >
-                  <Building2 className="w-7 h-7 stroke-[2]" />
-                </div>
-
-                <div className="space-y-1.5 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-lg sm:text-xl font-bold text-[#0B3B60]">
-                      {recommendedPartner.name}
-                    </h3>
-                    {isSelected(recommendedPartner) && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                        <Check className="w-3 h-3 text-emerald-700 stroke-[3]" />
-                        <span>Active Application Desk</span>
+                  {/* Top Badge Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-2xs ${
+                          isSelected(recommendedPartner)
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-[#0B3B60] text-white'
+                        }`}
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>
+                          {isSelected(recommendedPartner)
+                            ? 'Recommended & Selected Desk ✓'
+                            : 'Recommended Partner Desk'}
+                        </span>
                       </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-[#475569] flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4 text-[#EF4444] shrink-0" />
-                    <span>{recommendedPartner.address}</span>
-                  </p>
 
-                  {/* Operational Eligibility Pillars */}
-                  <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
-                    <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                      {t('journey_step5.fund_utilization', 'Fund Utilization Rate:')} <strong>{recommendedPartner.fund_utilization_percent || 92.5}%</strong>
-                    </span>
-                    <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-semibold border border-blue-200">
-                      {t('journey_step5.overdue_status', 'Overdue Status:')} <strong>{recommendedPartner.overdue_status || 'Current'}</strong>
-                    </span>
-                    <span className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 font-semibold border border-purple-200">
-                      {t('journey_step5.npa_status', 'Asset Classification:')} <strong>{recommendedPartner.npa_status || 'Standard Asset'}</strong>
-                    </span>
-                  </div>
-                </div>
-              </div>
+                      <span className="text-xs font-bold text-[#065F46] bg-[#D1FAE5] px-3 py-1 rounded-full border border-[#A7F3D0]">
+                        {recommendedPartner.partner_type || recommendedPartner.type}
+                      </span>
+                    </div>
 
-              {/* Why this partner matches */}
-              <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2 text-xs text-slate-700">
-                <strong className="text-[#0B3B60] block font-bold uppercase tracking-wider text-[10px]">
-                  {t('journey_step5.compliance_title', 'Eligibility & Inspection Checklist:')}
-                </strong>
-                <ul className="space-y-1 text-slate-600">
-                  {(recommendedPartner.compatibility_factors || [
-                    'Authorized Channel Partner empanelled with NSFDC',
-                    'Branch is operational and actively accepting beneficiary applications',
-                    'Satisfies fund-utilization, overdue, and NPA eligibility standards',
-                    'Closest verified eligible branch to your location',
-                  ]).map((f, i) => (
-                    <li key={i} className="flex items-start gap-1.5">
-                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#10B981]">
+                      <span className="bg-[#E8F8F2] px-3 py-1 rounded-full border border-[#10B981]/30 flex items-center gap-1.5">
+                        <Navigation className="w-3.5 h-3.5 text-[#10B981]" />
+                        <span>{recommendedPartner.distance_text}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Main Info */}
+                  <div className="flex items-start gap-4">
+                    <div
+                      className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border transition-colors ${
+                        isSelected(recommendedPartner)
+                          ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
+                          : 'bg-[#EFF6FF] text-[#2563EB] border-[#DBEAFE]'
+                      }`}
+                    >
+                      <Building2 className="w-7 h-7 stroke-[2]" />
+                    </div>
+
+                    <div className="space-y-1.5 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-lg sm:text-xl font-bold text-[#0B3B60]">
+                          {recommendedPartner.name}
+                        </h3>
+                        {isSelected(recommendedPartner) && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            <Check className="w-3 h-3 text-emerald-700 stroke-[3]" />
+                            <span>Active Application Desk</span>
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-[#475569] flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4 text-[#EF4444] shrink-0" />
+                        <span>{recommendedPartner.address}</span>
+                      </p>
+
+                      {/* Operational Eligibility Status */}
+                      <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
+                        <span className="px-2.5 py-1 rounded-lg bg-slate-50 text-slate-700 font-medium border border-slate-200 flex items-center gap-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Partner eligibility status unavailable for live verification</span>
+                        </span>
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-medium border border-emerald-200">
+                          Directory Status: <strong>{recommendedPartner.status || 'Operational'}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Why this partner matches */}
+                  <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2 text-xs text-slate-700">
+                    <strong className="text-[#0B3B60] block font-bold uppercase tracking-wider text-[10px]">
+                      {t('journey_step5.compliance_title', 'Eligibility & Inspection Checklist:')}
+                    </strong>
+                    <ul className="space-y-1 text-slate-600">
+                      {(recommendedPartner.compatibility_factors || [
+                        'Authorized Channel Partner empanelled with NSFDC',
+                        'Branch is operational and actively accepting beneficiary applications',
+                        'Partner eligibility status unavailable for live verification',
+                        'Closest verified eligible branch to your location',
+                      ]).map((f, i) => (
+                        <li key={i} className="flex items-start gap-1.5">
+                          <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
                 <div className="flex items-center gap-2 text-slate-500 text-[11px]">
@@ -831,8 +889,8 @@ export default function Step5RightPartner({ onContinue }) {
                                 <span>Currently Selected Desk</span>
                               </span>
                             )}
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                              {t('journey_step5.fund_utilization', 'Fund Utilization:')} {partner.fund_utilization_percent || 88}%
+                            <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                              {partner.verification_notes || 'Partner eligibility status unavailable for live verification'}
                             </span>
                           </div>
 
@@ -985,6 +1043,8 @@ export default function Step5RightPartner({ onContinue }) {
           </div>
         </>
       )}
+    </>
+  )}
 
 
       {/* ── 6. STEP NAVIGATION CONTROLS ────────────────────────────── */}
@@ -1058,15 +1118,11 @@ export default function Step5RightPartner({ onContinue }) {
                 <p className="text-slate-700 mt-0.5">{selectedDetailPartner.address}</p>
               </div>
 
-              <div className="pt-2 grid grid-cols-2 gap-2">
-                <div>
-                  <strong>{t('journey_step5.modal_fund_util', 'Fund Utilization:')}</strong>
-                  <p className="text-emerald-700 font-bold">{selectedDetailPartner.fund_utilization_percent || 92.5}%</p>
-                </div>
-                <div>
-                  <strong>{t('journey_step5.modal_overdue', 'Overdue Status:')}</strong>
-                  <p className="text-emerald-700 font-bold">{selectedDetailPartner.overdue_status || 'Clean'}</p>
-                </div>
+              <div className="pt-2">
+                <strong>{t('journey_step5.modal_verification_status', 'Operational Status:')}</strong>
+                <p className="text-slate-700 font-medium text-xs mt-0.5">
+                  {selectedDetailPartner.verification_notes || 'Partner eligibility status unavailable for live verification'}
+                </p>
               </div>
 
               <div className="pt-2 grid grid-cols-2 gap-2">

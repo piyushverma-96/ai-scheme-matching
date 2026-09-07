@@ -40,6 +40,9 @@ CREATE TABLE IF NOT EXISTS schemes (
     last_verified_at DATE NOT NULL,
     needs_manual_verification BOOLEAN NOT NULL DEFAULT false,
     verification_note TEXT,
+    verification_status TEXT DEFAULT 'verified',
+    verification_source_type TEXT DEFAULT 'official_portal',
+    verification_notes TEXT,
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()

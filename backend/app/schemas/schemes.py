@@ -71,6 +71,9 @@ class SchemeOut(BaseModel):
     last_verified_at: str
     needs_manual_verification: bool
     verification_note: Optional[str] = None
+    verification_status: Optional[str] = "verified"
+    verification_source_type: Optional[str] = "official_portal"
+    verification_notes: Optional[str] = None
 
     is_active: bool = True
     data_source: str = Field(default="supabase", alias="_data_source")
@@ -138,6 +141,12 @@ class SchemeOut(BaseModel):
                 d["last_verified_at"] = "2026-09-06"
             if "needs_manual_verification" not in d:
                 d["needs_manual_verification"] = False
+            if "verification_status" not in d:
+                d["verification_status"] = "verified"
+            if "verification_source_type" not in d:
+                d["verification_source_type"] = "official_portal"
+            if "verification_notes" not in d:
+                d["verification_notes"] = d.get("verification_note")
             if "is_active" not in d:
                 d["is_active"] = True
             return d

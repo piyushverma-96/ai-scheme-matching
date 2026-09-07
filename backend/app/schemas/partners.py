@@ -49,6 +49,9 @@ class PartnerOut(BaseModel):
     source_url: Optional[str] = Field(default="https://nsfdc.nic.in", description="Audit source URL")
     is_demo_data: bool = Field(default=True, description="Flag indicating demo / prototype record")
     data_confidence_label: str = Field(default="Verified Master Data", description="Data confidence label")
+    verification_status: Optional[str] = Field(default="verified", description="Verification status of partner")
+    verification_source_type: Optional[str] = Field(default="official_directory", description="Source type of verification")
+    verification_notes: Optional[str] = Field(default=None, description="Detailed verification notes")
 
     contact_person: Optional[str] = None
     phone: Optional[str] = None
