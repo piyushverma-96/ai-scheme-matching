@@ -1,5 +1,5 @@
 /**
- * ArthSetu Map API Service
+ * UdyamNex Map API Service
  * ========================
  * All routing and geocoding calls go through the FastAPI backend.
  * The ORS (HeiGIT) API key NEVER leaves the backend — it is not in

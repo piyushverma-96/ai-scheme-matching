@@ -10,8 +10,8 @@ export default function AiAssistantModal() {
   const isHi = i18n.language === 'hi';
 
   const defaultWelcome = isHi
-    ? 'नमस्ते! मैं आपका अर्थसेतु AI सहायक हूँ। मैं आपको सरकारी योजनाओं की खोज, आवश्यक दस्तावेजों को समझने, ऋण ईएमआई की गणना करने या निकटतम पार्टनर एजेंसियों को खोजने में मदद कर सकता हूँ। आज मैं आपकी क्या सहायता कर सकता हूँ?'
-    : 'Namaste! I am your ArthSetu AI Sahayak. I can help you find government schemes, understand required documents, calculate loan EMIs, or locate channelizing agencies. How can I assist you today?';
+    ? 'नमस्ते! मैं आपका UdyamNex सहायक हूँ। मैं आपको सरकारी योजनाओं की खोज, आवश्यक दस्तावेजों को समझने, ऋण ईएमआई की गणना करने या निकटतम पार्टनर एजेंसियों को खोजने में मदद कर सकता हूँ। आज मैं आपकी क्या सहायता कर सकता हूँ?'
+    : 'Namaste! I am your UdyamNex Sahayak. I can help you find government schemes, understand required documents, calculate loan EMIs, or locate channelizing agencies. How can I assist you today?';
 
   const [messages, setMessages] = useState([
     {
@@ -77,7 +77,7 @@ export default function AiAssistantModal() {
           <div className="w-6 h-6 rounded-full bg-[#EAF1F6] group-hover:bg-[#0B3B60] group-hover:text-white transition-base flex items-center justify-center text-[#0B3B60]">
             <Bot className="w-3.5 h-3.5" />
           </div>
-          <span>{t('nav.ai', 'Ask ArthSetu')}</span>
+          <span>{t('nav.ai', 'Ask UdyamNex')}</span>
         </button>
       </div>
 
@@ -91,7 +91,7 @@ export default function AiAssistantModal() {
                 <Bot className="w-4 h-4 text-[#E59310]" />
               </div>
               <div>
-                <h4 className="font-bold text-xs sm:text-sm">{t('ai_modal.title', 'ArthSetu AI Assistant')}</h4>
+                <h4 className="font-bold text-xs sm:text-sm">{t('ai_modal.title', 'UdyamNex Assistant')}</h4>
                 <p className="text-[10px] text-blue-200">MoSJE Scheme Advisory</p>
               </div>
             </div>

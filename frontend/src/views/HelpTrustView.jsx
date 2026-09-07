@@ -33,18 +33,18 @@ export default function HelpTrustView() {
           <span>Official Disclaimer</span>
         </div>
         <p className="text-xs sm:text-sm text-[#92400E] leading-relaxed">
-          ArthSetu provides guidance based on publicly available government scheme guidelines. Final loan sanctioning and subsidy disbursement are made exclusively by authorized State Channelizing Agencies and partner banks following physical document verification.
+          UdyamNex provides guidance based on publicly available government scheme guidelines. Final loan sanctioning and subsidy disbursement are made exclusively by authorized State Channelizing Agencies and partner banks following physical document verification.
         </p>
       </div>
 
-      {/* 1. How ArthSetu Works */}
+      {/* 1. How UdyamNex Works */}
       <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center">
             <HelpCircle className="w-5 h-5" />
           </div>
           <h3 className="text-base font-bold text-[#0B3B60]">
-            How ArthSetu Works
+            How UdyamNex Works
           </h3>
         </div>
 

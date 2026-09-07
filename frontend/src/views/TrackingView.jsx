@@ -19,7 +19,7 @@ export default function TrackingView() {
   const [selectedAppIndex, setSelectedAppIndex] = useState(0);
 
   const STAGES = [
-    { key: 'Submitted', label: 'Application Submitted', desc: 'Application packet registered on ArthSetu.' },
+    { key: 'Submitted', label: 'Application Submitted', desc: 'Application packet registered on UdyamNex.' },
     { key: 'Under Review', label: 'Under Review', desc: 'SCA / Bank reviewing preliminary documents.' },
     { key: 'Documents Required', label: 'Documents Required', desc: 'Additional verification or certificates required.' },
     { key: 'Forwarded to Partner', label: 'Forwarded to Partner Bank', desc: 'Docket forwarded to lead branch desk.' },

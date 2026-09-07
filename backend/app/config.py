@@ -8,8 +8,8 @@ load_dotenv()
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "ArthSetu API"
-    PROJECT_TAGLINE: str = "Right Scheme. Right Partner. Right Guidance."
+    PROJECT_NAME: str = "UdyamNex API"
+    PROJECT_TAGLINE: str = "Right Scheme. Real Support."
     PROBLEM_STATEMENT_ID: str = "26092"
     ORGANIZATION: str = "Ministry of Social Justice and Empowerment"
     VERSION: str = "1.0.0"
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     # OpenRouteService & Geocoding Configuration (Step 5)
     # Free tier: 2,500 requests/day from https://openrouteservice.org
     ORS_API_KEY: str = os.getenv("ORS_API_KEY", "")
-    NOMINATIM_USER_AGENT: str = os.getenv("NOMINATIM_USER_AGENT", "ArthSetu-SIH26092/1.0 (contact@arthsetu.gov.in)")
+    NOMINATIM_USER_AGENT: str = os.getenv("NOMINATIM_USER_AGENT", "UdyamNex-SIH26092/1.0 (contact@udyamnex.gov.in)")
 
     # Security & Admin Configuration (Step 6)
     ADMIN_SECRET_KEY: str = os.getenv("ADMIN_SECRET_KEY", "arthsetu_admin_secret_2026")

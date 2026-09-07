@@ -259,7 +259,7 @@ export default function Step5RightPartner({ onContinue }) {
               supported_schemes: p.supported_schemes || [selectedScheme?.name || 'NSFDC Scheme'],
               contact_person: p.contact_person || 'Lead Nodal Officer',
               phone: p.phone || '+91 755 2554101',
-              email: p.email || 'partner.desk@arthsetu.gov.in',
+              email: p.email || 'partner.desk@udyamnex.gov.in',
               operating_hours: p.operating_hours || '10:00 AM – 4:00 PM (Mon-Sat)',
               compatibility_factors: item.compatibility_factors || [
                 'Authorized Channel Partner empanelled with NSFDC',

@@ -1,5 +1,5 @@
 """
-ArthSetu AI — Production Entry Point (Step 6)
+UdyamNex — Production Entry Point (Step 6)
 ==============================================
 Aliases the modular FastAPI app from backend.app.main for root-level deployment (Render, Heroku, Docker).
 """

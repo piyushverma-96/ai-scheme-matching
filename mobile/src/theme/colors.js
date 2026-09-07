@@ -1,4 +1,4 @@
-// ArthSetu Design System Colors
+// UdyamNex Design System Colors
 // Restrained, trustworthy financial & government digital service palette
 
 export const colors = {

@@ -60,7 +60,7 @@ async function runComprehensiveVerification() {
         // 1. Verify Home & "How It Works" modal
         console.log("\n[2/6] Verifying Dashboard & 'How It Works' modal...");
         const homeText = await evalJs('document.body.innerText');
-        console.log("  -> Dashboard loaded:", homeText.includes("Your 6-Step Journey") || homeText.includes("ArthSetu"));
+        console.log("  -> Dashboard loaded:", homeText.includes("Your 6-Step Journey") || homeText.includes("UdyamNex"));
 
         // Click "How It Works" button
         const clickedHow = await evalJs(`
@@ -75,7 +75,7 @@ async function runComprehensiveVerification() {
         await new Promise(r => setTimeout(r, 600));
 
         const howModalText = await evalJs('document.body.innerText');
-        const modalOpen = howModalText.includes("How ArthSetu Works") || howModalText.includes("6-Step Journey");
+        const modalOpen = howModalText.includes("How UdyamNex Works") || howModalText.includes("6-Step Journey");
         console.log("  -> 'How It Works' modal rendered successfully:", modalOpen);
 
         // Close modal
@@ -110,7 +110,7 @@ async function runComprehensiveVerification() {
         await new Promise(r => setTimeout(r, 600));
 
         const hindiBody = await evalJs('document.body.innerText');
-        const hasHindi = hindiBody.includes('अर्थसेतु') || hindiBody.includes('नमस्ते') || hindiBody.includes('यात्रा') || hindiBody.includes('योजनाएं');
+        const hasHindi = hindiBody.includes('UdyamNex') || hindiBody.includes('नमस्ते') || hindiBody.includes('यात्रा') || hindiBody.includes('योजनाएं');
         console.log("  -> Switched to Hindi, rendered Devanagari text:", hasHindi ? "[PASS]" : "[FAIL]");
 
         // Switch back to English

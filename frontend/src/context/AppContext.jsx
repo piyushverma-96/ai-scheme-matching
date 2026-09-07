@@ -69,7 +69,7 @@ export function AppProvider({ children }) {
 
   const [journeyFormData, setJourneyFormDataState] = useState(() => {
     try {
-      const cached = localStorage.getItem('arthsetu_journey_form_data');
+      const cached = localStorage.getItem('udyamnex_journey_form_data') || localStorage.getItem('arthsetu_journey_form_data');
       if (cached) {
         const parsed = JSON.parse(cached);
         return { ...defaultJourneyData, ...parsed };
@@ -84,7 +84,7 @@ export function AppProvider({ children }) {
     setJourneyFormDataState((prev) => {
       const next = typeof dataOrFn === 'function' ? dataOrFn(prev) : { ...prev, ...dataOrFn };
       try {
-        localStorage.setItem('arthsetu_journey_form_data', JSON.stringify(next));
+        localStorage.setItem('udyamnex_journey_form_data', JSON.stringify(next));
       } catch (e) {}
       return next;
     });
@@ -412,7 +412,7 @@ export function AppProvider({ children }) {
           id: crypto.randomUUID(),
           from_status: null,
           to_status: 'Submitted',
-          remarks: 'Application packet registered and submitted by applicant on ArthSetu.',
+          remarks: 'Application packet registered and submitted by applicant on UdyamNex.',
           updated_by: 'Applicant',
           created_at: new Date().toISOString(),
         },

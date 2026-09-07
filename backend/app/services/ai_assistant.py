@@ -158,7 +158,7 @@ class AIAssistantService:
             for r in rule_results
         ])
 
-        system_prompt = f"""You are the official ArthSetu Scheme Explainer.
+        system_prompt = f"""You are the official UdyamNex Scheme Explainer.
 Language preference: {lang} (Respond in the same language as the user: English, Hindi, or Hinglish).
 
 CRITICAL GROUNDING RULES:
@@ -218,7 +218,7 @@ Generate the user explanation now:"""
 
         llm = get_llm_provider()
 
-        system_prompt = """You are the official ArthSetu Assistant answering questions regarding NSFDC government schemes.
+        system_prompt = """You are the official UdyamNex Assistant answering questions regarding NSFDC government schemes.
 Rules:
 1. Answer ONLY using the facts provided in the Verified Context.
 2. If the verified context does not contain the answer, say: 'This information cannot be verified from the official NSFDC source documents.'

@@ -1,11 +1,11 @@
-// ArthSetu Bilingual Localization Dictionary (English & Hindi)
+// UdyamNex Bilingual Localization Dictionary (English & Hindi)
 // Accessible, clear, natural financial terminology
 
 export const translations = {
   en: {
     // Brand
-    appName: 'ArthSetu',
-    tagline: 'Right Scheme. Right Partner. Right Guidance.',
+    appName: 'UdyamNex',
+    tagline: 'Right Scheme. Real Support.',
     govSubtext: 'Supported Financial & Educational Schemes Portal',
 
     // Common Actions
@@ -34,7 +34,7 @@ export const translations = {
 
     // Language Screen
     chooseLanguageTitle: 'Choose Your Language',
-    chooseLanguageSubtitle: 'Select your preferred language for using ArthSetu. You can change this anytime in settings.',
+    chooseLanguageSubtitle: 'Select your preferred language for using UdyamNex. You can change this anytime in settings.',
     langEnglish: 'English',
     langHindi: 'हिंदी (Hindi)',
 
@@ -47,7 +47,7 @@ export const translations = {
     onboard3Desc: 'Locate authorized State Channelizing Agencies, Public Sector Banks, and Regional Rural Banks near you.',
 
     // Authentication
-    loginTitle: 'Sign In to ArthSetu',
+    loginTitle: 'Sign In to UdyamNex',
     loginSubtitle: 'Enter your mobile number or email to access your account.',
     signupTitle: 'Create an Account',
     signupSubtitle: 'Register with basic details to save schemes and track applications.',
@@ -79,7 +79,7 @@ export const translations = {
     qaPartnerSub: 'Locate nearest nodal branch',
     qaTrack: 'Track Application',
     qaTrackSub: 'Check real-time stage status',
-    qaAssistant: 'Ask ArthSetu',
+    qaAssistant: 'Ask UdyamNex',
     qaAssistantSub: 'Get clear scheme guidance',
     recentApplicationsTitle: 'Your Applications',
     noActiveApplications: 'No active application submitted yet.',
@@ -213,7 +213,7 @@ export const translations = {
     currentStageLabel: 'Current Stage',
     timelineTitle: 'Stage-by-Stage Audit Timeline',
     stageCreated: 'Application Created',
-    stageSubmitted: 'Submitted to ArthSetu Portal',
+    stageSubmitted: 'Submitted to UdyamNex Portal',
     stageUnderReview: 'Under Preliminary Review',
     stageDocsRequired: 'Documents Verification',
     stageForwarded: 'Forwarded to Channel Partner',
@@ -221,7 +221,7 @@ export const translations = {
     stageDecision: 'Sanction Decision',
 
     // AI Assistant
-    assistantTitle: 'Ask ArthSetu',
+    assistantTitle: 'Ask UdyamNex',
     assistantSubtitle: 'Ask clear questions about eligibility, schemes, documents, or channel partners.',
     suggestedQuestionsTitle: 'Suggested Questions',
     q1: 'Which scheme is best for small dairy business?',
@@ -241,18 +241,18 @@ export const translations = {
     termsOfService: 'Terms of Service',
     signOut: 'Sign Out',
     helpTitle: 'Help & Trust Governance',
-    howItWorksTitle: 'How ArthSetu Works',
-    howItWorksDesc: 'ArthSetu is an impartial digital guide that helps eligible beneficiaries discover concessional welfare credit schemes, calculate repayments, and connect with authorized nodal channel agencies.',
+    howItWorksTitle: 'How UdyamNex Works',
+    howItWorksDesc: 'UdyamNex is an impartial digital guide that helps eligible beneficiaries discover concessional welfare credit schemes, calculate repayments, and connect with authorized nodal channel agencies.',
     ruleEngineTitle: 'Rule Engine Authority',
     ruleEngineDesc: 'Eligibility decisions are strictly determined by mathematical rules from official government gazettes, not AI heuristics.',
     officialDisclaimerTitle: 'Important Official Disclaimer',
-    officialDisclaimerDesc: 'ArthSetu is an informational guidance platform. It does not disburse funds directly or guarantee loan approval. Final sanction and disbursement are subject to the independent credit appraisal and verification of authorized channelizing agencies and empanelled banks.',
+    officialDisclaimerDesc: 'UdyamNex is an informational guidance platform. It does not disburse funds directly or guarantee loan approval. Final sanction and disbursement are subject to the independent credit appraisal and verification of authorized channelizing agencies and empanelled banks.',
   },
 
   hi: {
     // Brand
-    appName: 'अर्थसेतु',
-    tagline: 'सही योजना। सही सहयोगी। सही मार्गदर्शन।',
+    appName: 'UdyamNex',
+    tagline: 'Right Scheme. Real Support.',
     govSubtext: 'सरकारी वित्तीय एवं शैक्षणिक ऋण योजना मार्गदर्शन पोर्टल',
 
     // Common Actions
@@ -281,7 +281,7 @@ export const translations = {
 
     // Language Screen
     chooseLanguageTitle: 'अपनी भाषा चुनें',
-    chooseLanguageSubtitle: 'अर्थसेतु का उपयोग करने के लिए अपनी पसंदीदा भाषा चुनें। इसे आप कभी भी सेटिंग्स में बदल सकते हैं।',
+    chooseLanguageSubtitle: 'UdyamNex का उपयोग करने के लिए अपनी पसंदीदा भाषा चुनें। इसे आप कभी भी सेटिंग्स में बदल सकते हैं।',
     langEnglish: 'English (अंग्रेज़ी)',
     langHindi: 'हिंदी',
 
@@ -294,7 +294,7 @@ export const translations = {
     onboard3Desc: 'अपने निकटतम अधिकृत राज्य चैनेलाइजिंग एजेंसी, सार्वजनिक क्षेत्र के बैंक और क्षेत्रीय ग्रामीण बैंक खोजें।',
 
     // Authentication
-    loginTitle: 'अर्थसेतु में साइन इन करें',
+    loginTitle: 'UdyamNex में साइन इन करें',
     loginSubtitle: 'अपने खाते तक पहुँचने के लिए अपना मोबाइल नंबर या ईमेल दर्ज करें।',
     signupTitle: 'नया खाता बनाएं',
     signupSubtitle: 'योजनाओं को सहेजने और आवेदनों को ट्रैक करने के लिए बुनियादी विवरण दर्ज करें।',
@@ -326,7 +326,7 @@ export const translations = {
     qaPartnerSub: 'निकटतम नोडल शाखा खोजें',
     qaTrack: 'आवेदन ट्रैक करें',
     qaTrackSub: 'स्थिति की वास्तविक जानकारी',
-    qaAssistant: 'अर्थसेतु से पूछें',
+    qaAssistant: 'UdyamNex से पूछें',
     qaAssistantSub: 'स्पष्ट योजना मार्गदर्शन प्राप्त करें',
     recentApplicationsTitle: 'आपके आवेदन',
     noActiveApplications: 'अभी तक कोई आवेदन जमा नहीं किया गया है।',
@@ -460,7 +460,7 @@ export const translations = {
     currentStageLabel: 'वर्तमान चरण',
     timelineTitle: 'चरण-दर-चरण ऑडिट समय-सीमा',
     stageCreated: 'आवेदन तैयार',
-    stageSubmitted: 'अर्थसेतु पोर्टल पर जमा',
+    stageSubmitted: 'UdyamNex पोर्टल पर जमा',
     stageUnderReview: 'प्रारंभिक समीक्षाधीन',
     stageDocsRequired: 'दस्तावेज सत्यापन',
     stageForwarded: 'चैनल पार्टनर को अग्रेषित',
@@ -468,7 +468,7 @@ export const translations = {
     stageDecision: 'स्वीकृति निर्णय',
 
     // AI Assistant
-    assistantTitle: 'अर्थसेतु से पूछें',
+    assistantTitle: 'UdyamNex से पूछें',
     assistantSubtitle: 'पात्रता, योजनाओं, दस्तावेजों या सहयोगी संस्थाओं के बारे में स्पष्ट प्रश्न पूछें।',
     suggestedQuestionsTitle: 'सुझाए गए प्रश्न',
     q1: 'छोटे डेयरी व्यवसाय के लिए कौन सी योजना सर्वोत्तम है?',
@@ -488,11 +488,11 @@ export const translations = {
     termsOfService: 'सेवा की शर्तें',
     signOut: 'साइन आउट करें',
     helpTitle: 'सहायता एवं विश्वास शासन',
-    howItWorksTitle: 'अर्थसेतु कैसे काम करता है',
-    howItWorksDesc: 'अर्थसेतु एक निष्पक्ष डिजिटल गाइड है जो पात्र लाभार्थियों को रियायती कल्याणकारी ऋण योजनाएं खोजने, किश्तों की गणना करने और अधिकृत नोडल एजेंसियों से जुड़ने में मदद करता है।',
+    howItWorksTitle: 'UdyamNex कैसे काम करता है',
+    howItWorksDesc: 'UdyamNex एक निष्पक्ष डिजिटल गाइड है जो पात्र लाभार्थियों को रियायती कल्याणकारी ऋण योजनाएं खोजने, किश्तों की गणना करने और अधिकृत नोडल एजेंसियों से जुड़ने में मदद करता है।',
     ruleEngineTitle: 'नियम इंजन की आधिकारिक प्रामाणिकता',
     ruleEngineDesc: 'पात्रता के निर्णय आधिकारिक सरकारी गजट के गणितीय नियमों द्वारा निर्धारित होते हैं, न कि किसी AI अनुमान द्वारा।',
     officialDisclaimerTitle: 'महत्वपूर्ण आधिकारिक अस्वीकरण',
-    officialDisclaimerDesc: 'अर्थसेतु केवल एक सूचनात्मक मार्गदर्शन मंच है। यह सीधे धनराशि वितरित नहीं करता है और न ही ऋण स्वीकृति की गारंटी देता है। अंतिम स्वीकृति और ऋण वितरण अधिकृत चैनेलाइजिंग एजेंसियों और बैंकों के सत्यापन पर निर्भर करता है।',
+    officialDisclaimerDesc: 'UdyamNex केवल एक सूचनात्मक मार्गदर्शन मंच है। यह सीधे धनराशि वितरित नहीं करता है और न ही ऋण स्वीकृति की गारंटी देता है। अंतिम स्वीकृति और ऋण वितरण अधिकृत चैनेलाइजिंग एजेंसियों और बैंकों के सत्यापन पर निर्भर करता है।',
   },
 };

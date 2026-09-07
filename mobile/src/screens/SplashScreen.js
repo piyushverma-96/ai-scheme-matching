@@ -20,11 +20,10 @@ export default function SplashScreen() {
         {/* Brand Center */}
         <View style={styles.brandCenter}>
           <View style={styles.emblemBadge}>
-            <Text style={styles.emblemText}>अ</Text>
+            <Text style={styles.emblemText}>U</Text>
           </View>
 
-          <Text style={styles.title}>ArthSetu</Text>
-          <Text style={styles.titleHi}>अर्थसेतु</Text>
+          <Text style={styles.title}>UdyamNex</Text>
 
           <View style={styles.taglineBox}>
             <Text style={styles.tagline}>

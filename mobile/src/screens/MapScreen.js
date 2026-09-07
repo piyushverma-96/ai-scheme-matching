@@ -1,5 +1,5 @@
 /**
- * ArthSetu — Real Interactive Map Screen (MapLibre + OpenFreeMap OSM tiles)
+ * UdyamNex — Real Interactive Map Screen (MapLibre + OpenFreeMap OSM tiles)
  * ============================================================================
  * Map library  : @maplibre/maplibre-react-native
  * Tile source  : OpenFreeMap (https://openfreemap.org) — free, no key,

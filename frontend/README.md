@@ -1,6 +1,6 @@
-# ArthSetu AI — Frontend
+# UdyamNex — Frontend
 
-React + Vite frontend for ArthSetu AI — Smart India Hackathon PS 26092 (Ministry of Social Justice and Empowerment), Team Runtime Rebel.
+React + Vite frontend for UdyamNex — Smart India Hackathon PS 26092 (Ministry of Social Justice and Empowerment), Team Runtime Rebel.
 
 ## Tech Stack
 

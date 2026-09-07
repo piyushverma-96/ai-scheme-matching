@@ -75,7 +75,7 @@ export default function LoginScreen({ onNavigate }) {
               label={t('emailLabel')}
               value={email}
               onChangeText={setEmail}
-              placeholder="e.g. entrepreneur@arthsetu.gov.in"
+              placeholder="e.g. entrepreneur@udyamnex.gov.in"
               keyboardType="email-address"
               autoCapitalize="none"
             />

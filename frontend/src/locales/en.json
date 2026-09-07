@@ -1,6 +1,6 @@
 {
   "header": {
-    "title": "ArthSetu AI",
+    "title": "UdyamNex",
     "tagline": "Government Scheme Matching for SC Entrepreneurs & Students",
     "verified_id": "Government ID Verified",
     "notifications": "Notifications",
@@ -22,7 +22,7 @@
     "partners": "Find Partner",
     "calculator": "EMI Calculator",
     "documents": "Documents",
-    "ai": "Ask ArthSetu",
+    "ai": "Ask UdyamNex",
     "help": "Help & Support",
     "profile": "Profile",
     "settings": "Settings",
@@ -78,11 +78,11 @@
     "no_saved_title": "No saved schemes yet",
     "no_saved_desc": "Bookmark schemes during your journey or browse verified NSFDC schemes.",
     "need_help": "Need Help?",
-    "ask_assistant": "Ask ArthSetu Assistant",
+    "ask_assistant": "Ask UdyamNex Assistant",
     "ask_desc": "Get instant answers to your questions about verified NSFDC schemes, eligibility criteria, required documents, and empanelled channel partners.",
     "ask_now": "Ask Now",
     "trust_footer": "The information and guidance provided are based on verified NSFDC scheme guidelines. Official sanction and disbursement are subject to partner bank verification.",
-    "how_modal_title": "How ArthSetu Works — 6-Step Journey",
+    "how_modal_title": "How UdyamNex Works — 6-Step Journey",
     "submitted_date": "Submitted",
     "current_step": "Current Step",
     "partner": "Partner",
@@ -94,7 +94,7 @@
     "official_portal": "Official Portal"
   },
   "ai_modal": {
-    "title": "ArthSetu AI Assistant",
+    "title": "UdyamNex Assistant",
     "subtitle": "Ask questions about schemes, eligibility, documents & partners",
     "placeholder": "Type your question here (e.g. Can I get a loan without collateral?)",
     "send": "Send",
@@ -243,7 +243,7 @@
     "network_error": "Network error. Please check your connection and try again."
   },
   "footer": {
-    "tagline": "ArthSetu · Right Scheme. Right Partner. Right Guidance.",
+    "tagline": "UdyamNex · Right Scheme. Real Support.",
     "disclaimer": "This platform provides guidance on government supported financial and educational loan schemes. Final approval and loan terms are determined by the authorized channel partner following verification.",
     "sih": "Smart India Hackathon 2024",
     "ps": "PS 26092 · Ministry of Social Justice and Empowerment",
@@ -253,7 +253,7 @@
     "badge_form_code": "OFFICIAL INTAKE · FORM ARTH-01",
     "badge_scheme_match": "Direct Scheme Eligibility Matching",
     "title": "Beneficiary Intake & Scheme Requirement Profile",
-    "subtitle": "Complete this single statutory assessment form. ArthSetu AI cross-references your demographic, purpose, and income criteria against apex welfare corporations (NSFDC, NBCFDC, NSKFDC) and central credit guarantees.",
+    "subtitle": "Complete this single statutory assessment form. UdyamNex cross-references your demographic, purpose, and income criteria against apex welfare corporations (NSFDC, NBCFDC, NSKFDC) and central credit guarantees.",
     "btn_ai_open": "⚡ Quick Auto-Fill with AI",
     "btn_ai_close": "Close Smart Fill",
     "ai_desc_title": "Describe your requirement in ordinary language",

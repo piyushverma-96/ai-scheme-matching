@@ -50,11 +50,11 @@ export default function Logo({ showTagline = true, size = 'md', className = '' }
             isSmall ? 'text-lg' : isLarge ? 'text-2xl' : 'text-xl'
           }`}
         >
-          ArthSetu
+          UdyamNex
         </span>
         {showTagline && (
           <span className="text-[10px] sm:text-[11px] font-medium text-[#64748B] leading-tight mt-0.5">
-            Right Scheme. Right Partner. Right Guidance.
+            Right Scheme. Real Support.
           </span>
         )}
       </div>

@@ -2,13 +2,13 @@ from typing import Optional, Dict, Any
 from pydantic import BaseModel, EmailStr, Field
 
 class SignUpRequest(BaseModel):
-    email: EmailStr = Field(..., example="entrepreneur@arthsetu.gov.in")
+    email: EmailStr = Field(..., example="entrepreneur@udyamnex.gov.in")
     password: str = Field(..., min_length=6, example="SecurePassword123!")
     full_name: Optional[str] = Field(None, example="Applicant Name")
     phone: Optional[str] = Field(None, example="+919876543210")
 
 class SignInRequest(BaseModel):
-    email: EmailStr = Field(..., example="entrepreneur@arthsetu.gov.in")
+    email: EmailStr = Field(..., example="entrepreneur@udyamnex.gov.in")
     password: str = Field(..., min_length=6, example="SecurePassword123!")
 
 class UserMetadata(BaseModel):

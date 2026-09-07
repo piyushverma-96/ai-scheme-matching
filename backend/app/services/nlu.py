@@ -85,7 +85,7 @@ def extract_purpose_heuristic(text: str) -> str:
 class NLUExtractor:
     """Extracts structured fields from natural language text using Groq LLM + Deterministic Fallback."""
 
-    SYSTEM_PROMPT = """You are the ArthSetu Natural Language Understanding Engine for Government Scheme Discovery.
+    SYSTEM_PROMPT = """You are the UdyamNex Natural Language Understanding Engine for Government Scheme Discovery.
 Your job is to extract structured loan requirements from user queries in English, Hindi, or Hinglish.
 
 Extract the following JSON strictly:

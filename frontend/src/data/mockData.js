@@ -1,5 +1,5 @@
 /**
- * ArthSetu Central Verified Data
+ * UdyamNex Central Verified Data
  * Realistic data for all views (Schemes, Partners, Applications, Profile, Documents, FAQs)
  * ONLY 3 verified NSFDC schemes:
  * 1. NSFDC Term Loan Scheme

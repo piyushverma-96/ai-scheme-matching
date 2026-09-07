@@ -101,7 +101,7 @@ export default function SignupScreen({ onNavigate }) {
               label={t('emailLabel')}
               value={email}
               onChangeText={setEmail}
-              placeholder="e.g. applicant@arthsetu.gov.in"
+              placeholder="e.g. applicant@udyamnex.gov.in"
               keyboardType="email-address"
               autoCapitalize="none"
             />

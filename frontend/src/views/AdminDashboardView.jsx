@@ -260,7 +260,7 @@ export default function AdminDashboardView() {
               </span>
             </div>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              ArthSetu Administration & Monitoring Panel
+              UdyamNex Administration & Monitoring Panel
             </h2>
             <p className="text-xs sm:text-sm text-blue-100 max-w-2xl">
               Centralized interface for managing verified NSFDC loan schemes, deterministic eligibility thresholds, State Channelizing Agencies (SCAs), and beneficiary application pipelines.
@@ -347,7 +347,7 @@ export default function AdminDashboardView() {
                     {analytics.total_applications}
                   </div>
                   <span className="text-[10px] text-[#6B7280] mt-1 block">
-                    Registered on ArthSetu
+                    Registered on UdyamNex
                   </span>
                 </Card>
 

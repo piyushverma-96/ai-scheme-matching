@@ -18,8 +18,8 @@ export default function AiAssistantView() {
   const userName = profile?.full_name?.split(' ')[0] || user?.user_metadata?.full_name?.split(' ')[0] || '';
   
   const defaultText = isHi
-    ? `नमस्ते${userName ? ' ' + userName : ''}! मैं आपका अर्थसेतु मार्गदर्शन सहायक हूँ। आज मैं सरकारी योजनाओं, पात्रता या पार्टनर स्थानों के संबंध में आपकी क्या मदद कर सकता हूँ?`
-    : `Namaste${userName ? ' ' + userName : ''}! I am your ArthSetu Guidance Assistant. How can I help you today with government schemes, eligibility, or partner locations?`;
+    ? `नमस्ते${userName ? ' ' + userName : ''}! मैं आपका UdyamNex मार्गदर्शन सहायक हूँ। आज मैं सरकारी योजनाओं, पात्रता या पार्टनर स्थानों के संबंध में आपकी क्या मदद कर सकता हूँ?`
+    : `Namaste${userName ? ' ' + userName : ''}! I am your UdyamNex Guidance Assistant. How can I help you today with government schemes, eligibility, or partner locations?`;
 
   const [messages, setMessages] = useState([
     {
@@ -86,7 +86,7 @@ export default function AiAssistantView() {
           </div>
           <div>
             <h3 className="text-sm font-bold text-[#0B3B60]">
-              ArthSetu Assistant
+              UdyamNex Assistant
             </h3>
             <p className="text-[10px] text-[#64748B]">
               Guidance on government loan schemes

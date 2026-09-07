@@ -88,7 +88,7 @@ async function testAllViews() {
         console.log("6. Navigating to AI Assistant...");
         await evalJs('document.querySelector("aside button:nth-child(7)")?.click()');
         await new Promise(r => setTimeout(r, 500));
-        const aiAssistantText = await evalJs('document.body.innerText.includes("ArthSetu Assistant")');
+        const aiAssistantText = await evalJs('document.body.innerText.includes("UdyamNex Assistant")');
         console.log("   AI Assistant header loaded:", aiAssistantText);
 
         // 7. Test Navigation to Profile

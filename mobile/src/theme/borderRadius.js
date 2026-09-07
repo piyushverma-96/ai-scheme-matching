@@ -1,4 +1,4 @@
-// ArthSetu Border Radius and Shadow Tokens
+// UdyamNex Border Radius and Shadow Tokens
 // Subtle, restrained, professional fintech styling
 
 export const borderRadius = {

@@ -1,8 +1,8 @@
-# ArthSetu AI — Final Production & Hackathon MVP Deliverable (Step 6)
+# UdyamNex — Final Production & Hackathon MVP Deliverable (Step 6)
 
 **Smart India Hackathon Problem Statement 26092**  
 *Ministry of Social Justice and Empowerment / National Scheduled Castes Finance and Development Corporation (NSFDC)*  
-**Official Project Tagline:** *Right Scheme. Right Partner. Right Guidance.*
+**Official Project Tagline:** *Right Scheme. Real Support.*
 
 ---
 
@@ -425,7 +425,7 @@ python -m pytest backend/ -v
    - Inspect **Platform Analytics**, **Schemes & Rules Catalog**, **Channel Partners**, and **Scheme Mapping Matrix**.
    - In **Applications & Status**, locate Ramesh Kumar's application and simulate advancing the stage to `Forwarded to Partner` with custom officer audit remarks.
 9. **Floating AI Scheme Assistant**:
-   - Click the floating **Ask ArthSetu AI** button.
+   - Click the floating **Ask UdyamNex** button.
    - Ask: *"What is the interest rebate for women on education loans?"*
    - Assistant answers with verified grounding: *"0.5% interest rebate for women beneficiaries under the Educational Loan Scheme."*
 

@@ -75,7 +75,7 @@ export default function Sidebar() {
     },
     {
       id: 'ai',
-      label: t('nav.ai', 'Ask ArthSetu'),
+      label: t('nav.ai', 'Ask UdyamNex'),
       icon: MessageSquare,
       action: () => setAiAssistantOpen(true),
     },

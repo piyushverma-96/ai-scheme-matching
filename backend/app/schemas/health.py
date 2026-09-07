@@ -4,9 +4,9 @@ from pydantic import BaseModel, Field
 
 class HealthResponse(BaseModel):
     status: str = Field(..., example="healthy")
-    service: str = Field(..., example="ArthSetu API")
+    service: str = Field(..., example="UdyamNex API")
     version: str = Field(..., example="1.0.0")
-    tagline: str = Field(..., example="Right Scheme. Right Partner. Right Guidance.")
+    tagline: str = Field(..., example="Right Scheme. Real Support.")
     problem_statement_id: str = Field(..., example="26092")
     organization: str = Field(..., example="Ministry of Social Justice and Empowerment")
     database_connected: bool = Field(..., example=True)

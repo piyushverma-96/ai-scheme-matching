@@ -24,7 +24,7 @@ export default function AiAssistantScreen() {
     {
       id: 'msg-1',
       sender: 'assistant',
-      text: 'Namaste! I am the ArthSetu Scheme Assistant. I can help you understand NSFDC guidelines, eligibility thresholds, required documents, or how to reach channel partners.',
+      text: 'Namaste! I am the UdyamNex Scheme Assistant. I can help you understand NSFDC guidelines, eligibility thresholds, required documents, or how to reach channel partners.',
     },
   ]);
   const [inputText, setInputText] = useState('');

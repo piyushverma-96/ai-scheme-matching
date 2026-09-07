@@ -173,7 +173,7 @@ export const DEMO_APPLICATIONS = [
     updated_at: '2026-09-04T14:30:00Z',
     stages: [
       { name: 'Application Created', date: '2026-09-02', done: true, remarks: 'Requirement packet generated' },
-      { name: 'Submitted', date: '2026-09-02', done: true, remarks: 'Submitted to ArthSetu digital portal' },
+      { name: 'Submitted', date: '2026-09-02', done: true, remarks: 'Submitted to UdyamNex digital portal' },
       { name: 'Under Review', date: '2026-09-04', done: true, current: true, remarks: 'Eligibility criteria verified with Tehsildar income ceiling' },
       { name: 'Documents Required', date: null, done: false, remarks: 'Pending partner document verification' },
       { name: 'Forwarded to Partner', date: null, done: false, remarks: 'To be forwarded to Bhopal SCA' },

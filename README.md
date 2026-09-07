@@ -1,6 +1,6 @@
-# ArthSetu (अर्थसेतु)
+# UdyamNex
 
-> **"Right Scheme. Right Partner. Right Guidance."**  
+> **"Right Scheme. Real Support."**  
 > *AI-Driven Scheme Matching for Marginalized Entrepreneurs*  
 > **Smart India Hackathon Problem Statement ID:** `26092`  
 > **Theme:** Smart Automation | **Organization:** Ministry of Social Justice and Empowerment (MoSJE)
@@ -202,9 +202,9 @@ arth-setu/
   ```json
   {
     "status": "healthy",
-    "service": "ArthSetu API",
+    "service": "UdyamNex API",
     "version": "1.0.0",
-    "tagline": "Right Scheme. Right Partner. Right Guidance.",
+    "tagline": "Right Scheme. Real Support.",
     "problem_statement_id": "26092",
     "organization": "Ministry of Social Justice and Empowerment",
     "database_connected": true,

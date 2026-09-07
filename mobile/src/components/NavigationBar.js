@@ -48,11 +48,11 @@ export default function NavigationBar({
               style={styles.logoRow}
             >
               <View style={styles.emblemBadge}>
-                <Text style={styles.emblemText}>अ</Text>
+                <Text style={styles.emblemText}>U</Text>
               </View>
               <View>
-                <Text style={styles.brandTitle}>ArthSetu</Text>
-                <Text style={styles.brandTagline}>Right Scheme. Right Partner.</Text>
+                <Text style={styles.brandTitle}>UdyamNex</Text>
+                <Text style={styles.brandTagline}>Right Scheme. Real Support.</Text>
               </View>
             </TouchableOpacity>
           )}

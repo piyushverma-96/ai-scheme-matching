@@ -1,4 +1,4 @@
-// ArthSetu Typography System
+// UdyamNex Typography System
 // Legible, high-contrast, scalable sans-serif definitions
 
 import { Platform } from 'react-native';

@@ -160,7 +160,7 @@ class ApplicationService:
                 id=str(uuid.uuid4()),
                 from_status=None,
                 to_status="Submitted",
-                remarks="Application packet registered and submitted by applicant on ArthSetu.",
+                remarks="Application packet registered and submitted by applicant on UdyamNex.",
                 updated_by="Applicant",
                 created_at=now_str,
             )
@@ -259,7 +259,7 @@ class ApplicationService:
                         ApplicationStatusHistoryItem(
                             from_status=None,
                             to_status="Submitted",
-                            remarks="Application received on ArthSetu Portal.",
+                            remarks="Application received on UdyamNex Portal.",
                             updated_by="Applicant",
                             created_at=app_data.get("created_at", now_str),
                         )
@@ -438,7 +438,7 @@ class ApplicationService:
                 "timeline": [
                     ApplicationStatusHistoryItem(
                         to_status="Submitted",
-                        remarks="Application packet submitted online via ArthSetu Portal.",
+                        remarks="Application packet submitted online via UdyamNex Portal.",
                         updated_by="Applicant",
                         created_at=two_days_ago_str,
                     ),

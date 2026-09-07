@@ -501,7 +501,7 @@ export default function HomeView() {
         <div className="bg-white rounded-3xl border border-[#E2E8F0] p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4">
           <div className="space-y-2">
             <h4 className="text-sm sm:text-base font-bold text-[#0B3B60]">{t('dashboard.need_help', 'Need Help?')}</h4>
-            <h5 className="text-xs font-bold text-slate-800">{t('dashboard.ask_assistant', 'Ask ArthSetu Assistant')}</h5>
+            <h5 className="text-xs font-bold text-slate-800">{t('dashboard.ask_assistant', 'Ask UdyamNex Assistant')}</h5>
             <p className="text-[11px] text-[#64748B] leading-relaxed">
               {t('dashboard.ask_desc', 'Get instant answers to your questions about verified NSFDC schemes, eligibility criteria, required documents, and empanelled channel partners.')}
             </p>
@@ -539,7 +539,7 @@ export default function HomeView() {
           <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-8 max-w-xl w-full shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-base sm:text-lg font-bold text-[#0B3B60]">
-                {t('dashboard.how_modal_title', 'How ArthSetu Works — 6-Step Journey')}
+                {t('dashboard.how_modal_title', 'How UdyamNex Works — 6-Step Journey')}
               </h3>
               <button
                 type="button"

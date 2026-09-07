@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ArthSetu",
-    "slug": "arthsetu",
+    "name": "UdyamNex",
+    "slug": "udyamnex",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,8 +15,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "ArthSetu uses your location to show nearby NSFDC channel partners and calculate travel routes.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "ArthSetu uses your location to show nearby NSFDC channel partners and calculate travel routes."
+        "NSLocationWhenInUseUsageDescription": "UdyamNex uses your location to show nearby NSFDC channel partners and calculate travel routes.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "UdyamNex uses your location to show nearby NSFDC channel partners and calculate travel routes."
       }
     },
     "android": {
@@ -46,8 +46,8 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "ArthSetu uses your location to find nearby NSFDC channel partners and show driving routes.",
-          "locationAlwaysAndWhenInUsePermission": "ArthSetu uses your location to find nearby NSFDC channel partners and show driving routes."
+          "locationWhenInUsePermission": "UdyamNex uses your location to find nearby NSFDC channel partners and show driving routes.",
+          "locationAlwaysAndWhenInUsePermission": "UdyamNex uses your location to find nearby NSFDC channel partners and show driving routes."
         }
       ]
     ]

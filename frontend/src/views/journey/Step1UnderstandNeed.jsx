@@ -562,7 +562,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
               {t('journey_step1.title', 'Beneficiary Intake & Scheme Requirement Profile')}
             </h1>
             <p className="text-xs sm:text-sm text-[#64748B] max-w-3xl">
-              {t('journey_step1.subtitle', 'Complete this single statutory assessment form. ArthSetu AI cross-references your demographic, purpose, and income criteria against apex welfare corporations (NSFDC, NBCFDC, NSKFDC) and central credit guarantees.')}
+              {t('journey_step1.subtitle', 'Complete this single statutory assessment form. UdyamNex cross-references your demographic, purpose, and income criteria against apex welfare corporations (NSFDC, NBCFDC, NSKFDC) and central credit guarantees.')}
             </p>
           </div>
 

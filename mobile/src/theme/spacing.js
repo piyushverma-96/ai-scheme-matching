@@ -1,4 +1,4 @@
-// ArthSetu Spacing & Layout Tokens
+// UdyamNex Spacing & Layout Tokens
 // 4px / 8px Grid System
 
 export const spacing = {
