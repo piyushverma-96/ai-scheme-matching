@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS schemes (
     needs_manual_verification BOOLEAN NOT NULL DEFAULT false,
     verification_note TEXT,
     verification_status TEXT DEFAULT 'verified',
+    data_status TEXT NOT NULL DEFAULT 'verified',
     verification_source_type TEXT DEFAULT 'official_portal',
     verification_notes TEXT,
     is_active BOOLEAN NOT NULL DEFAULT true,

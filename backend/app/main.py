@@ -149,7 +149,7 @@ app.include_router(documents_router, prefix=settings.API_V1_PREFIX)
 app.include_router(admin_router)
 app.include_router(admin_router, prefix=settings.API_V1_PREFIX)
 
-# ── Root Welcome Endpoint ──────────────────────────────────────────────────
+# ── Root Welcome & Recommend Endpoints ─────────────────────────────────────
 @app.get("/", tags=["General"])
 async def root():
     return {
@@ -162,3 +162,23 @@ async def root():
         "documentation": "/docs",
         "health_check": f"{settings.API_V1_PREFIX}/health",
     }
+
+
+from app.routes.schemes import schemes_match
+from app.schemas.schemes import EligibilityCheckRequest, EligibilityCheckResponse
+
+@app.post(
+    "/recommend",
+    response_model=EligibilityCheckResponse,
+    tags=["Schemes & Eligibility"],
+    summary="Recommend eligible schemes (root alias for /schemes/match)",
+)
+@app.post(
+    f"{settings.API_V1_PREFIX}/recommend",
+    response_model=EligibilityCheckResponse,
+    tags=["Schemes & Eligibility"],
+    summary="Recommend eligible schemes (v1 alias for /schemes/match)",
+)
+async def root_recommend(body: EligibilityCheckRequest):
+    return await schemes_match(body)
+

@@ -24,12 +24,12 @@ class PartnerOut(BaseModel):
             return "NBFC_MFI"
         return v
     address: Optional[str] = None
-    city: str
+    city: Optional[str] = None
     district: Optional[str] = None
     state: str
     pincode: Optional[str] = None
-    latitude: float
-    longitude: float
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     status: str = Field(default="Operational", description="'Operational' | 'Active' | 'Temporarily Inactive'")
     supported_schemes: List[str] = Field(default_factory=list)
     scheme_ids: List[str] = Field(default_factory=list)
@@ -43,12 +43,13 @@ class PartnerOut(BaseModel):
     npa_status: Optional[str] = Field(default="Standard Asset", description="Asset categorization / NPA status")
     eligibility_status: str = Field(default="Eligible", description="'Eligible' | 'Suspended / Overdue' | 'Ineligible'")
     eligibility_reason: Optional[str] = Field(default=None, description="Explanation of eligibility or exclusion")
-    last_verified_at: Optional[str] = Field(default="2026-08-15", description="Audit verification timestamp string")
+    last_verified_at: Optional[str] = Field(default="2026-09-04", description="Audit verification timestamp string")
     source_name: Optional[str] = Field(default="NSFDC Channelizing Agency Master Directory", description="Audit source")
     source: Optional[str] = Field(default="NSFDC Channelizing Agency Master Directory", description="Audit source summary")
-    source_url: Optional[str] = Field(default="https://nsfdc.nic.in", description="Audit source URL")
-    is_demo_data: bool = Field(default=True, description="Flag indicating demo / prototype record")
+    source_url: Optional[str] = Field(default="https://nsfdc.nic.in/our-channel-partners", description="Audit source URL")
+    is_demo_data: bool = Field(default=False, description="Flag indicating demo / prototype record")
     data_confidence_label: str = Field(default="Verified Master Data", description="Data confidence label")
+    data_status: str = Field(default="verified", description="Data status: 'verified' vs 'unavailable'")
     verification_status: Optional[str] = Field(default="verified", description="Verification status of partner")
     verification_source_type: Optional[str] = Field(default="official_directory", description="Source type of verification")
     verification_notes: Optional[str] = Field(default=None, description="Detailed verification notes")
@@ -64,7 +65,7 @@ class PartnerOut(BaseModel):
 class RankedPartnerOut(BaseModel):
     """Partner with multi-factor ranking, distance, travel time, and route points."""
     partner: PartnerOut
-    distance_km: float = Field(description="Distance in kilometers from applicant location")
+    distance_km: Optional[float] = Field(default=None, description="Distance in kilometers from applicant location")
     driving_duration_mins: Optional[float] = Field(
         default=None, description="Estimated driving duration in minutes"
     )
@@ -82,15 +83,17 @@ class RankedPartnerOut(BaseModel):
     route_geometry: Optional[List[List[float]]] = Field(
         default=None, description="GeoJSON coordinates array [[lon, lat], ...]"
     )
+    data_status: str = Field(default="verified", description="Data status: 'verified' vs 'unavailable'")
 
 
 class ExcludedPartnerOut(BaseModel):
     id: str
     name: str
     partner_type: str
-    distance_km: float
+    distance_km: Optional[float] = None
     exclusion_reason: str
     last_verified_at: Optional[str] = None
+    data_status: str = Field(default="verified", description="Data status: 'verified' vs 'unavailable'")
 
 
 class NearbyPartnersResponse(BaseModel):

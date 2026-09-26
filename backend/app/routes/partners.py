@@ -42,10 +42,11 @@ async def get_nearby_partners(
     latitude: Optional[float] = Query(None, description="Applicant GPS latitude"),
     longitude: Optional[float] = Query(None, description="Applicant GPS longitude"),
     city: Optional[str] = Query(None, description="Applicant city or district name"),
+    state: Optional[str] = Query(None, description="Applicant state name (filters the 38 official SCAs by state)"),
     scheme_id: Optional[str] = Query(None, description="Optional target scheme UUID"),
     scheme_type: Optional[str] = Query(None, description="Optional target scheme type (e.g. micro_finance, term_loan)"),
     scheme_name: Optional[str] = Query(None, description="Optional target scheme name"),
-    limit: int = Query(10, ge=1, le=50),
+    limit: int = Query(50, ge=1, le=100),
 ):
     try:
         eligible_list, best_partner, excluded_list, total_eval = (
@@ -53,6 +54,7 @@ async def get_nearby_partners(
                 user_lat=latitude,
                 user_lng=longitude,
                 city=city,
+                state=state,
                 scheme_id=scheme_id,
                 scheme_type=scheme_type,
                 scheme_name=scheme_name,
@@ -60,14 +62,15 @@ async def get_nearby_partners(
             )
         )
 
-        final_lat = latitude or (best_partner.partner.latitude if best_partner else 23.2350)
-        final_lng = longitude or (best_partner.partner.longitude if best_partner else 77.4000)
+        final_lat = latitude if latitude is not None else (best_partner.partner.latitude if (best_partner and best_partner.partner.latitude is not None) else None)
+        final_lng = longitude if longitude is not None else (best_partner.partner.longitude if (best_partner and best_partner.partner.longitude is not None) else None)
 
         return NearbyPartnersResponse(
             user_location={
                 "latitude": final_lat,
                 "longitude": final_lng,
-                "city": city or "Bhopal",
+                "city": city or (best_partner.partner.city if best_partner else None),
+                "state": state or (best_partner.partner.state if best_partner else None),
             },
             total_partners_evaluated=total_eval,
             eligible_count=len(eligible_list),

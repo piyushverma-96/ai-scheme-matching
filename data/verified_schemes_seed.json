@@ -1,0 +1,200 @@
+{
+  "_note": "REAL VERIFIED DATA — sourced directly from https://nsfdc.nic.in (official NSFDC website, Ministry of Social Justice & Empowerment, Govt of India) on 2026-09-04. Every field traces to a specific official page. Fields not published by NSFDC are explicitly marked data_status: 'unavailable' — none were invented.",
+  "schemes": [
+    {
+      "id": "nsfdc_mfs",
+      "official_name": "Micro Finance Scheme (MFS)",
+      "short_description": "Micro credit finance for very small income-generating units.",
+      "purpose": "Micro Credit Finance for units costing up to ₹1.40 lakh.",
+      "target_beneficiaries": "Individuals belonging to the Scheduled Caste community with annual family income up to ₹5.00 lakh; also Partnership Firms and Co-operative Societies where all members are SC and each member's income is within the ceiling.",
+      "assistance_type": "Term loan (micro credit)",
+      "funding_information": {
+        "project_cost_max": 140000,
+        "project_cost_currency": "INR",
+        "max_loan_percent_of_project_cost": 90,
+        "max_loan_amount": 125000,
+        "interest_rate_to_sca_percent": 2.5,
+        "interest_rate_to_beneficiary_percent": 6.5,
+        "repayment_period_years_max": 3,
+        "moratorium_period_months": 3,
+        "repayment_frequency": "Quarterly"
+      },
+      "official_application_route": "https://pmsuraj.dosje.gov.in/",
+      "official_source_url": "https://nsfdc.nic.in/scheme",
+      "source_document": "NSFDC official website — 'Loan/Credit Schemes' page",
+      "last_verified_at": "2026-09-04",
+      "data_status": "verified"
+    },
+    {
+      "id": "nsfdc_term_loan",
+      "official_name": "Term Loan",
+      "short_description": "Standard term loan for larger income-generating business units.",
+      "purpose": "Term loans for units costing more than ₹1.40 lakh and up to ₹50.00 lakh.",
+      "target_beneficiaries": "Individuals belonging to the Scheduled Caste community with annual family income up to ₹5.00 lakh; also Partnership Firms and Co-operative Societies meeting the same membership/income conditions.",
+      "assistance_type": "Term loan",
+      "funding_information": {
+        "project_cost_min": 140001,
+        "project_cost_max": 5000000,
+        "project_cost_currency": "INR",
+        "max_loan_percent_of_project_cost": 90,
+        "max_loan_amount": 4500000,
+        "max_loan_amount_min_band": 125000,
+        "interest_rate_to_sca_percent": 4,
+        "interest_rate_to_beneficiary_percent": 8,
+        "repayment_period_years_max": 7,
+        "moratorium_period_months": 6,
+        "moratorium_period_months_plantation_construction": 12,
+        "repayment_frequency": "Quarterly"
+      },
+      "official_application_route": "https://pmsuraj.dosje.gov.in/",
+      "official_source_url": "https://nsfdc.nic.in/scheme",
+      "source_document": "NSFDC official website — 'Loan/Credit Schemes' page",
+      "last_verified_at": "2026-09-04",
+      "data_status": "verified"
+    },
+    {
+      "id": "nsfdc_aajeevika_mfy",
+      "official_name": "Aajeevika Micro-Finance Yojana",
+      "short_description": "Micro finance routed through NBFC-MFIs for small/micro business activities.",
+      "purpose": "Prompt, need-based micro finance to eligible Scheduled Caste persons at reasonable interest rates through selected NBFC-MFIs, to pursue small/micro business activities.",
+      "target_beneficiaries": "Individuals belonging to the Scheduled Caste community with annual family income up to ₹5.00 lakh.",
+      "assistance_type": "Micro finance (via NBFC-MFIs)",
+      "funding_information": {
+        "project_cost_max": 140000,
+        "project_cost_currency": "INR",
+        "max_loan_percent_of_project_cost": 90,
+        "max_loan_amount": 125000,
+        "interest_rate_to_nbfc_mfi_percent": 5,
+        "interest_rate_to_beneficiary_percent": 15,
+        "repayment_period_years_max": 3,
+        "moratorium_period_months": 3,
+        "repayment_frequency": "Quarterly"
+      },
+      "official_application_route": "https://pmsuraj.dosje.gov.in/",
+      "official_source_url": "https://nsfdc.nic.in/scheme",
+      "source_document": "NSFDC official website — 'Loan/Credit Schemes' page",
+      "last_verified_at": "2026-09-04",
+      "data_status": "verified"
+    },
+    {
+      "id": "nsfdc_udyam_nidhi_yojana",
+      "official_name": "Udyam Nidhi Yojana (UNY)",
+      "short_description": "Loans routed through Cooperative Societies/Banks and Small Finance Banks for small/micro activities.",
+      "purpose": "Loans for projects/units costing up to ₹5.00 lakh, provided through Cooperative Societies, Cooperative Banks, and Small Finance Banks (SFBs), to pursue small/micro activities.",
+      "target_beneficiaries": "Individuals belonging to the Scheduled Caste community with annual family income up to ₹5.00 lakh.",
+      "assistance_type": "Term loan (via Cooperative Banks/Societies or Small Finance Banks)",
+      "funding_information": {
+        "project_cost_max": 500000,
+        "project_cost_currency": "INR",
+        "max_loan_percent_of_project_cost": 90,
+        "max_loan_amount": 450000,
+        "interest_rate_cooperative_channel": {
+          "to_sca_percent": 5,
+          "to_beneficiary_percent": 13
+        },
+        "interest_rate_sfb_channel": {
+          "to_sca_percent": 5,
+          "to_beneficiary_percent": 15
+        },
+        "repayment_period_years_max": 5,
+        "moratorium_period_months": 3,
+        "repayment_frequency": "Quarterly or half-yearly"
+      },
+      "official_application_route": "https://pmsuraj.dosje.gov.in/",
+      "official_source_url": "https://nsfdc.nic.in/scheme",
+      "source_document": "NSFDC official website — 'Loan/Credit Schemes' page",
+      "last_verified_at": "2026-09-04",
+      "data_status": "verified"
+    },
+    {
+      "id": "nsfdc_educational_loan_scheme",
+      "official_name": "Educational Loan Scheme (ELS)",
+      "short_description": "Education loans for recognized professional/technical courses, in India or abroad.",
+      "purpose": "Educational loans for eligible students pursuing regular full-time professional/technical recognized courses approved by the Government, in India or abroad.",
+      "target_beneficiaries": "Students belonging to the Scheduled Caste community who have secured admission to a recognized professional/technical course.",
+      "assistance_type": "Education loan",
+      "funding_information": {
+        "max_loan_amount": 4000000,
+        "max_loan_percent_of_course_fee": 90,
+        "loan_cap_rule": "Up to ₹40.00 lakh OR 90% of course fee, whichever is less",
+        "interest_rate_to_ca_percent": 2.5,
+        "interest_rate_to_beneficiary_percent": 6.5,
+        "repayment_period": "Up to 12 years if repayment not yet started; up to 10 years if loan disbursed and repayment already started",
+        "moratorium_period": "Course period plus 1 year (if repayment not started); up to 6 months (if loan disbursed and repayment started)"
+      },
+      "eligible_courses_examples": [
+        "Engineering (Diploma/B.Tech/B.E/M.Tech/M.E)",
+        "Medical (MBBS/MD/MS)",
+        "Management (BBA/MBA)",
+        "Law (LLB/LLM)",
+        "Chartered Accountancy (CA)",
+        "Company Secretaryship (CS)",
+        "Doctoral studies (M.Phil/PhD)"
+      ],
+      "official_application_route": "https://pmsuraj.dosje.gov.in/",
+      "official_source_url": "https://nsfdc.nic.in/scheme",
+      "source_document": "NSFDC official website — 'Loan/Credit Schemes' page",
+      "last_verified_at": "2026-09-04",
+      "data_status": "verified"
+    }
+  ],
+  "shared_eligibility_rules": {
+    "_note": "These rules apply across all 5 NSFDC credit-linked schemes above (except where a scheme has its own specific rule, e.g. ELS requires course admission, not income-generating activity). Source: https://nsfdc.nic.in/eligibility-requirements",
+    "rules": [
+      {
+        "rule_id": "elig_caste",
+        "field": "category",
+        "operator": "eq",
+        "value": "SC",
+        "unit": null,
+        "required": true,
+        "source_reference": "https://nsfdc.nic.in/eligibility-requirements — 'The beneficiary(ies) must belong to the Scheduled Caste (SC) community.'"
+      },
+      {
+        "rule_id": "elig_income_ceiling",
+        "field": "annual_family_income",
+        "operator": "lte",
+        "value": 500000,
+        "unit": "INR",
+        "required": true,
+        "source_reference": "https://nsfdc.nic.in/eligibility-requirements — 'The annual family income of applicants must not exceed ₹5.00 lakh (applicable to both rural and urban areas, effective from January 7, 2026).' Note: this ₹5 lakh ceiling does NOT apply to Skill Development Training Programmes (no income criterion for those)."
+      },
+      {
+        "rule_id": "elig_entity_type",
+        "field": "applicant_entity_type",
+        "operator": "in",
+        "value": ["individual", "partnership_firm", "cooperative_society"],
+        "unit": null,
+        "required": true,
+        "source_reference": "https://nsfdc.nic.in/eligibility-requirements — 'Individuals, Partnership Firms, and Co-operative Societies are eligible to undertake income-generating activities.'"
+      },
+      {
+        "rule_id": "elig_partnership_membership",
+        "field": "all_members_sc_if_entity",
+        "operator": "eq",
+        "value": true,
+        "unit": null,
+        "required": false,
+        "source_reference": "https://nsfdc.nic.in/eligibility-requirements — applies only if applicant_entity_type is partnership_firm or cooperative_society: 'All members of the Partnership Firm or Co-operative Society must belong to the Scheduled Caste community', and each member's income must individually be within the ₹5 lakh ceiling."
+      }
+    ]
+  },
+  "application_process": {
+    "primary_channel": "Online via PM-SURAJ Portal (pmsuraj.dosje.gov.in) — OTP-based registration, digital form, document upload, application tracking by Application ID.",
+    "secondary_channel": "Offline, via the applicant's State Channelizing Agency (SCA) or Channelizing Agency (CA), submitted at the nearest district or head office branch.",
+    "important_note": "NSFDC does NOT accept direct applications or correspondence from applicants — all applications must be routed through an SCA/CA. Eligibility verification is the primary responsibility of the SCA/CA, though NSFDC reserves the right to re-verify at its own discretion.",
+    "source_url": "https://nsfdc.nic.in/how-to-apply-2",
+    "last_verified_at": "2026-09-04"
+  },
+  "required_documents_general": {
+    "_note": "NSFDC's public site does NOT publish a granular, per-scheme document checklist — it states the checklist is maintained by each individual SCA/CA. Only these general categories are officially confirmed. data_status is deliberately 'unavailable' for anything more specific — do not expand this list without a named source.",
+    "documents": [
+      { "name": "Caste Certificate", "required": true, "data_status": "verified" },
+      { "name": "Income Proof / Income Certificate", "required": true, "data_status": "verified" },
+      { "name": "KYC Documents (identity + address proof)", "required": true, "data_status": "verified" },
+      { "name": "Other documents as per the specific SCA/CA's checklist", "required": "varies_by_partner", "data_status": "unavailable" }
+    ],
+    "source_url": "https://nsfdc.nic.in/how-to-apply-2",
+    "last_verified_at": "2026-09-04"
+  }
+}

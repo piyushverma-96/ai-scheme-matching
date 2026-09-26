@@ -12,6 +12,7 @@ Deterministic Endpoints:
 from __future__ import annotations
 
 import logging
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, HTTPException, status
 
@@ -130,6 +131,7 @@ def _to_schema(result: EligibilityResult) -> SchemeMatchResult:
         last_verified_at=result.last_verified_at,
         needs_manual_verification=result.needs_manual_verification,
         verification_note=result.verification_note,
+        data_status=getattr(result, "data_status", "verified"),
     )
 
 
@@ -297,8 +299,15 @@ async def get_scheme_rules_endpoint(scheme_id: str):
 
 
 # ---------------------------------------------------------------------------
-# POST /schemes/match
 # ---------------------------------------------------------------------------
+# POST /schemes/match and POST /schemes/recommend
+# ---------------------------------------------------------------------------
+@router.post(
+    "/recommend",
+    response_model=EligibilityCheckResponse,
+    summary="Recommend eligible NSFDC schemes for applicant",
+    description="Evaluates applicant profile against real verified statutory criteria and returns matching schemes.",
+)
 @router.post(
     "/match",
     response_model=EligibilityCheckResponse,
@@ -329,9 +338,30 @@ async def schemes_match(body: EligibilityCheckRequest):
         business_status=body.business_status,
         occupation=body.occupation,
     )
-    # Matched includes both fully eligible and partially eligible
-    matched = [r for r in all_results if r.matched]
-    # Sort priority: fully eligible first, then partially eligible, then match_score desc
+
+    # Step 4: Debug log showing received body and per-scheme conditions (gated by DEBUG_RECOMMEND)
+    import os
+    if os.environ.get("DEBUG_RECOMMEND", "0") == "1":
+        def _clean(s: Any) -> str:
+            return str(s).replace("₹", "Rs. ")
+
+        print("\n" + "=" * 80)
+        print("[DEBUG: /recommend RECEIVED REQUEST BODY]")
+        print(_clean(f"Request: {body.model_dump()}"))
+        print("-" * 80)
+        print("[DEBUG: /recommend PER-SCHEME EVALUATION RESULTS]")
+        for r in all_results:
+            print(_clean(f"Scheme: {r.scheme_name}"))
+            print(_clean(f"  Verdict: {r.verdict} | Eligible: {r.eligible} | Matched: {r.matched}"))
+            print(_clean(f"  Passed Conditions: {r.matching_factors if r.matching_factors else 'None'}"))
+            print(_clean(f"  Failed Conditions: {r.failed_factors if r.failed_factors else 'None'}"))
+            print(_clean(f"  Missing Info: {r.missing_information if r.missing_information else 'None'}"))
+            print(_clean(f"  Explanation: {r.explanation}"))
+        print("=" * 80 + "\n")
+
+    # Step 6: A scheme that fails ANY required condition must be excluded from the response entirely
+    matched = [r for r in all_results if r.matched and not r.failed_factors]
+    # Sort priority: fully eligible first, then match_score desc
     matched.sort(key=lambda r: (1 if r.eligible else 0, r.match_score), reverse=True)
 
     return EligibilityCheckResponse(

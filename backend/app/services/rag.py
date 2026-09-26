@@ -48,11 +48,12 @@ class SchemeRAGRetriever:
 
         for rule in SCHEME_RULES:
             # Chunk 1: Scheme Overview & Financial Limits
-            cost_range = (
-                f"Projects costing up to ₹{rule.project_cost_max:,.0f}"
-                if not rule.project_cost_min_exclusive
-                else f"Projects costing more than ₹{rule.project_cost_min:,.0f} up to ₹{rule.project_cost_max:,.0f}"
-            )
+            if rule.project_cost_max is None:
+                cost_range = f"Projects costing above ₹{rule.project_cost_min:,.0f}" if rule.project_cost_min else "Any recognized course fee scale"
+            elif not rule.project_cost_min_exclusive:
+                cost_range = f"Projects costing up to ₹{rule.project_cost_max:,.0f}"
+            else:
+                cost_range = f"Projects costing more than ₹{rule.project_cost_min:,.0f} up to ₹{rule.project_cost_max:,.0f}"
             overview_text = (
                 f"Scheme: {rule.name} ({rule.scheme_type}). "
                 f"Issuing Body: {rule.issuing_body}. "

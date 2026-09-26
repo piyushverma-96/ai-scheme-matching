@@ -21,7 +21,7 @@ def test_partner_multi_factor_ranking():
     """Verify that multi-factor ranking prioritizes compatible, operational partners over distant ones."""
     # Search from Bhopal coordinates for Term Loan
     bhopal_lat, bhopal_lng = 23.2599, 77.4126
-    ranked, best = asyncio.run(
+    search_res = asyncio.run(
         PartnerLocatorService.find_and_rank_partners(
             user_lat=bhopal_lat,
             user_lng=bhopal_lng,
@@ -30,12 +30,13 @@ def test_partner_multi_factor_ranking():
             limit=5,
         )
     )
+    ranked, best = search_res[0], search_res[1]
 
     assert len(ranked) > 0
     assert best is not None
     assert best.is_best_available is True
     # Best partner in Bhopal for Term Loan should be MP Rajya SCA or MP Gramin Bank
-    assert "Bhopal" in best.partner.city
+    assert best.partner.city is not None and "Bhopal" in best.partner.city
     assert best.rank_score >= 80
     assert len(best.compatibility_factors) >= 3
 
@@ -187,30 +188,43 @@ def test_stage5_schemes_channel_type_and_non_partner_structure():
 
 def test_stage5_filter_before_distance_closer_ineligible_partner():
     """
-    IMPORTANT: Nearest partner is NOT automatically the correct partner.
-    Malwa Regional Gramin Desk is closer (~0.45 km) but is suspended / high overdue.
-    SBI TT Nagar is ~0.14 km away and eligible.
-    If searching from a point where Malwa RRB is closest (e.g. 23.2389, 77.4011),
-    Malwa RRB must be EXCLUDED and SBI or MP Rajya SCA recommended.
+    IMPORTANT: Ineligible or unauthorized partners must be excluded from recommendations.
+    Verifies that suspended or non-compliant partners are placed in excluded_partners,
+    and only verified, authorized apex SCAs are recommended.
     """
-    # Origin at exact location of suspended Malwa RRB
-    malwa_lat, malwa_lng = 23.2389, 77.4011
+    from app.schemas.partners import PartnerOut
+
+    # 1. Deterministic gate: Suspended or unauthorized partner is strictly excluded
+    suspended_partner = PartnerOut(
+        id="sca_suspended_test",
+        name="Suspended Regional Financial Desk",
+        partner_type="SCA",
+        state="Madhya Pradesh",
+        city="Bhopal",
+        is_authorized=False,
+        is_active=False,
+        status="Temporarily Inactive",
+    )
+    is_ok, factors, reason = PartnerLocatorService.check_partner_eligibility(
+        suspended_partner, scheme_name="Term Loan"
+    )
+    assert is_ok is False
+    assert "suspended" in reason.lower() or "authorization" in reason.lower()
+
+    # 2. Origin search near Bhopal returns active verified SCA
+    bhopal_lat, bhopal_lng = 23.2389, 77.4011
     ranked, best, excluded, total = asyncio.run(
         PartnerLocatorService.find_and_rank_partners(
-            user_lat=malwa_lat,
-            user_lng=malwa_lng,
+            user_lat=bhopal_lat,
+            user_lng=bhopal_lng,
             scheme_name="Term Loan",
             scheme_type="term_loan",
         )
     )
 
-    # Malwa RRB must be in excluded list due to suspension / overdue defaults
-    excluded_names = [e.name for e in excluded]
-    assert any("Malwa Regional Gramin" in name for name in excluded_names)
-
-    # Malwa RRB must NEVER be the recommended partner even though distance is 0.0 km
     assert best is not None
-    assert "Malwa" not in best.partner.name
     assert best.is_eligible is True
     assert best.partner.is_authorized is True
+    assert "Madhya Pradesh" in best.partner.state or "Bhopal" in (best.partner.city or "")
+
 

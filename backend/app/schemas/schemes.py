@@ -72,6 +72,7 @@ class SchemeOut(BaseModel):
     needs_manual_verification: bool
     verification_note: Optional[str] = None
     verification_status: Optional[str] = "verified"
+    data_status: str = Field(default="verified", description="Data status: 'verified' vs 'unavailable'")
     verification_source_type: Optional[str] = "official_portal"
     verification_notes: Optional[str] = None
 
@@ -201,13 +202,22 @@ VALID_STUDY_LOCATIONS = {"india", "abroad", "not_specified"}
 
 
 class EligibilityCheckRequest(BaseModel):
-    purpose: str = Field(
-        ...,
+    purpose: Optional[str] = Field(
+        default=None,
         description=(
             "Purpose of the loan. e.g. entrepreneurship, business, micro_business, "
             "education, agriculture, services, trade, handicraft, industry, transport, etc."
         ),
-        json_schema_extra={"example": "entrepreneurship"},
+        json_schema_extra={"example": "business"},
+    )
+    project_type: Optional[str] = Field(
+        default=None,
+        description="Project category / enterprise type (e.g., 'business', 'education', 'micro_business').",
+    )
+    annual_income: Optional[float] = Field(
+        default=None,
+        ge=0,
+        description="Total annual family income in INR (alias for annual_family_income).",
     )
     annual_family_income: Optional[float] = Field(
         default=None,
@@ -272,10 +282,6 @@ class EligibilityCheckRequest(BaseModel):
         default=None,
         description="Applicant 6-digit postal PIN code (e.g. '462003').",
     )
-    project_type: Optional[str] = Field(
-        default=None,
-        description="Project category / enterprise type.",
-    )
     business_type: Optional[str] = Field(
         default=None,
         description="Type or sector of business enterprise (e.g., 'Retail', 'Manufacturing', 'Services').",
@@ -293,16 +299,72 @@ class EligibilityCheckRequest(BaseModel):
         description="Preferred language for matching explanations ('english' | 'hindi').",
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def pre_validate_and_normalize(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            d = dict(data)
+
+            # 1. Alias annual_income -> annual_family_income
+            if "annual_family_income" not in d or d.get("annual_family_income") is None:
+                if "annual_income" in d and d.get("annual_income") is not None:
+                    d["annual_family_income"] = d["annual_income"]
+                elif "income" in d and d.get("income") is not None:
+                    d["annual_family_income"] = d["income"]
+
+            # 2. Parse numeric strings (e.g. "2000000", "5,00,000", "₹100000")
+            for num_key in ("annual_family_income", "annual_income", "project_cost", "loan_amount"):
+                if num_key in d and isinstance(d[num_key], str):
+                    clean = d[num_key].replace(",", "").replace("₹", "").replace(" ", "").strip()
+                    try:
+                        d[num_key] = float(clean)
+                    except ValueError:
+                        pass
+
+            # 3. Normalize project_type / purpose / education_status routing
+            raw_purpose = d.get("purpose")
+            raw_pt = d.get("project_type")
+            raw_edu = d.get("education_status")
+
+            if not raw_purpose:
+                if raw_pt:
+                    pt_str = str(raw_pt).lower().strip()
+                    if any(k in pt_str for k in ("edu", "study", "student", "course", "college", "school")):
+                        d["purpose"] = "education"
+                    elif any(k in pt_str for k in ("micro", "vendor", "tiny", "nano")):
+                        d["purpose"] = "micro_business"
+                    elif any(k in pt_str for k in ("service", "repair", "hospitality")):
+                        d["purpose"] = "services"
+                    elif any(k in pt_str for k in ("trade", "shop", "retail", "kirana", "merchant")):
+                        d["purpose"] = "trade"
+                    elif any(k in pt_str for k in ("manufactur", "industr", "factory", "unit")):
+                        d["purpose"] = "manufacturing"
+                    elif any(k in pt_str for k in ("agri", "farm", "kisan", "dairy", "poultry")):
+                        d["purpose"] = "agriculture"
+                    else:
+                        d["purpose"] = "business"
+                elif raw_edu and str(raw_edu).lower().strip() in ("higher_education", "technical_course", "professional_course"):
+                    d["purpose"] = "education"
+                else:
+                    d["purpose"] = "business"
+            else:
+                norm = str(raw_purpose).lower().strip().replace(" ", "_").replace("-", "_")
+                d["purpose"] = PURPOSE_ALIASES.get(norm, norm)
+
+            return d
+        return data
+
     @field_validator("purpose")
     @classmethod
-    def validate_purpose(cls, v: str) -> str:
+    def validate_purpose(cls, v: Optional[str]) -> str:
+        if not v:
+            return "business"
         normalised = v.lower().strip().replace(" ", "_").replace("-", "_")
         if normalised in PURPOSE_ALIASES:
             return PURPOSE_ALIASES[normalised]
         if normalised not in VALID_PURPOSES:
-            raise ValueError(
-                f"purpose must be one of: {', '.join(sorted(VALID_PURPOSES))}. Got: '{v}'"
-            )
+            # Fall back to 'business' rather than crashing unhandled
+            return "business"
         return normalised
 
     @field_validator("study_location")
@@ -378,6 +440,7 @@ class SchemeMatchResult(BaseModel):
     last_verified_at: str
     needs_manual_verification: bool
     verification_note: str
+    data_status: str = Field(default="verified", description="Data status: 'verified' vs 'unavailable'")
 
 
 

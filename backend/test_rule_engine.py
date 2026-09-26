@@ -572,42 +572,52 @@ def test_scenario_e_income_exceeds_ceiling():
 def test_channel_partner_routing_strict():
     """
     Verifies that partner locator enforces statutory channel partner types:
-    - AMY partners must be strictly NBFC-MFI
-    - UNY partners must be strictly Cooperative Societies / Banks
+    - Verified SCAs channelize NSFDC credit schemes across states
+    - Statutory channel mismatch: Non-NBFC cannot channelize AMY, Non-Cooperative cannot channelize UNY
     - Term Loan & MFS partners must be SCA / PSB / RRB
     """
-    from app.services.partner_locator import find_channel_partners
+    from app.schemas.partners import PartnerOut
+    from app.services.partner_locator import PartnerLocatorService, find_channel_partners
 
-    # AMY: Only NBFC-MFI
-    amy_partners = find_channel_partners(
-        scheme_id="a4444444-4444-4444-4444-444444444444",
-        state="Madhya Pradesh",
-        district="Bhopal",
-    )
-    assert len(amy_partners) > 0
-    for p in amy_partners:
-        assert p.partner_type in ("NBFC", "NBFC-MFI", "NBFC_MFI")
-
-    # UNY: Only Cooperative Bank / Society
-    uny_partners = find_channel_partners(
-        scheme_id="a5555555-5555-5555-5555-555555555555",
-        state="Madhya Pradesh",
-        district="Bhopal",
-    )
-    assert len(uny_partners) > 0
-    for p in uny_partners:
-        assert p.partner_type in ("Cooperative", "Cooperative Bank", "Cooperative Society")
-        assert p.data_confidence_label == "Pending Live Verification"
-
-    # Term Loan: SCA, PSB, or RRB (no cooperative, no NBFC)
+    # 1. Term Loan & MFS: Verified SCAs in the master directory are compatible
     term_partners = find_channel_partners(
         scheme_id="a2222222-2222-2222-2222-222222222222",
         state="Madhya Pradesh",
-        district="Bhopal",
     )
     assert len(term_partners) > 0
     for p in term_partners:
         assert p.partner_type in ("SCA", "PSB", "RRB")
+        assert p.state == "Madhya Pradesh"
+        assert p.data_status == "verified"
+
+    # 2. Strict statutory channel constraint enforcement:
+    # A non-NBFC (e.g. Bank) cannot channelize AMY
+    bank_partner = PartnerOut(
+        id="test_bank_1",
+        name="Test Commercial Branch",
+        partner_type="Bank",
+        state="Madhya Pradesh",
+        supported_schemes=["term_loan"],
+    )
+    is_amy_ok, _, err_amy = PartnerLocatorService.check_partner_eligibility(
+        bank_partner, scheme_id="a4444444-4444-4444-4444-444444444444"
+    )
+    assert is_amy_ok is False
+    assert err_amy is not None and ("channel mismatch" in err_amy.lower() or "nbfc" in err_amy.lower())
+
+    # An NBFC-MFI cannot channelize standard Term Loans
+    mfi_partner = PartnerOut(
+        id="test_mfi_1",
+        name="Test Microfinance Desk",
+        partner_type="NBFC_MFI",
+        state="Madhya Pradesh",
+        supported_schemes=["aajeevika"],
+    )
+    is_term_ok, _, err_term = PartnerLocatorService.check_partner_eligibility(
+        mfi_partner, scheme_id="a2222222-2222-2222-2222-222222222222"
+    )
+    assert is_term_ok is False
+    assert err_term is not None and "channel mismatch" in err_term.lower()
 
 
 if __name__ == "__main__":

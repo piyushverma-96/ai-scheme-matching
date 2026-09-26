@@ -85,6 +85,7 @@ class SchemeRule:
     # Verification flags
     needs_manual_verification: bool = False
     verification_note: str = ""
+    data_status: str = "verified"
 
     # Specific condition flags
     requires_education_purpose: bool = False
@@ -267,7 +268,7 @@ SCHEME_RULES: List[SchemeRule] = [
         ),
         issuing_body="National Scheduled Castes Finance and Development Corporation (NSFDC)",
         project_cost_min=0,
-        project_cost_max=4000000,
+        project_cost_max=None,
         project_cost_min_exclusive=False,
         max_loan_amount=4000000,
         financing_pct=90.0,
@@ -586,9 +587,9 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
             rule_id="r3-cost",
             scheme_id="a3333333-3333-3333-3333-333333333333",
             field_name="project_cost",
-            operator="lte",
-            value_num=4000000.0,
-            description="Course fee / loan requirement must not exceed ₹40,00,000 (up to ₹30,00,000 for studies in India, ₹40,00,000 for studies abroad).",
+            operator="gt",
+            value_num=0.0,
+            description="Course fee must be specified. Loan coverage is up to 90% of course fee or ₹40,00,000, whichever is less.",
             is_hard_rule=True,
             rule_type="loan_limit",
             source_note="nsfdc.nic.in/scheme",
@@ -715,39 +716,48 @@ SEED_ELIGIBILITY_RULES: Dict[str, List[SchemeEligibilityRule]] = {
 }
 
 
+_SUPABASE_RULES_AVAILABLE: Optional[bool] = None
+
+
 def get_rules_for_scheme(scheme_id: str) -> List[SchemeEligibilityRule]:
     """
     Fetches the data-defined eligibility rules for a specific scheme.
     First attempts to query Supabase `eligibility_rules` table.
     Falls back to verified local SEED_ELIGIBILITY_RULES if database is offline or empty.
     """
-    try:
-        from app.database import get_supabase_client
-        supabase = get_supabase_client()
-        resp = supabase.table("eligibility_rules").select("*").eq("scheme_id", scheme_id).execute()
-        if resp and resp.data and len(resp.data) > 0:
-            db_rules = []
-            for row in resp.data:
-                db_rules.append(
-                    SchemeEligibilityRule(
-                        rule_id=str(row.get("id")),
-                        scheme_id=str(row.get("scheme_id")),
-                        field_name=str(row.get("field_name")),
-                        operator=str(row.get("operator")),
-                        value_num=float(row["value_num"]) if row.get("value_num") is not None else None,
-                        value_list=row.get("value_list"),
-                        value_text=row.get("value_text"),
-                        description=str(row.get("description", "")),
-                        is_hard_rule=bool(row.get("is_hard_rule", True)),
-                        rule_type=str(row.get("rule_type", "general")),
-                        source_note=str(row.get("source_note", "")),
-                        needs_manual_verification=bool(row.get("needs_manual_verification", False)),
-                        verification_note=str(row.get("verification_note", "")),
+    global _SUPABASE_RULES_AVAILABLE
+    if _SUPABASE_RULES_AVAILABLE is not False:
+        try:
+            from app.database import get_supabase_client
+            supabase = get_supabase_client()
+            resp = supabase.table("eligibility_rules").select("*").eq("scheme_id", scheme_id).execute()
+            if resp and resp.data and len(resp.data) > 0:
+                _SUPABASE_RULES_AVAILABLE = True
+                db_rules = []
+                for row in resp.data:
+                    db_rules.append(
+                        SchemeEligibilityRule(
+                            rule_id=str(row.get("id")),
+                            scheme_id=str(row.get("scheme_id")),
+                            field_name=str(row.get("field_name")),
+                            operator=str(row.get("operator")),
+                            value_num=float(row["value_num"]) if row.get("value_num") is not None else None,
+                            value_list=row.get("value_list"),
+                            value_text=row.get("value_text"),
+                            description=str(row.get("description", "")),
+                            is_hard_rule=bool(row.get("is_hard_rule", True)),
+                            rule_type=str(row.get("rule_type", "general")),
+                            source_note=str(row.get("source_note", "")),
+                            needs_manual_verification=bool(row.get("needs_manual_verification", False)),
+                            verification_note=str(row.get("verification_note", "")),
+                        )
                     )
-                )
-            return db_rules
-    except Exception as exc:
-        logger.debug(f"Could not load rules from Supabase for scheme '{scheme_id}' ({exc}); using verified local rules.")
+                return db_rules
+            else:
+                _SUPABASE_RULES_AVAILABLE = False
+        except Exception as exc:
+            _SUPABASE_RULES_AVAILABLE = False
+            logger.debug(f"Could not load rules from Supabase for scheme '{scheme_id}' ({exc}); using verified local rules.")
 
     return SEED_ELIGIBILITY_RULES.get(scheme_id, [])
 
@@ -796,6 +806,7 @@ class EligibilityResult:
     last_verified_at: str = ""
     needs_manual_verification: bool = False
     verification_note: str = ""
+    data_status: str = "verified"
 
 
 # ---------------------------------------------------------------------------
@@ -859,13 +870,18 @@ def _evaluate_single_rule(rule: SchemeEligibilityRule, profile: Dict[str, Any]) 
             elif profile.get("category"):
                 val = profile.get("category")
         elif field_name == "annual_family_income":
-            val = profile.get("income")
+            val = profile.get("annual_family_income") if profile.get("annual_family_income") is not None else (
+                profile.get("annual_income") if profile.get("annual_income") is not None else profile.get("income")
+            )
         elif field_name == "project_cost":
-            if profile.get("loan_amount") is not None:
+            val = profile.get("project_cost") if profile.get("project_cost") is not None else profile.get("cost")
+            if val is None and profile.get("loan_amount") is not None:
                 try:
                     val = round(float(profile["loan_amount"]) / 0.9, 2)
                 except (ValueError, TypeError):
                     val = None
+        elif field_name == "purpose":
+            val = profile.get("purpose") or profile.get("project_type")
 
     # Check for missing field
     if val is None or val == "" or val == "not_specified":
@@ -958,13 +974,23 @@ def evaluate_scheme(
     elif loan_amount is None and project_cost is not None:
         loan_amount = round(project_cost * 0.9, 2)
 
-    norm_purpose = normalize_purpose(purpose) if purpose else ""
+    # Resolve income alias if annual_family_income is None
+    if annual_family_income is None:
+        annual_family_income = kwargs.get("annual_income") or kwargs.get("income")
+
+    # Resolve purpose alias if purpose is empty
+    if not purpose:
+        purpose = kwargs.get("project_type") or "business"
+
+    norm_purpose = normalize_purpose(purpose) if purpose else "business"
 
     # Build canonical user profile dictionary
     profile: Dict[str, Any] = {
         "purpose": norm_purpose,
         "raw_purpose": purpose,
+        "project_type": kwargs.get("project_type") or purpose,
         "annual_family_income": annual_family_income,
+        "annual_income": annual_family_income,
         "income": annual_family_income,
         "project_cost": project_cost,
         "loan_amount": loan_amount,
@@ -997,7 +1023,10 @@ def evaluate_scheme(
             elif r.field_name == "project_cost" and r.value_num and r.operator == "lte":
                 matching_factors.append(f"Financial Requirement: Project cost fits within the allowable limit of ₹{r.value_num:,.0f} for {rule.name}.")
             elif r.field_name == "project_cost" and r.value_num and r.operator == "gt":
-                matching_factors.append(f"Financial Requirement: Project scale exceeds the micro-finance threshold (> ₹{r.value_num:,.0f}), qualifying for Term Loan support.")
+                if rule.scheme_type == "education_loan":
+                    matching_factors.append(f"Course Fee: Course fee fits {rule.name} guidelines (eligible for 90% loan coverage up to ₹40.00 Lakh).")
+                else:
+                    matching_factors.append(f"Financial Requirement: Project scale exceeds the micro-finance threshold (> ₹{r.value_num:,.0f}), qualifying for Term Loan support.")
             elif r.field_name == "annual_family_income" and r.value_num and r.operator == "lte":
                 inc_val = f"₹{annual_family_income:,.0f}" if annual_family_income is not None else "your income"
                 matching_factors.append(f"Income Criteria: Household income ({inc_val}) falls within the statutory ceiling of ₹{r.value_num:,.0f}.")
@@ -1264,6 +1293,7 @@ def evaluate_scheme(
         last_verified_at=rule.last_verified_at,
         needs_manual_verification=rule.needs_manual_verification,
         verification_note=rule.verification_note,
+        data_status=getattr(rule, "data_status", "verified"),
     )
 
 
@@ -1429,6 +1459,7 @@ def get_verified_schemes_data() -> List[Dict[str, Any]]:
             "last_verified_at": r.last_verified_at,
             "needs_manual_verification": r.needs_manual_verification,
             "verification_note": r.verification_note,
+            "data_status": getattr(r, "data_status", "verified"),
             "is_active": r.is_active,
         }
         for r in SCHEME_RULES

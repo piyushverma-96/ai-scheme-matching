@@ -108,8 +108,9 @@ export default function Step2EligibleSchemes({ onContinue }) {
 
   const rawResults = recommendResult?.results || [];
   const matchedList = rawResults.filter((r) => r.matched || r.eligible || r.partially_eligible);
-  const candidateSchemes = rawResults.length > 0 ? matchedList : SCHEMES_DATA;
-  const isIncomeDisqualified = rawResults.length > 0 && matchedList.length === 0;
+  const hasEvaluated = Boolean(recommendResult);
+  const candidateSchemes = hasEvaluated ? matchedList : SCHEMES_DATA;
+  const isIncomeDisqualified = hasEvaluated && matchedList.length === 0;
 
   // Sync initial selection to candidateSchemes[0] if current choice is invalid or absent
   useEffect(() => {
@@ -254,19 +255,25 @@ export default function Step2EligibleSchemes({ onContinue }) {
 
           <div className="bg-white/80 rounded-2xl p-4 border border-[#FECACA] space-y-2 text-xs">
             <span className="font-bold text-[#991B1B] block">Rule Engine Disqualification Summary:</span>
-            {rawResults.map((r, i) => (
-              <div key={i} className="flex items-start gap-2 text-[#7F1D1D]">
-                <span className="font-mono font-bold text-xs shrink-0">•</span>
-                <div>
-                  <strong className="font-semibold">{r.scheme_name || r.name}:</strong>{' '}
-                  <span className="text-[#991B1B]">
-                    {r.why_ineligible && r.why_ineligible.length > 0
-                      ? r.why_ineligible.join('; ')
-                      : 'Disqualified under statutory income limit of ₹5.00 Lakh.'}
-                  </span>
+            {rawResults.length > 0 ? (
+              rawResults.map((r, i) => (
+                <div key={i} className="flex items-start gap-2 text-[#7F1D1D]">
+                  <span className="font-mono font-bold text-xs shrink-0">•</span>
+                  <div>
+                    <strong className="font-semibold">{r.scheme_name || r.name}:</strong>{' '}
+                    <span className="text-[#991B1B]">
+                      {r.why_ineligible && r.why_ineligible.length > 0
+                        ? r.why_ineligible.join('; ')
+                        : 'Disqualified under statutory income limit of ₹5.00 Lakh.'}
+                    </span>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-[#7F1D1D] leading-relaxed">
+                All 5 NSFDC concessional schemes (Micro Finance Scheme, Term Loan, Aajeevika Micro-Finance Yojana, Udyam Nidhi Yojana, and Educational Loan Scheme) strictly enforce a statutory family income ceiling of <strong>₹5,00,000</strong> per annum. No schemes match your current household income profile.
               </div>
-            ))}
+            )}
           </div>
 
           <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
