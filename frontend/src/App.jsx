@@ -113,7 +113,7 @@ export default function App() {
   const isFullWidthView = currentView === 'home' || isJourneyMode;
 
   return (
-    <div className="min-h-dvh flex flex-col bg-[#F8FAFC] bg-grain pb-16 lg:pb-0 font-sans text-[#1E293B] overflow-x-hidden w-full max-w-[100vw]">
+    <div className="min-h-dvh flex flex-col bg-[#F8FAFC] bg-grain pb-28 sm:pb-32 lg:pb-0 font-sans text-[#1E293B] overflow-x-hidden w-full max-w-[100vw]">
       {/* Top Application Header */}
       <Header />
 

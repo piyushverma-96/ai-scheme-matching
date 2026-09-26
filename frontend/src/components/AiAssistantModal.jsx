@@ -89,15 +89,15 @@ export default function AiAssistantModal() {
 
   return (
     <>
-      {/* Floating trigger button on bottom-right matching reference image */}
-      <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-40">
+      {/* Floating trigger button on desktop only (on mobile, trigger is cleanly integrated in BottomNav) */}
+      <div className="hidden lg:flex fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setAiAssistantOpen(!aiAssistantOpen)}
-          className="flex items-center gap-2 bg-white hover:bg-[#F7F9FB] text-[#0B3B60] border border-[#CBD5E1] px-4 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-base cursor-pointer font-semibold text-xs sm:text-sm group min-h-[44px]"
+          className="flex items-center gap-2.5 bg-white hover:bg-[#F7F9FB] text-[#0B3B60] border border-[#CBD5E1] px-4 py-2.5 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer font-semibold text-xs sm:text-sm group min-h-[44px]"
           aria-label="Open AI Help Assistant"
         >
-          <div className="w-6 h-6 rounded-full bg-[#EAF1F6] group-hover:bg-[#0B3B60] group-hover:text-white transition-base flex items-center justify-center text-[#0B3B60]">
-            <Bot className="w-3.5 h-3.5" />
+          <div className="w-7 h-7 rounded-xl bg-[#E8F8F2] group-hover:bg-[#0E6655] group-hover:text-white transition-colors flex items-center justify-center text-[#0E6655]">
+            <Bot className="w-4 h-4" />
           </div>
           <span>{t('nav.ai', 'Ask UdyamNex')}</span>
         </button>
@@ -105,7 +105,15 @@ export default function AiAssistantModal() {
 
       {/* Assistant Modal Window */}
       {aiAssistantOpen && (
-        <div className="fixed bottom-20 right-4 sm:right-6 w-[calc(100vw-32px)] sm:w-[380px] max-w-[380px] h-[min(500px,calc(100vh-120px))] bg-white rounded-2xl shadow-2xl border border-[#CBD5E1] z-50 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <>
+          {/* Mobile Backdrop Overlay */}
+          <div
+            className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-xs z-50 transition-opacity animate-in fade-in"
+            onClick={() => setAiAssistantOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div className="fixed bottom-20 inset-x-3 sm:inset-x-auto sm:right-6 sm:w-[380px] max-w-[400px] mx-auto sm:mx-0 h-[min(520px,calc(100vh-140px))] bg-white rounded-3xl shadow-2xl border border-[#CBD5E1] z-50 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* Header */}
           <div className="bg-[#0B3B60] text-white p-3.5 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -218,7 +226,8 @@ export default function AiAssistantModal() {
             </button>
           </form>
         </div>
-      )}
-    </>
-  );
+      </>
+    )}
+  </>
+);
 }
