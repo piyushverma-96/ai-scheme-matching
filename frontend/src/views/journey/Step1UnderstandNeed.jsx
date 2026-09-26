@@ -10,6 +10,7 @@ import {
   Building2,
   FileCheck2,
   User,
+  Phone,
   Calendar,
   IndianRupee,
   ShieldCheck,
@@ -137,11 +138,15 @@ export default function Step1UnderstandNeed({ onComplete }) {
     profile,
     setRecommendResult,
     setSelectedScheme,
+    setAuthModalOpen,
   } = useApp();
 
   // ── Form State (Initialized from context, profile, or localStorage) ──
   const [applicantName, setApplicantName] = useState(
     journeyFormData?.applicantName || profile?.full_name || ''
+  );
+  const [phone, setPhone] = useState(
+    journeyFormData?.phone || profile?.phone || user?.user_metadata?.phone || ''
   );
   const [dob, setDob] = useState(
     journeyFormData?.dob || profile?.date_of_birth || ''
@@ -247,6 +252,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
   useEffect(() => {
     if (profile) {
       if (!applicantName && profile.full_name) setApplicantName(profile.full_name);
+      if (!phone && profile.phone) setPhone(profile.phone);
       if (!dob && profile.date_of_birth) setDob(profile.date_of_birth);
       if (!stateName && profile.state) setStateName(profile.state);
       if (!district && profile.district) setDistrict(profile.district);
@@ -260,6 +266,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
     const timer = setTimeout(() => {
       const draft = {
         applicantName,
+        phone,
         dob,
         age,
         gender,
@@ -292,6 +299,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
     return () => clearTimeout(timer);
   }, [
     applicantName,
+    phone,
     dob,
     age,
     gender,
@@ -386,6 +394,15 @@ export default function Step1UnderstandNeed({ onComplete }) {
     if (!applicantName.trim()) {
       errs.applicantName = t('journey_step1.err_name', 'Please enter beneficiary / applicant full name.');
     }
+    if (!phone.trim() || !/^[6-9]\d{9}$/.test(phone.trim())) {
+      errs.phone = t('journey_step1.err_phone', 'Please enter a valid 10-digit Indian mobile number.');
+    }
+    if (!age || Number(age) < 18) {
+      errs.age = t('journey_step1.err_age', 'Applicant must be at least 18 years of age for NSFDC loan assistance.');
+    }
+    if (!casteDeclared) {
+      errs.casteDeclared = t('journey_step1.err_declaration', 'Please confirm the statutory community & eligibility declaration.');
+    }
     if (!fundingAmount || Number(fundingAmount) <= 0) {
       errs.fundingAmount = t('journey_step1.err_amount', 'Please provide required financial support amount.');
     }
@@ -441,6 +458,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
 
       const canonicalPayload = {
         applicantName: applicantName.trim(),
+        phone: phone.trim(),
         dob: dob || null,
         age: age ? Number(age) : null,
         gender,
@@ -522,6 +540,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
         try {
           await saveProfile({
             full_name: applicantName.trim(),
+            phone: phone.trim() || null,
             date_of_birth: dob || null,
             gender: gender || 'Male',
             state: stateName,
@@ -554,6 +573,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
   const handleResetForm = () => {
     if (window.confirm('Reset all fields in this intake form to defaults?')) {
       setApplicantName('');
+      setPhone('');
       setDob('');
       setAge('');
       setGender('Male');
@@ -581,6 +601,28 @@ export default function Step1UnderstandNeed({ onComplete }) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
+      {/* Guest Warning Banner if not authenticated */}
+      {!user && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900 shadow-xs animate-in fade-in duration-150">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+              <AlertCircle className="w-5 h-5 text-amber-700" />
+            </div>
+            <div className="text-xs">
+              <p className="font-bold text-sm text-amber-950">You are completing this intake as a Guest Applicant</p>
+              <p className="text-amber-800 mt-0.5">Please sign in or create an account to save your progress, lock your scheme eligibility, and submit official documents.</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAuthModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-[#0B3B60] hover:bg-[#07263F] text-white text-xs font-bold transition-all cursor-pointer shrink-0 shadow-xs"
+          >
+            Sign In / Sign Up
+          </button>
+        </div>
+      )}
+
       {/* ── 1. OFFICIAL FORM HEADER BANNER ── */}
       <div className="bg-white rounded-3xl border border-[#CBD5E1] p-6 sm:p-7 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#0B3B60] via-[#2563EB] to-[#0F8B8D]" />
@@ -679,28 +721,64 @@ export default function Step1UnderstandNeed({ onComplete }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Full Name */}
             <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
                 {t('journey_step1.full_name_label', 'Full Legal Name (as in Aadhaar / Official ID)')} <span className="text-[#DC2626]">*</span>
               </label>
-              <input
-                type="text"
-                value={applicantName}
-                onChange={(e) => {
-                  setApplicantName(e.target.value);
-                  if (errors.applicantName) setErrors((prev) => ({ ...prev, applicantName: null }));
-                }}
-                placeholder={t('journey_step1.full_name_placeholder', "Enter your full name as per Aadhaar")}
-                className={`w-full h-11 px-3.5 rounded-xl border text-xs sm:text-sm font-medium outline-none transition-all ${
-                  errors.applicantName
-                    ? 'border-[#DC2626] bg-[#FEF2F2] focus:ring-2 focus:ring-[#DC2626]/20'
-                    : 'border-[#CBD5E1] bg-white focus:border-[#0B3B60] focus:ring-2 focus:ring-[#0B3B60]/10'
-                }`}
-              />
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 text-gray-400">
+                  <User className="w-4 h-4" />
+                </span>
+                <input
+                  type="text"
+                  value={applicantName}
+                  onChange={(e) => {
+                    setApplicantName(e.target.value);
+                    if (errors.applicantName) setErrors((prev) => ({ ...prev, applicantName: null }));
+                  }}
+                  placeholder={t('journey_step1.full_name_placeholder', "Enter your full name as per Aadhaar")}
+                  className={`w-full h-11 pl-10 pr-3.5 rounded-xl border text-xs sm:text-sm font-medium outline-none transition-all ${
+                    errors.applicantName
+                      ? 'border-[#DC2626] bg-[#FEF2F2] focus:ring-2 focus:ring-[#DC2626]/20'
+                      : 'border-[#CBD5E1] bg-white focus:border-[#0B3B60] focus:ring-2 focus:ring-[#0B3B60]/10'
+                  }`}
+                />
+              </div>
               {errors.applicantName && (
                 <p className="text-[11px] font-semibold text-[#DC2626]">{errors.applicantName}</p>
+              )}
+            </div>
+
+            {/* Mobile Phone Number */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-[#334155]">
+                Primary Mobile Number (10 Digits) <span className="text-[#DC2626]">*</span>
+              </label>
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 text-gray-400">
+                  <Phone className="w-4 h-4" />
+                </span>
+                <input
+                  type="tel"
+                  maxLength={10}
+                  value={phone}
+                  onChange={(e) => {
+                    const cleaned = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setPhone(cleaned);
+                    if (errors.phone) setErrors((prev) => ({ ...prev, phone: null }));
+                  }}
+                  placeholder="e.g. 9876543210"
+                  className={`w-full h-11 pl-10 pr-3.5 rounded-xl border font-mono text-xs sm:text-sm font-medium outline-none transition-all ${
+                    errors.phone
+                      ? 'border-[#DC2626] bg-[#FEF2F2] focus:ring-2 focus:ring-[#DC2626]/20'
+                      : 'border-[#CBD5E1] bg-white focus:border-[#0B3B60] focus:ring-2 focus:ring-[#0B3B60]/10'
+                  }`}
+                />
+              </div>
+              {errors.phone && (
+                <p className="text-[11px] font-semibold text-[#DC2626]">{errors.phone}</p>
               )}
             </div>
 
@@ -741,21 +819,31 @@ export default function Step1UnderstandNeed({ onComplete }) {
             {/* Age in Years */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
-                {t('journey_step1.age_label', 'Age (in Years)')} <span className="text-[10px] font-normal text-[#64748B]">{t('journey_step1.age_sublabel', '(18–50 for entrepreneurship)')}</span>
+                {t('journey_step1.age_label', 'Age (in Years)')} <span className="text-[#DC2626]">*</span> <span className="text-[10px] font-normal text-[#64748B]">{t('journey_step1.age_sublabel', '(Min. 18 for loans)')}</span>
               </label>
               <input
                 type="number"
                 min={16}
                 max={99}
                 value={age}
-                onChange={(e) => setAge(e.target.value)}
+                onChange={(e) => {
+                  setAge(e.target.value);
+                  if (errors.age) setErrors((prev) => ({ ...prev, age: null }));
+                }}
                 placeholder="e.g. 28"
-                className="w-full h-11 px-3.5 rounded-xl border border-[#CBD5E1] bg-white text-xs sm:text-sm font-mono font-medium outline-none focus:border-[#0B3B60]"
+                className={`w-full h-11 px-3.5 rounded-xl border text-xs sm:text-sm font-mono font-medium outline-none transition-all ${
+                  errors.age
+                    ? 'border-[#DC2626] bg-[#FEF2F2] focus:ring-2 focus:ring-[#DC2626]/20'
+                    : 'border-[#CBD5E1] bg-white focus:border-[#0B3B60]'
+                }`}
               />
+              {errors.age && (
+                <p className="text-[11px] font-semibold text-[#DC2626]">{errors.age}</p>
+              )}
             </div>
 
             {/* Social Category / Community Selection */}
-            <div className="space-y-1.5">
+            <div className="sm:col-span-2 lg:col-span-3 space-y-1.5">
               <label className="block text-xs font-bold text-[#334155]">
                 {t('journey_step1.category_label', 'Social Category / Community')} <span className="text-[#DC2626]">*</span>
               </label>
@@ -775,22 +863,32 @@ export default function Step1UnderstandNeed({ onComplete }) {
 
           {/* Statutory Category Self-Declaration */}
           <div className="pt-2">
-            <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] cursor-pointer hover:bg-[#F1F5F9] transition-all">
+            <label className={`flex items-start gap-3 p-3.5 rounded-2xl border cursor-pointer transition-all ${
+              errors.casteDeclared
+                ? 'bg-red-50 border-red-300'
+                : 'bg-[#F8FAFC] border-[#E2E8F0] hover:bg-[#F1F5F9]'
+            }`}>
               <input
                 type="checkbox"
                 checked={casteDeclared}
-                onChange={(e) => setCasteDeclared(e.target.checked)}
+                onChange={(e) => {
+                  setCasteDeclared(e.target.checked);
+                  if (errors.casteDeclared) setErrors((prev) => ({ ...prev, casteDeclared: null }));
+                }}
                 className="w-4 h-4 rounded text-[#0B3B60] accent-[#0B3B60] mt-0.5 shrink-0"
               />
               <div className="space-y-0.5">
                 <span className="text-xs font-bold text-[#1E293B] block">
-                  {t('journey_step1.declaration_title', 'Statutory Community & Eligibility Declaration')}
+                  {t('journey_step1.declaration_title', 'Statutory Community & Eligibility Declaration')} <span className="text-[#DC2626]">*</span>
                 </span>
                 <span className="text-[11px] text-[#475569] leading-relaxed block">
                   {t('journey_step1.declaration_text', 'I hereby self-declare that the information provided is accurate and that I hold, or am eligible to obtain, a valid caste certificate and income declaration for statutory scheme verification.')}
                 </span>
               </div>
             </label>
+            {errors.casteDeclared && (
+              <p className="text-[11px] font-semibold text-[#DC2626] mt-1.5 ml-1">{errors.casteDeclared}</p>
+            )}
           </div>
         </div>
 

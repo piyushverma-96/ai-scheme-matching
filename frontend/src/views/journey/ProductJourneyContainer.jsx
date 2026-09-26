@@ -12,7 +12,14 @@ import { ArrowLeft, ShieldCheck, Sparkles, HelpCircle } from 'lucide-react';
 
 export default function ProductJourneyContainer() {
   const { t } = useTranslation();
-  const { journeyStep, setJourneyStep, setView } = useApp();
+  const { journeyStep, setJourneyStep, setView, user, setAuthModalOpen } = useApp();
+
+  // Prompt for authentication if entering journey without active session
+  useEffect(() => {
+    if (!user) {
+      setAuthModalOpen(true);
+    }
+  }, [user, setAuthModalOpen]);
 
   // Scroll to top whenever step changes
   useEffect(() => {

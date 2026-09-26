@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Lock, Mail, User, ArrowRight, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User, Phone, ArrowRight, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
 import Logo from '../components/Logo';
 import { useApp } from '../context/AppContext';
 import supabase from '../supabaseClient';
 
 export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
-  const { navigateTo, loginDemoUser } = useApp();
+  const {
+    navigateTo,
+    loginDemoUser,
+    pendingJourneyAction,
+    setPendingJourneyAction,
+    startJourney,
+    setJourneyFormData,
+  } = useApp();
   const [tab, setTab] = useState(initialTab); // 'login' | 'signup'
 
   useEffect(() => {
@@ -15,11 +22,27 @@ export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
   }, [initialTab]);
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  const handleSuccess = () => {
+    if (onLoginSuccess) {
+      onLoginSuccess();
+    } else if (pendingJourneyAction) {
+      const step = pendingJourneyAction.initialStep || 1;
+      const prefill = pendingJourneyAction.prefill || {};
+      if (fullName) prefill.applicantName = fullName;
+      if (phone) prefill.phone = phone;
+      setPendingJourneyAction(null);
+      startJourney(step, prefill);
+    } else {
+      navigateTo('home');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +59,11 @@ export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
       return;
     }
 
+    if (tab === 'signup' && phone && !/^[6-9]\d{9}$/.test(phone.trim())) {
+      setError('Please enter a valid 10-digit Indian mobile number.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -47,6 +75,7 @@ export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
           options: {
             data: {
               full_name: fullName.trim() || email.split('@')[0],
+              phone: phone.trim() || null,
             },
           },
         });
@@ -55,12 +84,15 @@ export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
           throw signUpError;
         }
 
+        if (phone.trim()) {
+          setJourneyFormData((prev) => ({ ...prev, phone: phone.trim(), applicantName: fullName.trim() }));
+        }
+
         // Auto-login or proceed
         if (data.session) {
           setSuccessMsg('Account created successfully! Redirecting...');
           setTimeout(() => {
-            if (onLoginSuccess) onLoginSuccess();
-            else navigateTo('home');
+            handleSuccess();
           }, 400);
         } else {
           // If session was not immediately returned, sign in with password
@@ -69,8 +101,7 @@ export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
             password: password,
           });
           if (signInError) throw signInError;
-          if (onLoginSuccess) onLoginSuccess();
-          else navigateTo('home');
+          handleSuccess();
         }
       } else {
         // Login Flow
@@ -86,11 +117,7 @@ export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
           throw signInError;
         }
 
-        if (onLoginSuccess) {
-          onLoginSuccess();
-        } else {
-          navigateTo('home');
-        }
+        handleSuccess();
       }
     } catch (err) {
       console.error('Auth action error:', err);
@@ -171,22 +198,41 @@ export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
         {/* Form Inputs */}
         <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
           {tab === 'signup' && (
-            <div className="space-y-1.5 animate-in fade-in duration-150">
-              <label className="block font-semibold text-[#1E293B]">Full Name</label>
-              <div className="relative flex items-center">
-                <span className="absolute left-3.5 text-gray-400">
-                  <User className="w-4 h-4" />
-                </span>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Aarav Sharma"
-                  className="w-full h-11 pl-10 pr-4 rounded-xl border border-[#E2E8F0] text-xs sm:text-sm outline-none focus:border-[#0B3B60] focus:ring-2 focus:ring-[#0B3B60]/10"
-                />
+            <>
+              <div className="space-y-1.5 animate-in fade-in duration-150">
+                <label className="block font-semibold text-[#1E293B]">Full Legal Name</label>
+                <div className="relative flex items-center">
+                  <span className="absolute left-3.5 text-gray-400">
+                    <User className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="e.g. Aarav Sharma"
+                    className="w-full h-11 pl-10 pr-4 rounded-xl border border-[#E2E8F0] text-xs sm:text-sm outline-none focus:border-[#0B3B60] focus:ring-2 focus:ring-[#0B3B60]/10"
+                  />
+                </div>
               </div>
-            </div>
+
+              <div className="space-y-1.5 animate-in fade-in duration-150">
+                <label className="block font-semibold text-[#1E293B]">Mobile Number (10 Digits)</label>
+                <div className="relative flex items-center">
+                  <span className="absolute left-3.5 text-gray-400">
+                    <Phone className="w-4 h-4" />
+                  </span>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="e.g. 9876543210"
+                    className="w-full h-11 pl-10 pr-4 rounded-xl border border-[#E2E8F0] font-mono text-xs sm:text-sm outline-none focus:border-[#0B3B60] focus:ring-2 focus:ring-[#0B3B60]/10"
+                  />
+                </div>
+              </div>
+            </>
           )}
 
           {/* Email Address */}

@@ -3,7 +3,14 @@ import { ShieldCheck, UserCheck, ArrowRight, X, AlertCircle } from 'lucide-react
 import { useApp } from '../context/AppContext';
 
 export default function CompleteProfileModal({ isOpen, onClose }) {
-  const { user, profile, saveProfile } = useApp();
+  const {
+    user,
+    profile,
+    saveProfile,
+    pendingJourneyAction,
+    setPendingJourneyAction,
+    startJourney,
+  } = useApp();
 
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || user?.user_metadata?.full_name || '',
@@ -44,6 +51,13 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
         annual_family_income: Number(formData.annual_family_income) || 250000,
       });
       if (onClose) onClose();
+
+      if (pendingJourneyAction) {
+        const step = pendingJourneyAction.initialStep || 1;
+        const extra = pendingJourneyAction.prefill || {};
+        setPendingJourneyAction(null);
+        startJourney(step, extra);
+      }
     } catch (err) {
       console.error('Save profile error:', err);
       setError(err?.message || 'Failed to save profile. Please try again.');

@@ -24,11 +24,21 @@ import LoginView from './views/LoginView';
 import AdminDashboardView from './views/AdminDashboardView';
 
 import CompleteProfileModal from './views/CompleteProfileModal';
+import AuthModal from './components/AuthModal';
 
 import useWindowDimensions from './hooks/useWindowDimensions';
 
 export default function App() {
-  const { currentView, navigateTo, completeProfileOpen, setCompleteProfileOpen } = useApp();
+  const {
+    currentView,
+    navigateTo,
+    completeProfileOpen,
+    setCompleteProfileOpen,
+    authModalOpen,
+    setAuthModalOpen,
+    pendingJourneyAction,
+    startJourney,
+  } = useApp();
   const { isMobile, isTablet, isDesktop } = useWindowDimensions();
   const [onboardingOpen, setOnboardingOpen] = useState(false);
 
@@ -64,9 +74,35 @@ export default function App() {
       case 'help_trust':
         return <HelpTrustView />;
       case 'login':
-        return <LoginView initialTab="login" onLoginSuccess={() => navigateTo('home')} />;
+        return (
+          <LoginView
+            initialTab="login"
+            onLoginSuccess={() => {
+              if (pendingJourneyAction) {
+                const step = pendingJourneyAction.initialStep || 1;
+                const prefill = pendingJourneyAction.prefill || {};
+                startJourney(step, prefill);
+              } else {
+                navigateTo('home');
+              }
+            }}
+          />
+        );
       case 'signup':
-        return <LoginView initialTab="signup" onLoginSuccess={() => navigateTo('home')} />;
+        return (
+          <LoginView
+            initialTab="signup"
+            onLoginSuccess={() => {
+              if (pendingJourneyAction) {
+                const step = pendingJourneyAction.initialStep || 1;
+                const prefill = pendingJourneyAction.prefill || {};
+                startJourney(step, prefill);
+              } else {
+                navigateTo('home');
+              }
+            }}
+          />
+        );
       case 'admin':
         return <AdminDashboardView />;
       default:
@@ -116,6 +152,12 @@ export default function App() {
       <CompleteProfileModal
         isOpen={completeProfileOpen}
         onClose={() => setCompleteProfileOpen(false)}
+      />
+
+      {/* Authentication Modal triggered before Journey */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
       />
     </div>
   );

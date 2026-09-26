@@ -9,6 +9,8 @@ export function AppProvider({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingJourneyAction, setPendingJourneyAction] = useState(null);
   const [trackModalOpen, setTrackModalOpen] = useState(false);
   const [schemeDetailModalOpen, setSchemeDetailModalOpen] = useState(false);
   const [selectedSchemeForDetail, setSelectedSchemeForDetail] = useState(null);
@@ -37,6 +39,7 @@ export function AppProvider({ children }) {
 
   const defaultJourneyData = {
     applicantName: '',
+    phone: '',
     dob: '',
     age: '',
     gender: 'Male',
@@ -177,6 +180,7 @@ export function AppProvider({ children }) {
         setJourneyFormData((prev) => ({
           ...prev,
           applicantName: prev.applicantName || profileData.full_name || '',
+          phone: prev.phone || profileData.phone || '',
           dob: prev.dob || profileData.date_of_birth || '',
           state: profileData.state || prev.state,
           stateName: profileData.state || prev.stateName,
@@ -189,8 +193,10 @@ export function AppProvider({ children }) {
         }));
       } else {
         setProfile(null);
-        // New user without profile -> trigger complete profile modal
-        setCompleteProfileOpen(true);
+        // Only open complete profile modal if not currently starting journey
+        if (!pendingJourneyAction) {
+          setCompleteProfileOpen(true);
+        }
       }
 
       // 2. Fetch Journey Persistence
@@ -268,6 +274,8 @@ export function AppProvider({ children }) {
       const authUser = newSession?.user ?? null;
       setUser(authUser);
       if (authUser) {
+        setAuthModalOpen(false);
+        setLoginModalOpen(false);
         await fetchUserData(authUser);
       } else {
         setProfile(null);
@@ -320,6 +328,7 @@ export function AppProvider({ children }) {
     setJourneyFormData((prev) => ({
       ...prev,
       applicantName: data.full_name || prev.applicantName,
+      phone: data.phone || prev.phone,
       dob: data.date_of_birth || prev.dob,
       state: data.state || prev.state,
       stateName: data.state || prev.stateName,
@@ -504,13 +513,15 @@ export function AppProvider({ children }) {
     const demoUser = {
       id: 'demo-user-12345',
       email: email,
-      user_metadata: { full_name: name },
+      user_metadata: { full_name: name, phone: '9876543210' },
     };
     setUser(demoUser);
     setProfile({
       id: 'demo-profile-12345',
       user_id: 'demo-user-12345',
       full_name: name,
+      phone: '9876543210',
+      date_of_birth: '1995-06-15',
       gender: 'Male',
       annual_family_income: 250000,
       state: 'Madhya Pradesh',
@@ -522,7 +533,44 @@ export function AppProvider({ children }) {
     });
     setSession({ access_token: 'demo_token', user: demoUser });
     setIsLoadingAuth(false);
-    navigateTo('home');
+    setAuthModalOpen(false);
+    setLoginModalOpen(false);
+
+    setJourneyFormData((prev) => ({
+      ...prev,
+      applicantName: name,
+      phone: '9876543210',
+      dob: '1995-06-15',
+      age: '29',
+      gender: 'Male',
+      state: 'Madhya Pradesh',
+      stateName: 'Madhya Pradesh',
+      district: 'Bhopal',
+      city: 'Bhopal',
+      pincode: '462001',
+      educationStatus: 'graduate',
+      occupation: 'Self-Employed / Micro-Entrepreneur',
+      familyIncome: '250000',
+      incomeValue: 250000,
+      category: 'Scheduled Caste (SC)',
+      categoryKey: 'SC',
+      casteDeclared: true,
+    }));
+
+    if (pendingJourneyAction) {
+      const step = pendingJourneyAction.initialStep || 1;
+      const extra = pendingJourneyAction.prefill || {};
+      if (Object.keys(extra).length > 0) {
+        setJourneyFormData((prev) => ({ ...prev, ...extra }));
+      }
+      setPendingJourneyAction(null);
+      saveJourneyProgress(step);
+      setCurrentView('journey');
+      setSidebarOpen(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigateTo('home');
+    }
   };
 
   // ── 9. Navigation Helpers ────────────────────────────────────────────────
@@ -538,7 +586,15 @@ export function AppProvider({ children }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const startJourney = (initialStep = 1) => {
+  const startJourney = (initialStep = 1, prefill = {}) => {
+    if (!user) {
+      setPendingJourneyAction({ initialStep, prefill });
+      setAuthModalOpen(true);
+      return;
+    }
+    if (prefill && Object.keys(prefill).length > 0) {
+      setJourneyFormData((prev) => ({ ...prev, ...prefill }));
+    }
     saveJourneyProgress(initialStep);
     setCurrentView('journey');
     setSidebarOpen(false);
@@ -546,13 +602,7 @@ export function AppProvider({ children }) {
   };
 
   const startWizard = (initialStep = 1, prefill = {}) => {
-    if (Object.keys(prefill).length > 0) {
-      setFormData((prev) => ({ ...prev, ...prefill }));
-    }
-    saveJourneyProgress(initialStep);
-    setCurrentView('journey');
-    setSidebarOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    startJourney(initialStep, prefill);
   };
 
   const navigateTo = (view) => {
@@ -670,6 +720,10 @@ export function AppProvider({ children }) {
         setAiAssistantOpen,
         loginModalOpen,
         setLoginModalOpen,
+        authModalOpen,
+        setAuthModalOpen,
+        pendingJourneyAction,
+        setPendingJourneyAction,
         trackModalOpen,
         setTrackModalOpen,
         schemeDetailModalOpen,
