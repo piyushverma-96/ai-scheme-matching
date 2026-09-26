@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ArrowRight,
   ChevronRight,
   ChevronDown,
+  Play,
   Check,
   CheckCircle2,
   Sparkles,
@@ -27,7 +28,9 @@ import {
   Scale,
   Brain,
   MessageSquare,
-  BadgeCheck,
+  Star,
+  X,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../context/AppContext';
@@ -41,27 +44,114 @@ export default function HomeView() {
     journeyStep = 1,
     user,
     profile,
-    userApplications = [],
   } = useApp();
 
   // FAQ Accordion State (open question index, default 0 open)
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
-  // Dynamic user name from real profile / Supabase Auth
-  const userFirstName =
-    profile?.full_name?.split(' ')[0] ||
-    user?.user_metadata?.full_name?.split(' ')[0] ||
-    user?.email?.split('@')[0] ||
-    'Beneficiary';
+  // Scheme Details Modal on Homepage (Allows inspecting scheme without leaving page)
+  const [selectedScheme, setSelectedScheme] = useState(null);
+
+  // Filter for verified schemes showcase
+  const [schemeCategoryFilter, setSchemeCategoryFilter] = useState('all');
+
+  // Inline Interactive Scheme Matcher State
+  const [matchPurpose, setMatchPurpose] = useState('business');
+  const [matchAmount, setMatchAmount] = useState(300000);
+  const [matchIncome, setMatchIncome] = useState(300000);
+  const [matchCaste, setMatchCaste] = useState('SC');
+
+  // Inline Interactive EMI Calculator State
+  const [calcLoanAmount, setCalcLoanAmount] = useState(300000);
+  const [calcTenureYears, setCalcTenureYears] = useState(5);
+  const [calcInterestRate, setCalcInterestRate] = useState(8.0);
+  const [calcMoratoriumMonths, setCalcMoratoriumMonths] = useState(6);
+
+  // Calculate dynamic EMI for the inline calculator
+  const calculateEMI = (principal, annualRate, years, moratoriumMonths) => {
+    const monthlyRate = annualRate / 12 / 100;
+    const totalMonths = Math.max(1, years * 12 - moratoriumMonths);
+    if (monthlyRate === 0) return Math.round(principal / totalMonths);
+    const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1);
+    return Math.round(emi);
+  };
+
+  const currentEMI = useMemo(
+    () => calculateEMI(calcLoanAmount, calcInterestRate, calcTenureYears, calcMoratoriumMonths),
+    [calcLoanAmount, calcInterestRate, calcTenureYears, calcMoratoriumMonths]
+  );
+
+  // Commercial comparison (13% interest without government subvention)
+  const commercialEMI = useMemo(
+    () => calculateEMI(calcLoanAmount, 13.0, calcTenureYears, 0),
+    [calcLoanAmount, calcTenureYears]
+  );
+
+  const monthlySavings = Math.max(0, commercialEMI - currentEMI);
+
+  // Filter schemes based on selected category
+  const filteredSchemes = useMemo(() => {
+    if (schemeCategoryFilter === 'all') return SCHEMES_DATA;
+    if (schemeCategoryFilter === 'micro') {
+      return SCHEMES_DATA.filter((s) => s.id.includes('micro') || s.id.includes('mfs') || s.id.includes('aajeevika'));
+    }
+    if (schemeCategoryFilter === 'term') {
+      return SCHEMES_DATA.filter((s) => s.id.includes('term') || s.id.includes('uny'));
+    }
+    if (schemeCategoryFilter === 'education') {
+      return SCHEMES_DATA.filter((s) => s.id.includes('education') || s.id.includes('els'));
+    }
+    return SCHEMES_DATA;
+  }, [schemeCategoryFilter]);
+
+  // Evaluated match in the inline matcher
+  const inlineMatchResult = useMemo(() => {
+    if (matchCaste !== 'SC') {
+      return {
+        matched: false,
+        reason: 'NSFDC schemes are statutorily reserved for Scheduled Caste (SC) applicants.',
+      };
+    }
+    if (matchIncome > 500000) {
+      return {
+        matched: false,
+        reason: 'Annual family income exceeds the NSFDC eligibility ceiling of ₹5,00,000.',
+      };
+    }
+
+    if (matchPurpose === 'education') {
+      const eduScheme = SCHEMES_DATA.find((s) => s.id === 'educational_loan_scheme') || SCHEMES_DATA[2];
+      return {
+        matched: true,
+        scheme: eduScheme,
+        score: 95,
+        reason: 'Perfect match for professional higher education with 6.0% concessional student rate.',
+      };
+    }
+
+    if (matchAmount <= 140000) {
+      const mfsScheme = SCHEMES_DATA.find((s) => s.id === 'micro_credit_finance') || SCHEMES_DATA[1];
+      return {
+        matched: true,
+        scheme: mfsScheme,
+        score: 96,
+        reason: 'Small enterprise project cost (≤ ₹1.40 Lakh) qualifies for fast-track Micro Finance Scheme at 6.50% p.a.',
+      };
+    }
+
+    const termScheme = SCHEMES_DATA.find((s) => s.id === 'nsfdc_term_loan') || SCHEMES_DATA[0];
+    return {
+      matched: true,
+      scheme: termScheme,
+      score: 98,
+      reason: 'Viable scale for NSFDC Term Loan (up to ₹50 Lakh) at 8.00% concessional interest rate with 6-month moratorium.',
+    };
+  }, [matchPurpose, matchAmount, matchIncome, matchCaste]);
 
   // Active step info (1 to 6)
   const currentStepNum = Math.min(6, Math.max(1, journeyStep || 1));
 
-  // Dynamic verified counts from ground truth database
-  const verifiedSchemesCount = SCHEMES_DATA?.length || 5;
-  const verifiedPartnersCount = 38; // Real State Channelizing Agencies (from data/verified_partners_seed.json)
-
-  // 6 Workflow Steps (Outcome-neutral, strict compliance with non-guaranteed claims)
+  // 6 Workflow Steps (Strict outcome-neutral language)
   const WORKFLOW_STEPS = [
     {
       num: 1,
@@ -141,7 +231,7 @@ export default function HomeView() {
     },
   ];
 
-  // 8 FAQs from the Brief (Verbatim answers avoiding overclaiming)
+  // 8 FAQs from Brief
   const FAQS = [
     {
       q: 'Does UdyamNex guarantee loan approval or financial outcomes?',
@@ -178,70 +268,37 @@ export default function HomeView() {
   ];
 
   return (
-    <div className="w-full space-y-16 sm:space-y-24 pb-16 animate-in fade-in duration-300">
-      {/* ── LOGGED-IN QUICK RESUME BANNER (If user is signed in) ─────────────── */}
-      {user && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mb-10 sm:-mb-16 pt-4">
-          <div className="bg-white border border-[#A3E4D7] rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#E8F8F2] text-[#0E6655] flex items-center justify-center shrink-0">
-                <Compass className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm font-bold text-[#0B3B60]">
-                  Welcome back, {userFirstName}! You are on Step {currentStepNum} of 6
-                </p>
-                <p className="text-[11px] text-[#64748B]">
-                  {currentStepNum > 1
-                    ? 'Resume your scheme application journey where you left off.'
-                    : 'Start Step 1 to discover verified NSFDC government schemes for your business.'}
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => startJourney(currentStepNum)}
-              className="px-4 py-2 bg-[#0E6655] hover:bg-[#0B5345] text-white rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-2 cursor-pointer self-start sm:self-auto shrink-0"
-            >
-              <span>{currentStepNum > 1 ? 'Resume Journey' : 'Start Journey'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ── SECTION 1: HERO SECTION ─────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-6 sm:pt-10 lg:pt-14 pb-8">
-        {/* Soft Background Radial Glow */}
-        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-96 h-96 bg-emerald-200/25 rounded-full blur-3xl pointer-events-none -z-10" />
-        <div className="absolute top-10 left-10 w-72 h-72 bg-blue-100/30 rounded-full blur-3xl pointer-events-none -z-10" />
+    <div id="top" className="w-full space-y-16 sm:space-y-24 pb-16 animate-in fade-in duration-300">
+      {/* ── SECTION 1: HERO SECTION (EXACT MOCKUP HEADLINE & FLOATING CARDS) ── */}
+      <section className="relative overflow-hidden pt-6 sm:pt-10 lg:pt-12 pb-6">
+        {/* Soft Background Radial Glows */}
+        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-96 h-96 bg-emerald-100/50 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="absolute top-8 left-8 w-80 h-80 bg-teal-50/60 rounded-full blur-3xl pointer-events-none -z-10" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
             {/* Left Hero Content (7 Cols) */}
-            <div className="lg:col-span-7 space-y-6 sm:space-y-7 text-left">
+            <div className="lg:col-span-7 space-y-5 sm:space-y-6 text-left">
               {/* Feature Pill Badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E8F8F2] border border-[#10B981]/30 text-[#0E6655] text-xs font-semibold shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-[#0E6655]" />
-                <span>AI-Powered Scheme Matching</span>
+                <span className="uppercase tracking-wider text-[11px] font-bold">AI-Powered Scheme Matching</span>
               </div>
 
-              {/* Main Headline */}
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#0B3B60] tracking-tight leading-[1.12]">
-                Your Idea. Our AI.{' '}
-                <span className="text-[#0E6655] block sm:inline">
-                  Government Support.
-                </span>
+              {/* Exact Mockup Headline */}
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold text-[#0B3B60] tracking-tight leading-[1.12]">
+                Your Business Idea.<br />
+                The Right Scheme.<br />
+                <span className="text-[#0E6655]">Real Government Support.</span>
               </h1>
 
-              {/* Subtitle */}
-              <p className="text-sm sm:text-base md:text-lg text-[#64748B] leading-relaxed max-w-xl">
-                UdyamNex helps marginalized entrepreneurs find the right government schemes, connect with trusted partners, and turn their ideas into successful businesses.
+              {/* Exact Mockup Subtitle */}
+              <p className="text-sm sm:text-base text-[#64748B] leading-relaxed max-w-xl">
+                UdyamNex helps eligible entrepreneurs discover relevant government financial schemes, understand their benefits, calculate financial impact, and find the right application channel.
               </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-1">
                 <button
                   type="button"
                   onClick={() => startJourney(1)}
@@ -259,57 +316,32 @@ export default function HomeView() {
                   }}
                   className="px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 text-[#0B3B60] font-semibold text-sm border border-[#CBD5E1] transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[48px] shadow-2xs"
                 >
+                  <Play className="w-3.5 h-3.5 fill-[#0B3B60] text-[#0B3B60]" />
                   <span>How It Works</span>
                 </button>
               </div>
 
-              {/* Trust Indicators (Direct from brief) */}
-              <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-3 text-xs font-semibold text-[#475569]">
+              {/* Trust Indicators (Exact from Mockup) */}
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-2 text-xs font-semibold text-[#475569]">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-[#0E6655]" />
                   <span>Verified Government Data</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-[#0E6655]" />
-                  <span>100% Free</span>
+                  <Sparkles className="w-4 h-4 text-[#0E6655]" />
+                  <span>Personalized Recommendations</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#0E6655]" />
-                  <span>For Marginalized Entrepreneurs</span>
+                  <span>Simple Application Guidance</span>
                 </div>
               </div>
             </div>
 
             {/* Right Hero Visual & 4 Interactive Floating Cards (5 Cols) */}
-            <div className="lg:col-span-5 relative flex items-center justify-center pt-4 lg:pt-0">
+            <div className="lg:col-span-5 relative flex items-center justify-center pt-6 lg:pt-0">
               {/* Circular Backdrop Aura with Contour and Growth Arrow */}
               <div className="relative w-72 sm:w-96 md:w-[420px] aspect-square rounded-full bg-gradient-to-tr from-emerald-100/60 via-teal-50 to-white flex items-center justify-center shadow-inner border border-emerald-100">
-                {/* Growth trend arrow swoosh */}
-                <div className="absolute -top-3 right-6 text-emerald-400/80 pointer-events-none">
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                    <polyline points="7 7 17 7 17 17"></polyline>
-                  </svg>
-                </div>
-
-                {/* Left Artisan Inset Thumbnail */}
-                <div className="hidden sm:block absolute -left-4 top-1/3 w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md z-10">
-                  <img
-                    src="/artisan_tailor.jpg"
-                    alt="Grassroots artisan working"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Right Local Business Inset Thumbnail */}
-                <div className="hidden sm:block absolute -right-3 top-1/4 w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md z-10">
-                  <img
-                    src="/business_shop.jpg"
-                    alt="Local small enterprise"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
                 {/* Central Entrepreneur Hero Portrait */}
                 <div className="w-64 sm:w-80 md:w-88 aspect-square rounded-full overflow-hidden border-4 border-white shadow-2xl relative z-0">
                   <img
@@ -320,33 +352,17 @@ export default function HomeView() {
                 </div>
               </div>
 
-              {/* ── 4 FLOATING GLASSMORPHIC CARDS AROUND HERO ──────────────── */}
-              {/* Card 1: Top-Left (AI Matching) */}
+              {/* ── 4 FLOATING GLASSMORPHIC CARDS MATCHING SCREENSHOT ──────── */}
+              {/* Card 1: Top-Left (Eligible Schemes) */}
               <div
-                onClick={() => startJourney(1)}
-                className="absolute -top-3 left-0 sm:-left-6 bg-white/95 backdrop-blur-md border border-[#E2E8F0] hover:border-[#0E6655] rounded-2xl p-2.5 sm:p-3 shadow-lg hover:shadow-xl transition-all cursor-pointer z-20 flex items-center gap-2.5 max-w-[210px] group"
-              >
-                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                  <Brain className="w-4 h-4" />
-                </div>
-                <div className="text-left overflow-hidden">
-                  <h4 className="text-xs font-bold text-[#0B3B60] leading-tight flex items-center justify-between">
-                    <span>AI Matching</span>
-                    <ChevronRight className="w-3 h-3 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                  </h4>
-                  <p className="text-[10px] text-[#64748B] truncate mt-0.5">
-                    Finds the best schemes
-                  </p>
-                </div>
-              </div>
-
-              {/* Card 2: Top-Right (Eligible Schemes - CRITICAL FIX 1: Non-numeric!) */}
-              <div
-                onClick={() => navigateTo('schemes')}
-                className="absolute top-4 -right-2 sm:-right-6 bg-white/95 backdrop-blur-md border border-[#E2E8F0] hover:border-[#0E6655] rounded-2xl p-2.5 sm:p-3 shadow-lg hover:shadow-xl transition-all cursor-pointer z-20 flex items-center gap-2.5 max-w-[230px] group"
+                onClick={() => {
+                  const el = document.getElementById('schemes-section');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="absolute top-2 left-0 sm:-left-6 bg-white/95 backdrop-blur-md border border-[#E2E8F0] hover:border-[#0E6655] rounded-2xl p-2.5 sm:p-3 shadow-lg hover:shadow-xl transition-all cursor-pointer z-20 flex items-center gap-2.5 max-w-[210px] group"
               >
                 <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#0E6655] flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-4 h-4" />
+                  <FileText className="w-4 h-4" />
                 </div>
                 <div className="text-left overflow-hidden">
                   <h4 className="text-xs font-bold text-[#0B3B60] leading-tight flex items-center justify-between">
@@ -359,31 +375,56 @@ export default function HomeView() {
                 </div>
               </div>
 
-              {/* Card 3: Bottom-Left (Channel Partners) */}
+              {/* Card 2: Top-Right (Best Match Found) */}
+              <div
+                onClick={() => {
+                  const el = document.getElementById('personalized-match');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="absolute top-4 -right-2 sm:-right-6 bg-white/95 backdrop-blur-md border border-[#E2E8F0] hover:border-[#0E6655] rounded-2xl p-2.5 sm:p-3 shadow-lg hover:shadow-xl transition-all cursor-pointer z-20 flex items-center gap-2.5 max-w-[220px] group"
+              >
+                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                  <Star className="w-4 h-4 fill-amber-500" />
+                </div>
+                <div className="text-left overflow-hidden">
+                  <h4 className="text-xs font-bold text-[#0B3B60] leading-tight flex items-center justify-between">
+                    <span>Best Match Found</span>
+                    <ChevronRight className="w-3 h-3 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                  </h4>
+                  <p className="text-[10px] text-[#64748B] truncate mt-0.5">
+                    Most relevant scheme
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 3: Bottom-Left (Channel Partner) */}
               <div
                 onClick={() => navigateTo('partners')}
-                className="absolute -bottom-3 left-0 sm:-left-4 bg-white/95 backdrop-blur-md border border-[#E2E8F0] hover:border-[#0E6655] rounded-2xl p-2.5 sm:p-3 shadow-lg hover:shadow-xl transition-all cursor-pointer z-20 flex items-center gap-2.5 max-w-[220px] group"
+                className="absolute bottom-4 left-0 sm:-left-4 bg-white/95 backdrop-blur-md border border-[#E2E8F0] hover:border-[#0E6655] rounded-2xl p-2.5 sm:p-3 shadow-lg hover:shadow-xl transition-all cursor-pointer z-20 flex items-center gap-2.5 max-w-[210px] group"
               >
                 <div className="w-8 h-8 rounded-xl bg-teal-50 text-[#0E6655] flex items-center justify-center shrink-0">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div className="text-left overflow-hidden">
                   <h4 className="text-xs font-bold text-[#0B3B60] leading-tight flex items-center justify-between">
-                    <span>Channel Partners</span>
+                    <span>Channel Partner</span>
                     <ChevronRight className="w-3 h-3 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                   </h4>
                   <p className="text-[10px] text-[#64748B] truncate mt-0.5">
-                    Banks, SCAs & nodal desks
+                    Nearest eligible partner
                   </p>
                 </div>
               </div>
 
               {/* Card 4: Bottom-Right (Financial Impact) */}
               <div
-                onClick={() => navigateTo('calculator')}
-                className="absolute bottom-6 -right-2 sm:-right-4 bg-white/95 backdrop-blur-md border border-[#E2E8F0] hover:border-[#0E6655] rounded-2xl p-2.5 sm:p-3 shadow-lg hover:shadow-xl transition-all cursor-pointer z-20 flex items-center gap-2.5 max-w-[220px] group"
+                onClick={() => {
+                  const el = document.getElementById('calculator-section');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="absolute bottom-6 -right-2 sm:-right-4 bg-white/95 backdrop-blur-md border border-[#E2E8F0] hover:border-[#0E6655] rounded-2xl p-2.5 sm:p-3 shadow-lg hover:shadow-xl transition-all cursor-pointer z-20 flex items-center gap-2.5 max-w-[210px] group"
               >
-                <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                   <Calculator className="w-4 h-4" />
                 </div>
                 <div className="text-left overflow-hidden">
@@ -396,83 +437,78 @@ export default function HomeView() {
                   </p>
                 </div>
               </div>
+
+              {/* Handwritten Script Accent Text (Exact from Screenshot) */}
+              <div className="absolute -bottom-6 right-0 sm:right-6 select-none pointer-events-none transform -rotate-6">
+                <span className="font-serif italic text-sm sm:text-base text-emerald-800/60 font-semibold tracking-wide">
+                  Build Your Tomorrow
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 2: TRUST / VALUE STRIP (CRITICAL FIX 1: REAL COUNTS) ────── */}
+      {/* ── SECTION 2: TRUST / VALUE STRIP (EXACT 4 ITEMS FROM SCREENSHOT) ─── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl border border-[#E2E8F0] p-5 sm:p-8 shadow-xs">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 items-center divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
-            {/* Stat 1: Real Government Schemes count from database */}
-            <div className="flex items-center gap-3.5 sm:gap-4 pt-4 first:pt-0 lg:pt-0 lg:px-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#E8F8F2] text-[#0E6655] flex items-center justify-center shrink-0 border border-[#10B981]/20">
-                <FileText className="w-6 h-6" />
+        <div className="bg-white rounded-3xl border border-[#E2E8F0] p-5 sm:p-7 shadow-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 items-center divide-y sm:divide-y-0 lg:divide-x divide-slate-100">
+            {/* Item 1: Verified Government Data */}
+            <div className="flex items-center gap-3.5 pt-3 first:pt-0 sm:pt-0 lg:px-4">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-[#0E6655] flex items-center justify-center shrink-0 border border-[#10B981]/20">
+                <Building2 className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <div className="text-xl sm:text-2xl font-extrabold text-[#0B3B60]">
-                  {verifiedSchemesCount}
-                </div>
-                <div className="text-xs font-semibold text-[#1E293B]">
-                  Government Schemes
+                <div className="text-xs sm:text-sm font-bold text-[#0B3B60]">
+                  Verified Government Data
                 </div>
                 <div className="text-[11px] text-[#64748B]">
-                  Verified NSFDC welfare programs
+                  Official & trusted sources
                 </div>
               </div>
             </div>
 
-            {/* Stat 2: Real Channel Partners count from verified directory */}
-            <div className="flex items-center gap-3.5 sm:gap-4 pt-4 first:pt-0 lg:pt-0 lg:px-4">
-              <div className="w-12 h-12 rounded-2xl bg-teal-50 text-[#0E6655] flex items-center justify-center shrink-0 border border-teal-200/50">
-                <Building2 className="w-6 h-6" />
+            {/* Item 2: Personalized Scheme Matching */}
+            <div className="flex items-center gap-3.5 pt-3 first:pt-0 sm:pt-0 lg:px-4">
+              <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200/50">
+                <Brain className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <div className="text-xl sm:text-2xl font-extrabold text-[#0B3B60]">
-                  {verifiedPartnersCount}
-                </div>
-                <div className="text-xs font-semibold text-[#1E293B]">
-                  Channel Partners
+                <div className="text-xs sm:text-sm font-bold text-[#0B3B60]">
+                  Personalized Scheme Matching
                 </div>
                 <div className="text-[11px] text-[#64748B]">
-                  State Channelizing Agencies (SCAs)
+                  Based on your profile
                 </div>
               </div>
             </div>
 
-            {/* Stat 3: Qualitative Truth Indicator */}
-            <div className="flex items-center gap-3.5 sm:gap-4 pt-4 first:pt-0 lg:pt-0 lg:px-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#0E6655] flex items-center justify-center shrink-0 border border-[#10B981]/20">
-                <ShieldCheck className="w-6 h-6" />
+            {/* Item 3: Financial Impact Calculator */}
+            <div className="flex items-center gap-3.5 pt-3 first:pt-0 sm:pt-0 lg:px-4">
+              <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 border border-purple-200/50">
+                <Calculator className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <div className="text-lg sm:text-xl font-extrabold text-[#0B3B60]">
-                  Verified Data
-                </div>
-                <div className="text-xs font-semibold text-[#1E293B]">
-                  Official Gazette Rules
+                <div className="text-xs sm:text-sm font-bold text-[#0B3B60]">
+                  Financial Impact Calculator
                 </div>
                 <div className="text-[11px] text-[#64748B]">
-                  Direct MoSJE & NSFDC terms
+                  Know your estimated benefits
                 </div>
               </div>
             </div>
 
-            {/* Stat 4: Zero fees claim */}
-            <div className="flex items-center gap-3.5 sm:gap-4 pt-4 first:pt-0 lg:pt-0 lg:px-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#0B3B60] flex items-center justify-center shrink-0 border border-blue-200/50">
-                <Users className="w-6 h-6" />
+            {/* Item 4: Application Guidance */}
+            <div className="flex items-center gap-3.5 pt-3 first:pt-0 sm:pt-0 lg:px-4">
+              <div className="w-11 h-11 rounded-2xl bg-teal-50 text-[#0E6655] flex items-center justify-center shrink-0 border border-teal-200/50">
+                <FileCheck2 className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <div className="text-lg sm:text-xl font-extrabold text-[#0B3B60]">
-                  100% Free
-                </div>
-                <div className="text-xs font-semibold text-[#1E293B]">
-                  Zero Intermediary Fees
+                <div className="text-xs sm:text-sm font-bold text-[#0B3B60]">
+                  Application Guidance
                 </div>
                 <div className="text-[11px] text-[#64748B]">
-                  Direct access for entrepreneurs
+                  Step-by-step support
                 </div>
               </div>
             </div>
@@ -480,7 +516,7 @@ export default function HomeView() {
         </div>
       </section>
 
-      {/* ── SECTION 3: "HOW UDYAMNEX WORKS" (CRITICAL FIX 2: GUIDE APPLICATION) ── */}
+      {/* ── SECTION 3: "HOW UDYAMNEX WORKS" (6-STEP WORKFLOW) ───────────────── */}
       <section id="how-it-works" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-20">
         <div className="text-left space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F8F2] text-[#0E6655] text-xs font-semibold border border-[#10B981]/20">
@@ -497,7 +533,7 @@ export default function HomeView() {
 
         {/* 6 Horizontal Workflow Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 relative">
-          {WORKFLOW_STEPS.map((step, idx) => {
+          {WORKFLOW_STEPS.map((step) => {
             const Icon = step.icon;
             return (
               <div
@@ -506,7 +542,6 @@ export default function HomeView() {
                 className="bg-white rounded-2xl p-4 sm:p-4.5 border border-[#E2E8F0] hover:border-[#0E6655] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between cursor-pointer group relative"
               >
                 <div>
-                  {/* Step Top Row with Icon, Number & Connector */}
                   <div className="flex items-center justify-between mb-3.5">
                     <div className="w-9 h-9 rounded-xl bg-[#E8F8F2] group-hover:bg-[#0E6655] text-[#0E6655] group-hover:text-white transition-colors flex items-center justify-center shrink-0">
                       <Icon className="w-4 h-4" />
@@ -534,15 +569,412 @@ export default function HomeView() {
         </div>
       </section>
 
-      {/* ── SECTION 4: CORE CAPABILITIES (2x3 GRID, 6 CARDS) ────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      {/* ── SECTION 4: VERIFIED GOVERNMENT SCHEMES (LIVE SHOWCASE ON SAME PAGE) ── */}
+      <section id="schemes-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-20">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="text-left space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F8F2] text-[#0E6655] text-xs font-semibold border border-[#10B981]/20">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Verified Government Schemes</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B3B60] tracking-tight">
+              Explore Verified NSFDC Welfare Schemes
+            </h2>
+            <p className="text-xs sm:text-sm text-[#64748B] max-w-xl">
+              100% official terms, statutory income limits, and concessional interest rates straight from live Government gazette guidelines.
+            </p>
+          </div>
+
+          {/* Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-2xl self-start">
+            <button
+              type="button"
+              onClick={() => setSchemeCategoryFilter('all')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                schemeCategoryFilter === 'all'
+                  ? 'bg-white text-[#0B3B60] shadow-2xs'
+                  : 'text-[#64748B] hover:text-[#0B3B60]'
+              }`}
+            >
+              All Schemes ({SCHEMES_DATA.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setSchemeCategoryFilter('micro')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                schemeCategoryFilter === 'micro'
+                  ? 'bg-white text-[#0B3B60] shadow-2xs'
+                  : 'text-[#64748B] hover:text-[#0B3B60]'
+              }`}
+            >
+              Micro-Credit (≤ ₹1.4L)
+            </button>
+            <button
+              type="button"
+              onClick={() => setSchemeCategoryFilter('term')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                schemeCategoryFilter === 'term'
+                  ? 'bg-white text-[#0B3B60] shadow-2xs'
+                  : 'text-[#64748B] hover:text-[#0B3B60]'
+              }`}
+            >
+              Term Loans (Up to ₹50L)
+            </button>
+            <button
+              type="button"
+              onClick={() => setSchemeCategoryFilter('education')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                schemeCategoryFilter === 'education'
+                  ? 'bg-white text-[#0B3B60] shadow-2xs'
+                  : 'text-[#64748B] hover:text-[#0B3B60]'
+              }`}
+            >
+              Education Loans
+            </button>
+          </div>
+        </div>
+
+        {/* Schemes Grid (Directly on this single page) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredSchemes.map((scheme) => (
+            <div
+              key={scheme.id}
+              className="bg-white rounded-3xl border border-[#E2E8F0] hover:border-[#0E6655] p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-5 group"
+            >
+              <div className="space-y-3.5">
+                {/* Header Badge */}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-bold text-[#0E6655] bg-[#E8F8F2] px-2.5 py-0.5 rounded-full border border-[#10B981]/20">
+                    {scheme.category || 'NSFDC Welfare Program'}
+                  </span>
+                  <span className="text-xs font-bold text-[#0B3B60]">
+                    {scheme.interest_rate_display || 'Subsidized Rate'}
+                  </span>
+                </div>
+
+                <h3 className="text-base font-bold text-[#0B3B60] group-hover:text-[#0E6655] transition-colors leading-snug">
+                  {scheme.name}
+                </h3>
+
+                <p className="text-xs text-[#64748B] leading-relaxed line-clamp-3">
+                  {scheme.short_description || scheme.description}
+                </p>
+
+                {/* Key Attributes Box */}
+                <div className="p-3 bg-slate-50 rounded-2xl space-y-1.5 text-xs text-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Max Project Scale:</span>
+                    <span className="font-bold text-[#1E293B]">{scheme.project_cost_max_display || 'Up to ₹50.00 Lakh'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Repayment Period:</span>
+                    <span className="font-semibold text-[#1E293B]">{scheme.repayment_period || 'Up to 7 Years'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Moratorium:</span>
+                    <span className="font-semibold text-[#1E293B]">{scheme.moratorium_period || '6 Months'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons on Card */}
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setSelectedScheme(scheme)}
+                  className="flex-1 py-2.5 rounded-xl border border-[#CBD5E1] hover:bg-slate-50 text-[#0B3B60] font-semibold text-xs transition-colors cursor-pointer text-center"
+                >
+                  View Details
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startJourney(1, { preferredSchemeId: scheme.id })}
+                  className="flex-1 py-2.5 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white font-bold text-xs transition-colors shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <span>Apply Now</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── SECTION 5: PERSONALIZED SCHEME MATCHING (INLINE ON SAME PAGE) ────── */}
+      <section id="personalized-match" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-20">
+        <div className="text-left space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F8F2] text-[#0E6655] text-xs font-semibold border border-[#10B981]/20">
+            <Brain className="w-3.5 h-3.5" />
+            <span>Instant Eligibility Check</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B3B60] tracking-tight">
+            Personalized Scheme Matching
+          </h2>
+          <p className="text-xs sm:text-sm text-[#64748B] max-w-xl">
+            See which verified government scheme matches your business or education requirement right now without paperwork.
+          </p>
+        </div>
+
+        {/* 2-Column Matcher Card */}
+        <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-8 shadow-xs grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Left Inputs (7 Cols) */}
+          <div className="lg:col-span-7 space-y-5">
+            {/* Input 1: Purpose */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[#0B3B60] block">
+                Requirement / Enterprise Purpose
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'business', label: 'Small Business' },
+                  { id: 'micro', label: 'Micro Enterprise' },
+                  { id: 'education', label: 'Higher Education' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setMatchPurpose(item.id)}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
+                      matchPurpose === item.id
+                        ? 'bg-[#0E6655] text-white border-[#0E6655] shadow-2xs'
+                        : 'bg-white text-[#475569] border-[#CBD5E1] hover:border-[#0E6655]/40'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Input 2: Project Cost / Loan Scale */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs font-bold">
+                <span className="text-[#0B3B60]">Required Amount / Scale:</span>
+                <span className="text-[#0E6655] font-mono text-sm">₹{matchAmount.toLocaleString('en-IN')}</span>
+              </div>
+              <input
+                type="range"
+                min="50000"
+                max="5000000"
+                step="50000"
+                value={matchAmount}
+                onChange={(e) => setMatchAmount(Number(e.target.value))}
+                className="w-full accent-[#0E6655] cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>₹50,000 (Micro)</span>
+                <span>₹10,00,000</span>
+                <span>₹50,00,000 (Max Limit)</span>
+              </div>
+            </div>
+
+            {/* Input 3: Annual Household Income */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs font-bold">
+                <span className="text-[#0B3B60]">Annual Household Income:</span>
+                <span className="text-[#0E6655] font-mono text-sm">₹{matchIncome.toLocaleString('en-IN')}</span>
+              </div>
+              <input
+                type="range"
+                min="50000"
+                max="600000"
+                step="25000"
+                value={matchIncome}
+                onChange={(e) => setMatchIncome(Number(e.target.value))}
+                className="w-full accent-[#0E6655] cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>₹50,000</span>
+                <span>₹3,00,000</span>
+                <span>₹5,00,000 (Statutory Ceiling)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Live Match Result (5 Cols) */}
+          <div className="lg:col-span-5 bg-[#F8FAFC] rounded-2xl border border-slate-200 p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B]">
+                Deterministic Rule Result
+              </span>
+              {inlineMatchResult.matched && (
+                <span className="text-[10px] font-bold text-[#0E6655] bg-[#E8F8F2] px-2.5 py-0.5 rounded-full border border-[#10B981]/20">
+                  {inlineMatchResult.score}% Compatibility
+                </span>
+              )}
+            </div>
+
+            {inlineMatchResult.matched ? (
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#E8F8F2] text-[#0E6655] flex items-center justify-center shrink-0">
+                    <Award className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#0B3B60]">
+                      {inlineMatchResult.scheme?.name}
+                    </h4>
+                    <p className="text-[11px] text-[#0E6655] font-semibold mt-0.5">
+                      {inlineMatchResult.scheme?.interest_rate_display} • {inlineMatchResult.scheme?.loan_amount_short}
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-[#475569] leading-relaxed bg-white p-3 rounded-xl border border-slate-200">
+                  {inlineMatchResult.reason}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => startJourney(1, { preferredSchemeId: inlineMatchResult.scheme?.id })}
+                  className="w-full py-2.5 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white font-bold text-xs transition-colors shadow-2xs flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>Proceed with this Scheme</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
+                <span className="text-xs font-bold text-rose-700 block">Not Eligible under NSFDC Rules</span>
+                <p className="text-xs text-rose-600 leading-relaxed">{inlineMatchResult.reason}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 6: FINANCIAL IMPACT & EMI CALCULATOR (INLINE ON SAME PAGE) ─ */}
+      <section id="calculator-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-20">
+        <div className="text-left space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F8F2] text-[#0E6655] text-xs font-semibold border border-[#10B981]/20">
+            <Calculator className="w-3.5 h-3.5" />
+            <span>Interactive Simulator</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B3B60] tracking-tight">
+            Financial Impact & EMI Calculator
+          </h2>
+          <p className="text-xs sm:text-sm text-[#64748B] max-w-xl">
+            Simulate monthly repayments with official subsidized rates (6%–8%) and see how much you save compared to commercial bank rates.
+          </p>
+        </div>
+
+        {/* Calculator Card */}
+        <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-8 shadow-xs grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Sliders (7 Cols) */}
+          <div className="lg:col-span-7 space-y-5">
+            {/* Slider 1: Loan Amount */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs font-bold">
+                <span className="text-[#0B3B60]">Loan Amount Required:</span>
+                <span className="text-[#0E6655] font-mono text-sm">₹{calcLoanAmount.toLocaleString('en-IN')}</span>
+              </div>
+              <input
+                type="range"
+                min="50000"
+                max="5000000"
+                step="50000"
+                value={calcLoanAmount}
+                onChange={(e) => setCalcLoanAmount(Number(e.target.value))}
+                className="w-full accent-[#0E6655] cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>₹50,000</span>
+                <span>₹25,00,000</span>
+                <span>₹50,00,000</span>
+              </div>
+            </div>
+
+            {/* Slider 2: Tenure Years */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs font-bold">
+                <span className="text-[#0B3B60]">Repayment Tenure:</span>
+                <span className="text-[#0E6655] font-mono text-sm">{calcTenureYears} Years ({calcTenureYears * 12} Months)</span>
+              </div>
+              <input
+                type="range"
+                min="1"
+                max="7"
+                step="1"
+                value={calcTenureYears}
+                onChange={(e) => setCalcTenureYears(Number(e.target.value))}
+                className="w-full accent-[#0E6655] cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>1 Year</span>
+                <span>3 Years</span>
+                <span>7 Years (Max)</span>
+              </div>
+            </div>
+
+            {/* Slider 3: Subsidized Interest Rate */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs font-bold">
+                <span className="text-[#0B3B60]">Concessional Interest Rate:</span>
+                <span className="text-[#0E6655] font-mono text-sm">{calcInterestRate.toFixed(1)}% p.a.</span>
+              </div>
+              <input
+                type="range"
+                min="4.0"
+                max="8.0"
+                step="0.5"
+                value={calcInterestRate}
+                onChange={(e) => setCalcInterestRate(Number(e.target.value))}
+                className="w-full accent-[#0E6655] cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>4.0% (Women AMY)</span>
+                <span>6.5% (MFS)</span>
+                <span>8.0% (Term Loan)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Results Summary Box (5 Cols) */}
+          <div className="lg:col-span-5 bg-gradient-to-br from-[#0B3B60] to-[#0E6655] text-white rounded-3xl p-6 sm:p-7 space-y-5 shadow-md">
+            <div>
+              <span className="text-[11px] font-semibold text-emerald-200 uppercase tracking-wider block">
+                Estimated Monthly Repayment
+              </span>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white mt-1 font-mono">
+                ₹{currentEMI.toLocaleString('en-IN')}<span className="text-xs font-normal text-slate-300">/mo</span>
+              </div>
+              <p className="text-[11px] text-emerald-100/80 mt-1">
+                Calculated on reducing monthly balance under official NSFDC subvention.
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-white/10 rounded-2xl border border-white/15 space-y-2 text-xs">
+              <div className="flex justify-between text-slate-200">
+                <span>Commercial Bank EMI (13%):</span>
+                <span className="line-through text-rose-300 font-mono">₹{commercialEMI.toLocaleString('en-IN')}/mo</span>
+              </div>
+              <div className="flex justify-between font-bold text-emerald-200 pt-1 border-t border-white/10">
+                <span>Monthly Subvention Savings:</span>
+                <span className="font-mono text-emerald-300">+₹{monthlySavings.toLocaleString('en-IN')}/mo</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => startJourney(1)}
+              className="w-full py-3 rounded-full bg-white text-[#0E6655] font-extrabold text-xs hover:bg-slate-100 transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>Apply with Subsidized Rate</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 7: CORE FEATURES / CAPABILITIES (2x3 GRID) ──────────────── */}
+      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-20">
         <div className="text-left space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F8F2] text-[#0E6655] text-xs font-semibold border border-[#10B981]/20">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Platform Capabilities</span>
+            <span>Key Features</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B3B60] tracking-tight">
-            Core Capabilities
+            Features & Capabilities
           </h2>
           <p className="text-xs sm:text-sm text-[#64748B] max-w-2xl">
             Everything you need to navigate government support with certainty, transparency, and dignity.
@@ -582,7 +1014,7 @@ export default function HomeView() {
         </div>
       </section>
 
-      {/* ── SECTION 5: HOW THE AI WORKS (UNDERSTAND → VERIFY → EXPLAIN) ──────── */}
+      {/* ── SECTION 8: HOW THE AI WORKS (UNDERSTAND → VERIFY → EXPLAIN) ──────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="text-left space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F8F2] text-[#0E6655] text-xs font-semibold border border-[#10B981]/20">
@@ -615,8 +1047,7 @@ export default function HomeView() {
 
         {/* 3 Columns: Understand → Verify → Explain */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Column 1: Understand */}
-          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-3 relative">
+          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-3">
             <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
               01
             </div>
@@ -626,8 +1057,7 @@ export default function HomeView() {
             </p>
           </div>
 
-          {/* Column 2: Verify */}
-          <div className="bg-white rounded-3xl border border-[#A3E4D7] ring-2 ring-[#0E6655]/10 p-6 shadow-xs space-y-3 relative">
+          <div className="bg-white rounded-3xl border border-[#A3E4D7] ring-2 ring-[#0E6655]/10 p-6 shadow-xs space-y-3">
             <div className="w-10 h-10 rounded-2xl bg-[#E8F8F2] text-[#0E6655] flex items-center justify-center font-bold text-sm">
               02
             </div>
@@ -637,8 +1067,7 @@ export default function HomeView() {
             </p>
           </div>
 
-          {/* Column 3: Explain */}
-          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-3 relative">
+          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-3">
             <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">
               03
             </div>
@@ -648,32 +1077,9 @@ export default function HomeView() {
             </p>
           </div>
         </div>
-
-        {/* Visual Flow Diagram */}
-        <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-7 shadow-xs space-y-4">
-          <h4 className="text-xs font-bold text-[#0B3B60] uppercase tracking-wider">
-            Transparent Architectural Pipeline
-          </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center text-center">
-            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
-              <span className="text-[10px] text-slate-400 block font-mono">Input</span>
-              <span className="text-xs font-bold text-[#1E293B]">Beneficiary Query</span>
-            </div>
-            <div className="hidden sm:flex justify-center text-slate-300">→</div>
-            <div className="p-3 bg-emerald-50 rounded-2xl border border-[#10B981]/30">
-              <span className="text-[10px] text-[#0E6655] block font-mono">Authority</span>
-              <span className="text-xs font-bold text-[#0E6655]">Rule Engine Evaluation</span>
-            </div>
-            <div className="hidden sm:flex justify-center text-slate-300">→</div>
-            <div className="p-3 bg-blue-50 rounded-2xl border border-blue-200">
-              <span className="text-[10px] text-blue-500 block font-mono">Output</span>
-              <span className="text-xs font-bold text-[#0B3B60]">Actionable Guidance</span>
-            </div>
-          </div>
-        </div>
       </section>
 
-      {/* ── SECTION 6: "WHY UDYAMNEX" COMPARISON ─────────────────────────────── */}
+      {/* ── SECTION 9: "WHY UDYAMNEX" COMPARISON ─────────────────────────────── */}
       <section id="why-udyamnex" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-20">
         <div className="text-left space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F8F2] text-[#0E6655] text-xs font-semibold border border-[#10B981]/20">
@@ -688,10 +1094,9 @@ export default function HomeView() {
           </p>
         </div>
 
-        {/* Comparison Table / Grid */}
+        {/* Comparison Table */}
         <div className="bg-white rounded-3xl border border-[#E2E8F0] overflow-hidden shadow-xs">
           <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100 text-xs">
-            {/* Headers */}
             <div className="hidden md:block p-5 bg-slate-50/70 font-bold text-[#0B3B60]">
               Evaluation Factor
             </div>
@@ -702,7 +1107,6 @@ export default function HomeView() {
               UdyamNex Guided Approach
             </div>
 
-            {/* Row 1: Information Access */}
             <div className="p-4 sm:p-5 font-bold text-[#0B3B60] bg-slate-50/40">
               Information Sourcing
             </div>
@@ -713,7 +1117,6 @@ export default function HomeView() {
               Centralized catalog of verified NSFDC credit schemes linking directly to live gazette source documents.
             </div>
 
-            {/* Row 2: Eligibility Check */}
             <div className="p-4 sm:p-5 font-bold text-[#0B3B60] bg-slate-50/40">
               Eligibility Assessment
             </div>
@@ -724,7 +1127,6 @@ export default function HomeView() {
               Instant deterministic matching comparing your income, caste, and project scale with mathematical precision.
             </div>
 
-            {/* Row 3: Financial Calculations */}
             <div className="p-4 sm:p-5 font-bold text-[#0B3B60] bg-slate-50/40">
               Financial & EMI Clarity
             </div>
@@ -735,7 +1137,6 @@ export default function HomeView() {
               Dynamic EMI simulator showing subsidized 6.0%–8.0% interest rates and repayment schedules upfront.
             </div>
 
-            {/* Row 4: Channel Partner Access */}
             <div className="p-4 sm:p-5 font-bold text-[#0B3B60] bg-slate-50/40">
               Channel Partner Finding
             </div>
@@ -745,130 +1146,11 @@ export default function HomeView() {
             <div className="p-4 sm:p-5 text-[#0E6655] font-semibold bg-[#F9FEFB]">
               Directory of 38 verified State Channelizing Agencies (SCAs) with official addresses across all States & UTs.
             </div>
-
-            {/* Row 5: Language Support */}
-            <div className="p-4 sm:p-5 font-bold text-[#0B3B60] bg-slate-50/40">
-              Language & Accessibility
-            </div>
-            <div className="p-4 sm:p-5 text-[#64748B]">
-              Formal administrative English terminology that creates digital barriers for grassroots beneficiaries.
-            </div>
-            <div className="p-4 sm:p-5 text-[#0E6655] font-semibold bg-[#F9FEFB]">
-              Bilingual support in Hindi and English with natural language search and plain-text explanations.
-            </div>
           </div>
         </div>
       </section>
 
-      {/* ── SECTION 7: IMPACT SECTION (ACCESSIBILITY, TRANSPARENCY, EFFICIENCY) ─ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-left space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F8F2] text-[#0E6655] text-xs font-semibold border border-[#10B981]/20">
-            <Users className="w-3.5 h-3.5" />
-            <span>Inclusive Mission</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B3B60] tracking-tight">
-            Impact for Grassroots Entrepreneurs
-          </h2>
-          <p className="text-xs sm:text-sm text-[#64748B] max-w-2xl">
-            Designed to bridge the last-mile gap between central welfare credit programs and deserving citizens.
-          </p>
-        </div>
-
-        {/* 3 Impact Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-7 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Zap className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-bold text-[#0B3B60]">Accessibility</h3>
-            <p className="text-xs text-[#64748B] leading-relaxed">
-              Eliminating literacy and digital barriers. Beneficiaries can describe their enterprise needs in natural everyday language to receive clear, structured guidance.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-7 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#0E6655] flex items-center justify-center">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-bold text-[#0B3B60]">Transparency</h3>
-            <p className="text-xs text-[#64748B] leading-relaxed">
-              Every matched scheme shows exact statutory rule factors, live government source links, and clear explanations without hidden clauses or commercial bias.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-7 shadow-xs space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-teal-50 text-[#0E6655] flex items-center justify-center">
-              <Compass className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-bold text-[#0B3B60]">Efficiency</h3>
-            <p className="text-xs text-[#64748B] leading-relaxed">
-              Replacing weeks of manual confusion with a structured 6-step roadmap, required document checklists, and direct navigation to authorized state nodal agencies.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 8: SECURITY & TRUST (4 CARDS) ───────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-left space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F8F2] text-[#0E6655] text-xs font-semibold border border-[#10B981]/20">
-            <Lock className="w-3.5 h-3.5" />
-            <span>Governance & Privacy</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B3B60] tracking-tight">
-            Security, Privacy & Responsible AI
-          </h2>
-          <p className="text-xs sm:text-sm text-[#64748B] max-w-2xl">
-            Built from the ground up to protect beneficiary data and ensure algorithmic fairness.
-          </p>
-        </div>
-
-        {/* 4 Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#E8F8F2] text-[#0E6655] flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <h4 className="text-sm font-bold text-[#0B3B60]">Verified Sources</h4>
-            <p className="text-xs text-[#64748B] leading-relaxed">
-              All scheme parameters, loan ceilings, and SCA addresses are traced to official Gazette publications and the NSFDC portal.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Lock className="w-5 h-5" />
-            </div>
-            <h4 className="text-sm font-bold text-[#0B3B60]">Privacy by Design</h4>
-            <p className="text-xs text-[#64748B] leading-relaxed">
-              We do not store bank passwords or Aadhaar biometric data. Your self-declared information is processed strictly for scheme matching.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Layers className="w-5 h-5" />
-            </div>
-            <h4 className="text-sm font-bold text-[#0B3B60]">Explainable Matching</h4>
-            <p className="text-xs text-[#64748B] leading-relaxed">
-              Zero black-box decisions. Inspect the statutory rule factors that qualified or disqualified your enterprise for each scheme.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-xs space-y-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-[#0E6655] flex items-center justify-center">
-              <Bot className="w-5 h-5" />
-            </div>
-            <h4 className="text-sm font-bold text-[#0B3B60]">Responsible AI</h4>
-            <p className="text-xs text-[#64748B] leading-relaxed">
-              Guarded against hallucinations, unauthorized loan guarantees, and predatory commercial lending marketing.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 9: FAQ ACCORDION (ALL 8 Q&As VERBATIM FROM BRIEF) ────────── */}
+      {/* ── SECTION 10: FAQ ACCORDION (ALL 8 Q&As VERBATIM) ─────────────────── */}
       <section id="faqs" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 scroll-mt-20">
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F8F2] text-[#0E6655] text-xs font-semibold border border-[#10B981]/20">
@@ -919,13 +1201,9 @@ export default function HomeView() {
         </div>
       </section>
 
-      {/* ── SECTION 10: FINAL CTA SECTION (TEAL GRADIENT BACKGROUND) ─────────── */}
+      {/* ── SECTION 11: FINAL CTA SECTION (TEAL GRADIENT BACKGROUND) ─────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="rounded-3xl bg-gradient-to-r from-[#0E6655] to-[#0B3B60] p-8 sm:p-12 lg:p-16 text-white text-center relative overflow-hidden shadow-xl">
-          {/* Subtle Decorative Pattern */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-
           <div className="relative z-10 max-w-2xl mx-auto space-y-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-white text-xs font-semibold border border-white/20">
               <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
@@ -952,7 +1230,10 @@ export default function HomeView() {
 
               <button
                 type="button"
-                onClick={() => navigateTo('schemes')}
+                onClick={() => {
+                  const el = document.getElementById('schemes-section');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white/10 hover:bg-white/15 text-white font-semibold text-sm border border-white/25 transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
               >
                 <span>Browse Verified Schemes</span>
@@ -967,6 +1248,90 @@ export default function HomeView() {
           </div>
         </div>
       </section>
+
+      {/* ── SCHEME DETAILS MODAL (Inspect scheme directly on homepage) ───────── */}
+      {selectedScheme && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border border-[#E2E8F0] p-6 sm:p-8 max-w-2xl w-full shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between gap-4 pb-3 border-b border-slate-100">
+              <div>
+                <span className="text-[10px] font-bold text-[#0E6655] bg-[#E8F8F2] px-2.5 py-0.5 rounded-full border border-[#10B981]/20">
+                  {selectedScheme.category || 'NSFDC Scheme'}
+                </span>
+                <h3 className="text-lg sm:text-xl font-bold text-[#0B3B60] mt-1.5">
+                  {selectedScheme.name}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedScheme(null)}
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs sm:text-sm text-[#475569]">
+              <p className="leading-relaxed">{selectedScheme.description || selectedScheme.short_description}</p>
+
+              <div className="grid grid-cols-2 gap-3 p-4 bg-slate-50 rounded-2xl text-xs">
+                <div>
+                  <span className="text-slate-400 block">Subsidized Interest:</span>
+                  <span className="font-bold text-[#0B3B60]">{selectedScheme.interest_rate_display || 'Concessional Rate'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Maximum Project Scale:</span>
+                  <span className="font-bold text-[#0B3B60]">{selectedScheme.project_cost_max_display || 'Up to ₹50 Lakh'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Repayment Tenure:</span>
+                  <span className="font-semibold text-slate-700">{selectedScheme.repayment_period || 'Up to 7 Years'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Moratorium Period:</span>
+                  <span className="font-semibold text-slate-700">{selectedScheme.moratorium_period || '6 Months'}</span>
+                </div>
+              </div>
+
+              {selectedScheme.eligibility_criteria && (
+                <div className="space-y-1.5">
+                  <h5 className="font-bold text-[#0B3B60] text-xs uppercase tracking-wider">Statutory Eligibility:</h5>
+                  <ul className="list-disc pl-5 space-y-1 text-xs text-[#64748B]">
+                    {selectedScheme.eligibility_criteria.map((c, i) => (
+                      <li key={i}>{c}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+              <a
+                href={selectedScheme.source_url || 'https://nsfdc.nic.in/scheme'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-[#0B3B60] hover:text-[#0E6655] font-semibold"
+              >
+                <span>View Official Gazette URL</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const sId = selectedScheme.id;
+                  setSelectedScheme(null);
+                  startJourney(1, { preferredSchemeId: sId });
+                }}
+                className="px-5 py-2.5 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <span>Apply for this Scheme</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

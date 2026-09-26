@@ -85,12 +85,12 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Center Desktop Navigation Links */}
+        {/* Center Desktop Navigation Links Matching Mockup */}
         <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-[#475569]">
           <button
             type="button"
             onClick={() => {
-              navigateTo('home');
+              if (currentView !== 'home') navigateTo('home');
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className={`transition-colors cursor-pointer pb-1 relative hover:text-[#0E6655] ${
@@ -100,16 +100,6 @@ export default function Header() {
             }`}
           >
             Home
-          </button>
-
-          <button
-            type="button"
-            onClick={() => navigateTo('schemes')}
-            className={`transition-colors cursor-pointer hover:text-[#0E6655] ${
-              currentView === 'schemes' ? 'text-[#0E6655] font-bold' : ''
-            }`}
-          >
-            Schemes
           </button>
 
           <button
@@ -127,6 +117,23 @@ export default function Header() {
             className="transition-colors cursor-pointer hover:text-[#0E6655]"
           >
             How It Works
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (currentView !== 'home') {
+                navigateTo('home');
+                setTimeout(() => {
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              } else {
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="transition-colors cursor-pointer hover:text-[#0E6655]"
+          >
+            Features
           </button>
 
           <button
