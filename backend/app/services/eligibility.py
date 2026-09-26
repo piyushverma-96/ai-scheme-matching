@@ -90,8 +90,16 @@ class SchemeRule:
     # Specific condition flags
     requires_education_purpose: bool = False
     is_active: bool = True
+    project_cost_max_display: Optional[str] = None
 
     def __post_init__(self):
+        if self.project_cost_max_display is None:
+            if self.project_cost_max is not None:
+                self.project_cost_max_display = f"Up to ₹{self.project_cost_max / 100000.0:.2f} Lakh"
+            elif self.max_loan_amount is not None:
+                self.project_cost_max_display = f"Up to ₹{self.max_loan_amount / 100000.0:.2f} Lakh"
+            else:
+                self.project_cost_max_display = "Up to ₹50.00 Lakh"
         if self.coverage_percent is None:
             self.coverage_percent = float(self.financing_pct)
         if self.business_categories is None:
@@ -784,6 +792,10 @@ class EligibilityResult:
     missing_information: List[str] = field(default_factory=list)
     explanation: str = ""
     recommended_loan_amount: Optional[float] = None
+    project_cost_min: Optional[float] = None
+    project_cost_max: Optional[float] = None
+    project_cost_max_display: Optional[str] = None
+    max_loan_amount: Optional[float] = None
     interest_rate_display: str = ""
     repayment_years: int = 0
     moratorium_note: str = ""
@@ -1269,6 +1281,10 @@ def evaluate_scheme(
         missing_information=missing_info,
         explanation=explanation,
         recommended_loan_amount=recommended_loan,
+        project_cost_min=rule.project_cost_min,
+        project_cost_max=rule.project_cost_max,
+        project_cost_max_display=rule.project_cost_max_display,
+        max_loan_amount=rule.max_loan_amount,
         interest_rate_display=rate_display,
         repayment_years=rule.repayment_years_max,
         moratorium_note=rule.moratorium_note,
@@ -1433,6 +1449,7 @@ def get_verified_schemes_data() -> List[Dict[str, Any]]:
             "issuing_body": r.issuing_body,
             "project_cost_min": r.project_cost_min,
             "project_cost_max": r.project_cost_max,
+            "project_cost_max_display": r.project_cost_max_display,
             "max_loan_amount": r.max_loan_amount,
             "financing_pct": r.financing_pct,
             "rate_beneficiary_min": r.rate_beneficiary_min,

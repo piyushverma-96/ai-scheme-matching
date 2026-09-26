@@ -58,7 +58,11 @@ export default function Step2EligibleSchemes({ onContinue }) {
         ? Number(String(journeyFormData.fundingAmount).replace(/[^0-9.]/g, ''))
         : 300000,
     project_cost:
-      journeyFormData?.amount != null
+      journeyFormData?.project_cost != null
+        ? Number(journeyFormData.project_cost)
+        : journeyFormData?.projectCost != null
+        ? Number(journeyFormData.projectCost)
+        : journeyFormData?.amount != null
         ? Number(journeyFormData.amount)
         : 333333,
     sc_caste_declared: journeyFormData?.casteDeclared !== false,
@@ -74,7 +78,7 @@ export default function Step2EligibleSchemes({ onContinue }) {
     language: i18n.language === 'hi' ? 'hindi' : 'english',
   };
 
-  const payloadKey = `${canonicalPayload.purpose}_${canonicalPayload.annual_family_income}_${canonicalPayload.loan_amount}_${canonicalPayload.sc_caste_declared}_${canonicalPayload.study_location}`;
+  const payloadKey = `${canonicalPayload.purpose}_${canonicalPayload.annual_family_income}_${canonicalPayload.project_cost}_${canonicalPayload.loan_amount}_${canonicalPayload.sc_caste_declared}_${canonicalPayload.study_location}`;
 
   // Evaluate rule engine dynamically whenever input profile changes
   useEffect(() => {
@@ -132,10 +136,49 @@ export default function Step2EligibleSchemes({ onContinue }) {
     }
   }, [candidateSchemes, chosenSchemeId]);
 
+  // Helper to format scheme's real verified project cost max limit
+  const getSchemeCostLimitDisplay = (schemeItem) => {
+    if (!schemeItem) return 'Up to ₹50.00 Lakh';
+    if (schemeItem.project_cost_max_display) {
+      return schemeItem.project_cost_max_display;
+    }
+    if (schemeItem.project_cost_max != null) {
+      const val = Number(schemeItem.project_cost_max) / 100000;
+      return `Up to ₹${val.toFixed(2)} Lakh`;
+    }
+    const id = (schemeItem.scheme_id || schemeItem.id || schemeItem.scheme_code || schemeItem.scheme_type || schemeItem.name || '').toLowerCase();
+    if (id.includes('micro_finance') || id.includes('mfs') || id.includes('micro_credit') || id.includes('a1111111') || id.includes('aajeevika') || id.includes('amy') || id.includes('a4444444')) {
+      return 'Up to ₹1.40 Lakh';
+    }
+    if (id.includes('udyam') || id.includes('uny') || id.includes('a5555555')) {
+      return 'Up to ₹5.00 Lakh';
+    }
+    if (id.includes('term') || id.includes('a2222222')) {
+      return 'Up to ₹50.00 Lakh';
+    }
+    if (id.includes('edu') || id.includes('els') || id.includes('a3333333')) {
+      return 'Up to ₹40.00 Lakh';
+    }
+    if (schemeItem.max_loan_amount_display) return schemeItem.max_loan_amount_display;
+    if (schemeItem.loan_amount_short) return schemeItem.loan_amount_short;
+    if (schemeItem.loan_amount_display) return schemeItem.loan_amount_display;
+    if (schemeItem.max_loan_amount != null) {
+      const val = Number(schemeItem.max_loan_amount) / 100000;
+      return `Up to ₹${val.toFixed(2)} Lakh`;
+    }
+    return 'Up to ₹50.00 Lakh';
+  };
+
   const normalizeScheme = (scheme) => {
     if (!scheme) return null;
     const id = scheme.scheme_id || scheme.id;
     const name = scheme.scheme_name || scheme.name;
+    const costLimitDisplay = getSchemeCostLimitDisplay(scheme);
+    const idStr = String(id || '').toLowerCase();
+    const costMaxVal = scheme.project_cost_max != null ? scheme.project_cost_max : (
+      (idStr.includes('micro_finance') || idStr.includes('mfs') || idStr.includes('micro_credit') || idStr.includes('a1111111') || idStr.includes('aajeevika') || idStr.includes('amy') || idStr.includes('a4444444')) ? 140000 :
+      (idStr.includes('udyam') || idStr.includes('uny') || idStr.includes('a5555555')) ? 500000 : 5000000
+    );
     return {
       ...scheme,
       id,
@@ -144,9 +187,11 @@ export default function Step2EligibleSchemes({ onContinue }) {
       scheme_name: name,
       fullName: scheme.fullName || scheme.full_description || name,
       category: scheme.category || scheme.scheme_type || 'National Scheduled Castes Finance & Development Corp',
-      maxLimit: scheme.max_loan_amount_display || scheme.loan_amount_display || '₹50 Lakh',
-      maxLimitVal: scheme.max_loan_amount_val || scheme.max_loan_amount || 5000000,
-      max_loan_amount: scheme.max_loan_amount_val || scheme.max_loan_amount || 5000000,
+      project_cost_max: costMaxVal,
+      project_cost_max_display: costLimitDisplay,
+      maxLimit: costLimitDisplay,
+      maxLimitVal: costMaxVal,
+      max_loan_amount: scheme.max_loan_amount_val || scheme.max_loan_amount || (costMaxVal * 0.9),
       interestRate: scheme.interest_rate_display || '8.0% p.a.',
       interestRateVal: scheme.interest_rate_val || 8.0,
       rate_beneficiary_min: scheme.rate_beneficiary_min || scheme.interest_rate_val || 8.0,
@@ -302,7 +347,7 @@ export default function Step2EligibleSchemes({ onContinue }) {
             const IconComponent = getSchemeIcon(item, idx);
             const displayName = item.scheme_name || item.name;
             const displayFullName = item.fullName || item.full_description || displayName;
-            const displayLoanAmount = item.max_loan_amount_display || item.loan_amount_short || item.loan_amount_display || 'Up to ₹50 Lakh';
+            const displayLoanAmount = getSchemeCostLimitDisplay(item);
             const displayRate = item.interest_rate_display || (item.rate_beneficiary_min ? `${item.rate_beneficiary_min}% p.a.` : '8.00% p.a.');
             const displayTenure = item.repayment_period || 'Up to 7 Years';
 

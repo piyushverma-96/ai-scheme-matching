@@ -418,6 +418,13 @@ class SchemeMatchResult(BaseModel):
     )
     explanation: str = Field(description="Deterministic structured explanation of the eligibility decision")
     recommended_loan_amount: Optional[float] = None
+    project_cost_min: Optional[float] = None
+    project_cost_max: Optional[float] = None
+    project_cost_max_display: Optional[str] = None
+    max_loan_amount: Optional[float] = None
+    max_loan_amount_display: Optional[str] = None
+    loan_amount_short: Optional[str] = None
+    loan_amount_display: Optional[str] = None
     interest_rate_display: str
     repayment_years: int
     moratorium_note: str

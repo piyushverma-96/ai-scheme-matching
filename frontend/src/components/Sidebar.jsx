@@ -104,24 +104,24 @@ export default function Sidebar() {
       {/* Mobile Drawer Backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden backdrop-blur-xs transition-opacity"
+          className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden backdrop-blur-sm transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar Container */}
+      {/* Sidebar Container with Smooth Glassmorphism */}
       <aside
-        className={`fixed lg:sticky top-0 h-screen w-64 bg-white border-r border-[#E2E8F0] z-40 flex flex-col justify-between py-5 px-4 transition-transform duration-200 ease-in-out shrink-0 overflow-y-auto ${
+        className={`fixed lg:sticky top-0 h-screen w-64 bg-white/80 backdrop-blur-xl border-r border-[#E2E8F0]/80 shadow-xs z-40 flex flex-col justify-between py-5 px-4 transition-transform duration-300 ease-in-out shrink-0 overflow-y-auto ${
           sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         <div className="space-y-4">
           {/* Mobile Top Header in Drawer */}
-          <div className="flex items-center justify-between px-2 lg:hidden pb-2 border-b border-[#F1F5F9]">
+          <div className="flex items-center justify-between px-2 lg:hidden pb-2 border-b border-[#F1F5F9]/80">
             <Logo size="sm" showTagline={false} />
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-2 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-slate-100 cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center"
+              className="p-2 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-slate-100/80 cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center transition-colors"
               aria-label="Close menu"
             >
               <X className="w-5 h-5" />
@@ -154,7 +154,7 @@ export default function Sidebar() {
                   className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer min-h-[44px] ${
                     isActive
                       ? 'bg-[#0E6655] text-white shadow-xs font-bold'
-                      : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0B3B60]'
+                      : 'text-[#475569] hover:bg-white/80 hover:text-[#0B3B60] hover:shadow-2xs'
                   }`}
                 >
                   <Icon
@@ -169,9 +169,9 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        {/* Bottom Trust & Data Safety Card (matching reference image) */}
-        <div className="pt-4 border-t border-[#E2E8F0]">
-          <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl p-3.5 space-y-1.5 shadow-2xs">
+        {/* Bottom Trust & Data Safety Card with Glassmorphism */}
+        <div className="pt-4 border-t border-[#E2E8F0]/80">
+          <div className="bg-white/70 backdrop-blur-md border border-[#E2E8F0]/80 rounded-2xl p-3.5 space-y-1.5 shadow-2xs">
             <div className="flex items-center gap-2 text-[#0E6655] font-bold text-xs">
               <ShieldCheck className="w-4 h-4 text-[#0E6655] shrink-0" />
               <span>{t('nav.trust_title', 'Your Information is Safe')}</span>

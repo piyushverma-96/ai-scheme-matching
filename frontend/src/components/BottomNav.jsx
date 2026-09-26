@@ -17,7 +17,7 @@ export default function BottomNav() {
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E2E8F0] px-4 py-2 shadow-lg"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/85 backdrop-blur-xl border-t border-[#E2E8F0]/80 px-4 py-2 shadow-lg"
     >
       <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map((item) => {
