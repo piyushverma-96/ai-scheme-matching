@@ -43,7 +43,7 @@ class GroqLLMProvider(BaseLLMProvider):
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
         self.api_key = api_key or settings.GROQ_API_KEY
-        self.model = model or settings.GROQ_MODEL or "llama-3.3-70b-versatile"
+        self.model = model or settings.GROQ_MODEL or "qwen/qwen3.8-27b"
         self.api_url = "https://api.groq.com/openai/v1/chat/completions"
 
     async def generate_chat_completion(
