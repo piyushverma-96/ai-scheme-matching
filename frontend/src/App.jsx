@@ -61,6 +61,7 @@ export default function App() {
         return <CalculatorView />;
       case 'partners':
         return <PartnersView />;
+      case 'dashboard':
       case 'tracking':
       case 'my_applications':
         return <TrackingView />;
@@ -110,8 +111,8 @@ export default function App() {
     }
   };
 
+  const isHomePage = currentView === 'home';
   const isJourneyMode = currentView === 'journey' || currentView === 'wizard' || currentView === 'find_scheme';
-  const isFullWidthView = currentView === 'home' || isJourneyMode;
 
   return (
     <div className="min-h-dvh flex flex-col bg-[#F8FAFC] bg-grain pb-28 sm:pb-32 lg:pb-0 font-sans text-[#1E293B] overflow-x-hidden w-full max-w-[100vw]">
@@ -119,13 +120,15 @@ export default function App() {
       <Header />
 
       <div className="flex-1 flex w-full min-w-0">
-        {/* Left Desktop Sidebar Navigation (Only on portal/dashboard views, not on home landing or journey) */}
-        {!isFullWidthView && <Sidebar />}
+        {/* Left Desktop Sidebar Navigation (Visible in all in-app application views, hidden on public homepage) */}
+        {!isHomePage && <Sidebar />}
 
         {/* Main Application Workspace Area */}
         <main
           className={`flex-1 min-w-0 ${
-            isFullWidthView
+            isHomePage
+              ? 'p-0 max-w-full'
+              : isJourneyMode
               ? 'p-0 max-w-full'
               : 'px-3 sm:px-6 md:px-8 py-3.5 sm:py-6 max-w-7xl'
           } mx-auto w-full overflow-x-hidden`}

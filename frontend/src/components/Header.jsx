@@ -16,6 +16,7 @@ export default function Header() {
     profile,
     logout,
     userApplications = [],
+    journeyStep = 1,
   } = useApp();
 
   const { isMobile } = useWindowDimensions();
@@ -73,103 +74,127 @@ export default function Header() {
             <Menu className="w-5 h-5" />
           </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              navigateTo('home');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="text-left cursor-pointer transition-transform active:scale-95"
-          >
-            <Logo size={isMobile ? 'sm' : 'md'} showTagline={!isMobile} />
-          </button>
+          {currentView === 'home' ? (
+            <button
+              type="button"
+              onClick={() => {
+                navigateTo('home');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="text-left cursor-pointer transition-transform active:scale-95"
+            >
+              <Logo size={isMobile ? 'sm' : 'md'} showTagline={!isMobile} />
+            </button>
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="lg:hidden">
+                <Logo size="sm" showTagline={false} />
+              </div>
+              <div className="hidden lg:flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+                <span className="text-xs font-bold text-[#0B3B60]">
+                  UdyamNex
+                </span>
+                <span className="text-slate-300">/</span>
+                <span className="text-xs font-semibold text-slate-600">
+                  {currentView === 'journey' || currentView === 'wizard' || currentView === 'find_scheme'
+                    ? `Step 0${journeyStep}: 6-Stage Application`
+                    : currentView === 'dashboard' || currentView === 'tracking'
+                    ? 'Dashboard'
+                    : currentView.charAt(0).toUpperCase() + currentView.slice(1).replace('_', ' ')}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Center Desktop Navigation Links Matching Mockup */}
-        <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-[#475569]">
-          <button
-            type="button"
-            onClick={() => {
-              if (currentView !== 'home') navigateTo('home');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className={`transition-colors cursor-pointer pb-1 relative hover:text-[#0E6655] ${
-              currentView === 'home'
-                ? 'text-[#0E6655] font-bold after:content-[""] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-5 after:h-0.5 after:bg-[#0E6655] after:rounded-full'
-                : ''
-            }`}
-          >
-            Home
-          </button>
+        {/* Center Desktop Navigation Links Matching Mockup (Home view only) */}
+        {currentView === 'home' && (
+          <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-[#475569]">
+            <button
+              type="button"
+              onClick={() => {
+                if (currentView !== 'home') navigateTo('home');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`transition-colors cursor-pointer pb-1 relative hover:text-[#0E6655] ${
+                currentView === 'home'
+                  ? 'text-[#0E6655] font-bold after:content-[""] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-5 after:h-0.5 after:bg-[#0E6655] after:rounded-full'
+                  : ''
+              }`}
+            >
+              Home
+            </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (currentView !== 'home') {
-                navigateTo('home');
-                setTimeout(() => {
+            <button
+              type="button"
+              onClick={() => {
+                if (currentView !== 'home') {
+                  navigateTo('home');
+                  setTimeout(() => {
+                    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                } else {
                   document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-              } else {
-                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            className="transition-colors cursor-pointer hover:text-[#0E6655]"
-          >
-            How It Works
-          </button>
+                }
+              }}
+              className="transition-colors cursor-pointer hover:text-[#0E6655]"
+            >
+              How It Works
+            </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (currentView !== 'home') {
-                navigateTo('home');
-                setTimeout(() => {
+            <button
+              type="button"
+              onClick={() => {
+                if (currentView !== 'home') {
+                  navigateTo('home');
+                  setTimeout(() => {
+                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                } else {
                   document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-              } else {
-                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            className="transition-colors cursor-pointer hover:text-[#0E6655]"
-          >
-            Features
-          </button>
+                }
+              }}
+              className="transition-colors cursor-pointer hover:text-[#0E6655]"
+            >
+              Features
+            </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (currentView !== 'home') {
-                navigateTo('home');
-                setTimeout(() => {
+            <button
+              type="button"
+              onClick={() => {
+                if (currentView !== 'home') {
+                  navigateTo('home');
+                  setTimeout(() => {
+                    document.getElementById('why-udyamnex')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                } else {
                   document.getElementById('why-udyamnex')?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-              } else {
-                document.getElementById('why-udyamnex')?.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            className="transition-colors cursor-pointer hover:text-[#0E6655]"
-          >
-            About
-          </button>
+                }
+              }}
+              className="transition-colors cursor-pointer hover:text-[#0E6655]"
+            >
+              About
+            </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (currentView !== 'home') {
-                navigateTo('home');
-                setTimeout(() => {
+            <button
+              type="button"
+              onClick={() => {
+                if (currentView !== 'home') {
+                  navigateTo('home');
+                  setTimeout(() => {
+                    document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                } else {
                   document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-              } else {
-                document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            className="transition-colors cursor-pointer hover:text-[#0E6655]"
-          >
-            FAQs
-          </button>
-        </nav>
+                }
+              }}
+              className="transition-colors cursor-pointer hover:text-[#0E6655]"
+            >
+              FAQs
+            </button>
+          </nav>
+        )}
 
         {/* Right Side: Language Switcher, Notifications, Auth & Get Started CTA */}
         <div className="flex items-center gap-2 sm:gap-3">
