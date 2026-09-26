@@ -45,6 +45,20 @@ def _is_unavailability_error(exc: Exception) -> bool:
     Checks if an exception represents network, connection, or service unavailability
     (where falling back to verified seed data is appropriate), vs. a schema or programming bug.
     """
+    try:
+        import httpx
+        if isinstance(exc, (httpx.TransportError, httpx.TimeoutException)):
+            return True
+    except ImportError:
+        pass
+
+    if isinstance(exc, (ConnectionError, TimeoutError, OSError)):
+        return True
+
+    cls_name = exc.__class__.__name__.lower()
+    if any(k in cls_name for k in ("connect", "timeout", "network", "transport", "resolution")):
+        return True
+
     msg = str(exc).lower()
     unavailability_markers = [
         "connect",
@@ -58,6 +72,8 @@ def _is_unavailability_error(exc: Exception) -> bool:
         "504",
         "placeholder-project",
         "name resolution",
+        "getaddrinfo",
+        "dns",
         "max retries",
         "connection refused",
         "reset by peer",
@@ -67,8 +83,6 @@ def _is_unavailability_error(exc: Exception) -> bool:
         "bad gateway",
         "service unavailable",
     ]
-    if isinstance(exc, (ConnectionError, TimeoutError, OSError)):
-        return True
     return any(marker in msg for marker in unavailability_markers)
 
 

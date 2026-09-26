@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../context/AppContext';
+import { matchSchemes } from '../../api';
 
 // Comprehensive list of Indian States & Union Territories
 const INDIAN_STATES = [
@@ -134,6 +135,8 @@ export default function Step1UnderstandNeed({ onComplete }) {
     saveProfile,
     user,
     profile,
+    setRecommendResult,
+    setSelectedScheme,
   } = useApp();
 
   // ── Form State (Initialized from context, profile, or localStorage) ──
@@ -473,7 +476,43 @@ export default function Step1UnderstandNeed({ onComplete }) {
         setJourneyFormData(canonicalPayload);
       }
 
-      // 2. Persist to Supabase user_journey table under authenticated user
+      // 2. Clear stale recommendations & trigger live scheme evaluation from backend rule engine
+      if (setRecommendResult) {
+        setRecommendResult(null);
+      }
+      try {
+        const evalPayload = {
+          purpose:
+            canonicalPayload.purposeKey === 'micro_finance'
+              ? 'micro_business'
+              : canonicalPayload.purposeKey === 'education'
+              ? 'education'
+              : canonicalPayload.purposeKey === 'sanitation'
+              ? 'services'
+              : 'business',
+          annual_family_income: numIncome,
+          loan_amount: numAmount,
+          project_cost: numAmount,
+          sc_caste_declared: canonicalPayload.casteDeclared !== false,
+          education_status: educationStatus || 'not_applicable',
+          study_location: studyLocation || 'india',
+          gender: gender || 'Male',
+        };
+        const matchResp = await matchSchemes(evalPayload);
+        if (matchResp?.data) {
+          setRecommendResult(matchResp.data);
+          const matchedSchemes = (matchResp.data.results || []).filter(
+            (r) => r.matched || r.eligible || r.partially_eligible
+          );
+          if (matchedSchemes.length > 0 && setSelectedScheme) {
+            setSelectedScheme(matchedSchemes[0]);
+          }
+        }
+      } catch (matchErr) {
+        console.warn('Live scheme evaluation note:', matchErr);
+      }
+
+      // 3. Persist to Supabase user_journey table under authenticated user
       if (saveJourneyProgress) {
         await saveJourneyProgress(2, canonicalPayload);
       }

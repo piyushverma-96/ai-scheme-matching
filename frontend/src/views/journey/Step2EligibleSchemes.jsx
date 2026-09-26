@@ -42,6 +42,8 @@ export default function Step2EligibleSchemes({ onContinue }) {
         ? 'micro_business'
         : journeyFormData?.purposeKey === 'education'
         ? 'education'
+        : journeyFormData?.purposeKey === 'sanitation'
+        ? 'services'
         : 'business',
     annual_family_income:
       journeyFormData?.incomeValue != null
@@ -69,18 +71,28 @@ export default function Step2EligibleSchemes({ onContinue }) {
     language: i18n.language === 'hi' ? 'hindi' : 'english',
   };
 
-  // Evaluate rule engine if not already evaluated
+  const payloadKey = `${canonicalPayload.purpose}_${canonicalPayload.annual_family_income}_${canonicalPayload.loan_amount}_${canonicalPayload.sc_caste_declared}_${canonicalPayload.study_location}`;
+
+  // Evaluate rule engine dynamically whenever input profile changes
   useEffect(() => {
     let isMounted = true;
     async function evaluateEligibility() {
-      if (recommendResult && recommendResult.results && recommendResult.results.length > 0) {
-        return;
-      }
       setLoading(true);
       try {
         const resp = await matchSchemes(canonicalPayload);
         if (isMounted && resp.data) {
           setRecommendResult(resp.data);
+          const matched = (resp.data.results || []).filter(
+            (r) => r.matched || r.eligible || r.partially_eligible
+          );
+          if (matched.length > 0) {
+            const top = matched[0];
+            const topId = top.scheme_id || top.id;
+            setChosenSchemeId(topId);
+            if (setSelectedScheme) {
+              setSelectedScheme(normalizeScheme(top));
+            }
+          }
         }
       } catch (err) {
         console.warn('Backend scheme evaluation fallback, using verified NSFDC seed data:', err);
@@ -92,24 +104,29 @@ export default function Step2EligibleSchemes({ onContinue }) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [payloadKey]);
 
   const rawResults = recommendResult?.results || [];
   const matchedList = rawResults.filter((r) => r.matched || r.eligible || r.partially_eligible);
   const candidateSchemes = rawResults.length > 0 ? matchedList : SCHEMES_DATA;
   const isIncomeDisqualified = rawResults.length > 0 && matchedList.length === 0;
 
-  // Sync initial selection
+  // Sync initial selection to candidateSchemes[0] if current choice is invalid or absent
   useEffect(() => {
-    if (candidateSchemes.length > 0 && !chosenSchemeId) {
-      const activeId =
-        selectedScheme?.scheme_id ||
-        selectedScheme?.id ||
-        candidateSchemes[0]?.scheme_id ||
-        candidateSchemes[0]?.id;
-      setChosenSchemeId(activeId);
+    if (candidateSchemes.length > 0) {
+      const isCurrentValid = candidateSchemes.some(
+        (c) => (c.scheme_id || c.id) === chosenSchemeId
+      );
+      if (!isCurrentValid) {
+        const top = candidateSchemes[0];
+        const topId = top.scheme_id || top.id;
+        setChosenSchemeId(topId);
+        if (setSelectedScheme) {
+          setSelectedScheme(normalizeScheme(top));
+        }
+      }
     }
-  }, [candidateSchemes, chosenSchemeId, selectedScheme]);
+  }, [candidateSchemes, chosenSchemeId]);
 
   const normalizeScheme = (scheme) => {
     if (!scheme) return null;

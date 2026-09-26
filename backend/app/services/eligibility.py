@@ -808,9 +808,12 @@ PURPOSE_MAP = {
     "business": "business",
     "micro_business": "micro_business",
     "micro_credit": "micro_business",
+    "micro_finance": "micro_business",
+    "vendor": "micro_business",
     "trade": "trade",
     "services": "services",
     "handicraft": "handicraft",
+    "artisan": "handicraft",
     "agriculture": "agriculture",
     "farming": "agriculture",
     "industry": "industry",
@@ -820,6 +823,9 @@ PURPOSE_MAP = {
     "education": "education",
     "studies": "education",
     "higher_education": "education",
+    "sanitation": "services",
+    "sanitary": "services",
+    "cleaning": "services",
 }
 
 def normalize_purpose(raw_purpose: str) -> str:

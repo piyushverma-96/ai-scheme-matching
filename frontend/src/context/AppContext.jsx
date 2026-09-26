@@ -256,6 +256,9 @@ export function AppProvider({ children }) {
       } else {
         setIsLoadingAuth(false);
       }
+    }).catch((err) => {
+      console.warn('Supabase auth getSession notice:', err?.message || err);
+      setIsLoadingAuth(false);
     });
 
     const {
@@ -497,6 +500,31 @@ export function AppProvider({ children }) {
     setCurrentView('home');
   };
 
+  const loginDemoUser = (name = 'Aarav Sharma', email = 'aarav.sharma@example.com') => {
+    const demoUser = {
+      id: 'demo-user-12345',
+      email: email,
+      user_metadata: { full_name: name },
+    };
+    setUser(demoUser);
+    setProfile({
+      id: 'demo-profile-12345',
+      user_id: 'demo-user-12345',
+      full_name: name,
+      gender: 'Male',
+      annual_family_income: 250000,
+      state: 'Madhya Pradesh',
+      city: 'Bhopal',
+      district: 'Bhopal',
+      pincode: '462001',
+      education_status: 'graduate',
+      occupation: 'Self-Employed / Micro-Entrepreneur',
+    });
+    setSession({ access_token: 'demo_token', user: demoUser });
+    setIsLoadingAuth(false);
+    navigateTo('home');
+  };
+
   // ── 9. Navigation Helpers ────────────────────────────────────────────────
   const nextJourneyStep = () => {
     const nextStep = Math.min(6, journeyStep + 1);
@@ -606,6 +634,7 @@ export function AppProvider({ children }) {
         setCompleteProfileOpen,
         saveProfile,
         logout,
+        loginDemoUser,
 
         // User persistent data
         userApplications,

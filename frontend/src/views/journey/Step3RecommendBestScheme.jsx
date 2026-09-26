@@ -41,6 +41,8 @@ export default function Step3RecommendBestScheme({ onContinue }) {
         ? 'micro_business'
         : journeyFormData?.purposeKey === 'education'
         ? 'education'
+        : journeyFormData?.purposeKey === 'sanitation'
+        ? 'services'
         : 'business',
     annual_family_income:
       journeyFormData?.incomeValue != null
@@ -68,13 +70,12 @@ export default function Step3RecommendBestScheme({ onContinue }) {
     language: i18n.language === 'hi' ? 'hindi' : 'english',
   };
 
+  const payloadKey = `${canonicalPayload.purpose}_${canonicalPayload.annual_family_income}_${canonicalPayload.loan_amount}_${canonicalPayload.sc_caste_declared}_${canonicalPayload.study_location}`;
+
   // Fetch or update live eligibility results from backend rule engine
   useEffect(() => {
     let isMounted = true;
     async function fetchRecommendation() {
-      if (recommendResult && recommendResult.results && recommendResult.results.length > 0) {
-        return;
-      }
       setLoading(true);
       try {
         const resp = await checkEligibility(canonicalPayload);
@@ -91,7 +92,7 @@ export default function Step3RecommendBestScheme({ onContinue }) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [payloadKey]);
 
   // Determine all matched schemes and primary "Best Match"
   const rawResults = recommendResult?.results || [];
@@ -100,7 +101,10 @@ export default function Step3RecommendBestScheme({ onContinue }) {
 
   // Best match is top-ranked eligible scheme
   const bestMatchFromEngine = candidateSchemes[0];
-  const rawPrimary = activeScheme || selectedScheme || bestMatchFromEngine;
+  const isSelectedInCandidates = selectedScheme && candidateSchemes.some(
+    (c) => (c.scheme_id || c.id) === (selectedScheme.scheme_id || selectedScheme.id)
+  );
+  const rawPrimary = activeScheme || (isSelectedInCandidates ? selectedScheme : bestMatchFromEngine) || bestMatchFromEngine;
   const primaryScheme = getLocalizedScheme(rawPrimary, i18n.language);
 
   // Other eligible schemes shown as alternatives

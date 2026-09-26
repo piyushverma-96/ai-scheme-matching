@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import supabase from '../supabaseClient';
 
 export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
-  const { navigateTo } = useApp();
+  const { navigateTo, loginDemoUser } = useApp();
   const [tab, setTab] = useState(initialTab); // 'login' | 'signup'
 
   useEffect(() => {
@@ -94,7 +94,12 @@ export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
       }
     } catch (err) {
       console.error('Auth action error:', err);
-      setError(err?.message || 'Authentication failed. Please try again.');
+      const isNetworkErr = err?.message?.toLowerCase().includes('fetch') || err?.message?.toLowerCase().includes('network') || !window.navigator.onLine;
+      if (isNetworkErr) {
+        setError('Supabase remote database is unreachable. You can click below to continue instantly with a Demo Beneficiary Account.');
+      } else {
+        setError(err?.message || 'Authentication failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -249,6 +254,30 @@ export default function LoginView({ onLoginSuccess, initialTab = 'login' }) {
                 : 'Create Real Account'}
             </span>
             <ArrowRight className="w-4 h-4" />
+          </button>
+
+          {/* Quick Demo Access */}
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-slate-200"></div>
+            <span className="shrink-0 px-2 text-[10px] text-slate-400 font-semibold tracking-wider uppercase">
+              Or Explore Instantly
+            </span>
+            <div className="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (loginDemoUser) {
+                loginDemoUser(fullName || 'Aarav Sharma', email || 'aarav.sharma@example.com');
+              }
+              if (onLoginSuccess) onLoginSuccess();
+              else navigateTo('home');
+            }}
+            className="w-full py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <User className="w-4 h-4 text-[#0B3B60]" />
+            <span>Continue with Demo Beneficiary Account</span>
           </button>
         </form>
 

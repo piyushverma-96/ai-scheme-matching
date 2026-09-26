@@ -170,10 +170,13 @@ PURPOSE_ALIASES = {
     "business": "business",
     "micro_business": "micro_business",
     "micro_credit": "micro_business",
+    "micro_finance": "micro_business",
+    "vendor": "micro_business",
     "startup": "business",
     "trade": "trade",
     "services": "services",
     "handicraft": "handicraft",
+    "artisan": "handicraft",
     "agriculture": "agriculture",
     "farming": "agriculture",
     "industry": "industry",
@@ -183,12 +186,15 @@ PURPOSE_ALIASES = {
     "education": "education",
     "studies": "education",
     "higher_education": "education",
+    "sanitation": "services",
+    "sanitary": "services",
+    "cleaning": "services",
 }
 
 VALID_PURPOSES = set(PURPOSE_ALIASES.keys()) | {
-    "business", "micro_business", "agriculture", "services",
+    "business", "micro_business", "micro_finance", "agriculture", "services",
     "trade", "handicraft", "industry", "transport",
-    "plantation", "construction", "education",
+    "plantation", "construction", "education", "sanitation",
 }
 
 VALID_STUDY_LOCATIONS = {"india", "abroad", "not_specified"}
@@ -292,7 +298,7 @@ class EligibilityCheckRequest(BaseModel):
     def validate_purpose(cls, v: str) -> str:
         normalised = v.lower().strip().replace(" ", "_").replace("-", "_")
         if normalised in PURPOSE_ALIASES:
-            return normalised
+            return PURPOSE_ALIASES[normalised]
         if normalised not in VALID_PURPOSES:
             raise ValueError(
                 f"purpose must be one of: {', '.join(sorted(VALID_PURPOSES))}. Got: '{v}'"
