@@ -453,7 +453,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
         businessSector: isBusinessPurpose ? businessSector : 'not_applicable',
         businessActivity: isBusinessPurpose ? businessActivity : '',
         courseLevel: purposeKey === 'education' ? courseLevel : 'not_applicable',
-        studyLocation: purposeKey === 'education' ? studyLocation : 'not_applicable',
+        studyLocation: purposeKey === 'education' ? studyLocation : 'not_specified',
         sanitationProfile: purposeKey === 'sanitation' ? sanitationProfile : 'not_applicable',
         fundingAmount: String(numAmount),
         amount: numAmount,
@@ -495,7 +495,7 @@ export default function Step1UnderstandNeed({ onComplete }) {
           project_cost: numAmount,
           sc_caste_declared: canonicalPayload.casteDeclared !== false,
           education_status: educationStatus || 'not_applicable',
-          study_location: studyLocation || 'india',
+          study_location: purposeKey === 'education' ? (studyLocation || 'india') : 'not_specified',
           gender: gender || 'Male',
         };
         const matchResp = await matchSchemes(evalPayload);

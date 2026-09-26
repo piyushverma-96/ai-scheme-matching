@@ -997,7 +997,7 @@ def evaluate_scheme(
         "sc_caste_declared": sc_caste_declared,
         "caste_category": "SC" if sc_caste_declared is True else ("OTHER" if sc_caste_declared is False else kwargs.get("caste_category")),
         "education_status": education_status if education_status not in (None, "not_applicable", "") else None,
-        "study_location": study_location if study_location not in (None, "not_specified", "") else None,
+        "study_location": study_location if study_location not in (None, "not_specified", "not_applicable", "") else None,
         "gender": gender,
     }
     profile.update(kwargs)

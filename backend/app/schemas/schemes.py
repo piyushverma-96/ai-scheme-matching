@@ -198,7 +198,7 @@ VALID_PURPOSES = set(PURPOSE_ALIASES.keys()) | {
     "plantation", "construction", "education", "sanitation",
 }
 
-VALID_STUDY_LOCATIONS = {"india", "abroad", "not_specified"}
+VALID_STUDY_LOCATIONS = {"india", "abroad", "not_specified", "not_applicable"}
 
 
 class EligibilityCheckRequest(BaseModel):
@@ -371,12 +371,13 @@ class EligibilityCheckRequest(BaseModel):
     @classmethod
     def validate_study_location(cls, v: Optional[str]) -> Optional[str]:
         if v is None:
-            return v
+            return None
         normalised = v.lower().strip()
+        if normalised in ("not_applicable", "na", "n/a", "none", "not_specified", "not-applicable", "not applicable"):
+            return "not_specified"
         if normalised not in VALID_STUDY_LOCATIONS:
-            raise ValueError(
-                f"study_location must be one of: {', '.join(sorted(VALID_STUDY_LOCATIONS))}. Got: '{v}'"
-            )
+            # Fall back to not_specified rather than crashing with 422
+            return "not_specified"
         return normalised
 
     @model_validator(mode="after")

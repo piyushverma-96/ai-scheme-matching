@@ -62,7 +62,10 @@ export default function Step3RecommendBestScheme({ onContinue }) {
         : 333333,
     sc_caste_declared: journeyFormData?.casteDeclared !== false,
     education_status: journeyFormData?.educationStatus || 'graduate',
-    study_location: journeyFormData?.studyLocation || 'india',
+    study_location:
+      journeyFormData?.purposeKey === 'education'
+        ? (journeyFormData?.studyLocation === 'abroad' ? 'abroad' : 'india')
+        : 'not_specified',
     gender: journeyFormData?.gender || 'Male',
     state: journeyFormData?.stateName || journeyFormData?.state || 'Madhya Pradesh',
     district: journeyFormData?.district || 'Bhopal',

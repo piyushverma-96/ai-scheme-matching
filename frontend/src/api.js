@@ -68,7 +68,7 @@ export const recommend = async (body) => {
         : 111111,
     sc_caste_declared: body.sc_caste_declared !== false,
     education_status: body.education_status || 'not_applicable',
-    study_location: body.study_location || 'india',
+    study_location: body.study_location || 'not_specified',
     gender: body.gender || undefined,
   };
 
