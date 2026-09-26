@@ -110,7 +110,7 @@ export default function App() {
     }
   };
 
-  const isJourneyMode = currentView === 'journey' || currentView === 'wizard' || currentView === 'find_scheme';
+  const isFullWidthView = currentView === 'home' || isJourneyMode;
 
   return (
     <div className="min-h-dvh flex flex-col bg-[#F8FAFC] bg-grain pb-16 lg:pb-0 font-sans text-[#1E293B] overflow-x-hidden w-full max-w-[100vw]">
@@ -118,13 +118,13 @@ export default function App() {
       <Header />
 
       <div className="flex-1 flex w-full min-w-0">
-        {/* Left Desktop Sidebar Navigation */}
-        <Sidebar />
+        {/* Left Desktop Sidebar Navigation (Only on portal/dashboard views, not on home landing or journey) */}
+        {!isFullWidthView && <Sidebar />}
 
         {/* Main Application Workspace Area */}
         <main
           className={`flex-1 min-w-0 ${
-            isJourneyMode
+            isFullWidthView
               ? 'p-0 max-w-full'
               : 'px-3 sm:px-6 md:px-8 py-3.5 sm:py-6 max-w-7xl'
           } mx-auto w-full overflow-x-hidden`}

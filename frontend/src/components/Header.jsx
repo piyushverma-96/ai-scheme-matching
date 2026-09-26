@@ -8,7 +8,9 @@ import Logo from './Logo';
 export default function Header() {
   const { t, i18n } = useTranslation();
   const {
+    currentView,
     navigateTo,
+    startJourney,
     setSidebarOpen,
     user,
     profile,
@@ -73,15 +75,97 @@ export default function Header() {
 
           <button
             type="button"
-            onClick={() => navigateTo('home')}
+            onClick={() => {
+              navigateTo('home');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             className="text-left cursor-pointer transition-transform active:scale-95"
           >
             <Logo size={isMobile ? 'sm' : 'md'} showTagline={!isMobile} />
           </button>
         </div>
 
-        {/* Right Side: Language Switcher, Notifications & Profile */}
-        <div className="flex items-center gap-2.5 sm:gap-4">
+        {/* Center Desktop Navigation Links */}
+        <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-[#475569]">
+          <button
+            type="button"
+            onClick={() => {
+              navigateTo('home');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`transition-colors cursor-pointer pb-1 relative hover:text-[#0E6655] ${
+              currentView === 'home'
+                ? 'text-[#0E6655] font-bold after:content-[""] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-5 after:h-0.5 after:bg-[#0E6655] after:rounded-full'
+                : ''
+            }`}
+          >
+            Home
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigateTo('schemes')}
+            className={`transition-colors cursor-pointer hover:text-[#0E6655] ${
+              currentView === 'schemes' ? 'text-[#0E6655] font-bold' : ''
+            }`}
+          >
+            Schemes
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (currentView !== 'home') {
+                navigateTo('home');
+                setTimeout(() => {
+                  document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              } else {
+                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="transition-colors cursor-pointer hover:text-[#0E6655]"
+          >
+            How It Works
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (currentView !== 'home') {
+                navigateTo('home');
+                setTimeout(() => {
+                  document.getElementById('why-udyamnex')?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              } else {
+                document.getElementById('why-udyamnex')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="transition-colors cursor-pointer hover:text-[#0E6655]"
+          >
+            About
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (currentView !== 'home') {
+                navigateTo('home');
+                setTimeout(() => {
+                  document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              } else {
+                document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="transition-colors cursor-pointer hover:text-[#0E6655]"
+          >
+            FAQs
+          </button>
+        </nav>
+
+        {/* Right Side: Language Switcher, Notifications, Auth & Get Started CTA */}
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Language Selector Dropdown */}
           <div className="relative">
             <button
@@ -183,126 +267,17 @@ export default function Header() {
 
           {/* Auth State: Profile if logged in, Sign Up & Login buttons if guest */}
           {user ? (
-            <div className="relative">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  setProfileDropdownOpen(!profileDropdownOpen);
-                  setNotificationsOpen(false);
-                  setLangDropdownOpen(false);
-                }}
-                className="flex items-center gap-2 bg-white border border-[#E2E8F0] hover:border-[#0B3B60]/40 rounded-xl px-2.5 sm:px-3 h-9 shadow-2xs transition-colors cursor-pointer"
-                aria-label="User account menu"
-                aria-expanded={profileDropdownOpen}
+                onClick={() => startJourney(1)}
+                className="hidden sm:inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white text-xs sm:text-sm font-semibold shadow-2xs transition-all cursor-pointer"
               >
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt={firstName}
-                    className="w-7 h-7 rounded-full object-cover border border-[#0B3B60]/20 shadow-2xs shrink-0"
-                  />
-                ) : (
-                  <div className="w-7 h-7 rounded-full bg-[#0B3B60] text-white text-xs font-bold flex items-center justify-center overflow-hidden border border-[#0B3B60]/20 shadow-2xs shrink-0">
-                    {initialLetter}
-                  </div>
-                )}
-                <span className="text-xs font-bold text-[#0B3B60] hidden md:inline leading-tight">
-                  {firstName}
-                </span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-150 ${
-                    profileDropdownOpen ? 'rotate-180' : ''
-                  }`}
-                />
+                <span>Get Started</span>
+                <span className="text-emerald-200">→</span>
               </button>
 
-              {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-52 max-w-[calc(100vw-32px)] bg-white rounded-2xl shadow-xl border border-[#E2E8F0] py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-4 py-2 border-b border-[#F1F5F9]">
-                    <span className="text-xs font-bold text-[#0B3B60] block truncate">
-                      {displayName}
-                    </span>
-                    <span className="text-[10px] text-[#64748B] block truncate">
-                      {user.email}
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                      navigateTo('profile');
-                    }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#1E293B] hover:bg-[#F8FAFC] cursor-pointer transition-colors min-h-[40px]"
-                  >
-                    <User className="w-3.5 h-3.5 text-gray-500" />
-                    <span>{t('header.profile', 'Profile')}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                      navigateTo('settings');
-                    }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#1E293B] hover:bg-[#F8FAFC] cursor-pointer transition-colors min-h-[40px]"
-                  >
-                    <Settings className="w-3.5 h-3.5 text-gray-500" />
-                    <span>{t('header.settings', 'Settings')}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                      navigateTo('tracking');
-                    }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#1E293B] hover:bg-[#F8FAFC] cursor-pointer transition-colors min-h-[40px]"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-gray-500" />
-                    <span>{t('nav.applications', 'My Applications')}</span>
-                  </button>
-
-                  <div className="my-1 border-t border-[#F1F5F9]" />
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                      logout();
-                    }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#FEF2F2] cursor-pointer transition-colors min-h-[40px]"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>{t('header.logout', 'Logout')}</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
-              {/* Desktop/Tablet Auth Action Buttons: [ Sign Up ] [ Login ] (>= 768px) */}
-              <div className="hidden md:flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => navigateTo('signup')}
-                  className="h-9 px-3.5 rounded-xl border border-[#0B3B60] text-[#0B3B60] hover:bg-[#0B3B60]/5 text-xs sm:text-sm font-semibold transition-colors cursor-pointer flex items-center justify-center shadow-2xs"
-                  aria-label="Sign Up"
-                >
-                  Sign Up
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigateTo('login')}
-                  className="h-9 px-3.5 rounded-xl bg-[#0B3B60] hover:bg-[#07263F] text-white text-xs sm:text-sm font-semibold shadow-2xs transition-colors cursor-pointer flex items-center justify-center"
-                  aria-label="Login"
-                >
-                  Login
-                </button>
-              </div>
-
-              {/* Mobile Width Auth Profile Icon & Dropdown (< 768px) */}
-              <div className="md:hidden relative">
+              <div className="relative">
                 <button
                   type="button"
                   onClick={() => {
@@ -310,41 +285,119 @@ export default function Header() {
                     setNotificationsOpen(false);
                     setLangDropdownOpen(false);
                   }}
-                  className="w-9 h-9 rounded-xl bg-white border border-[#E2E8F0] hover:border-[#0B3B60]/40 flex items-center justify-center text-[#0B3B60] shadow-2xs cursor-pointer"
-                  aria-label="Account menu"
+                  className="flex items-center gap-2 bg-white border border-[#E2E8F0] hover:border-[#0B3B60]/40 rounded-xl px-2.5 sm:px-3 h-9 shadow-2xs transition-colors cursor-pointer"
+                  aria-label="User account menu"
                   aria-expanded={profileDropdownOpen}
                 >
-                  <User className="w-4 h-4" />
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={firstName}
+                      className="w-7 h-7 rounded-full object-cover border border-[#0B3B60]/20 shadow-2xs shrink-0"
+                    />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-[#0B3B60] text-white text-xs font-bold flex items-center justify-center overflow-hidden border border-[#0B3B60]/20 shadow-2xs shrink-0">
+                      {initialLetter}
+                    </div>
+                  )}
+                  <span className="text-xs font-bold text-[#0B3B60] hidden md:inline leading-tight">
+                    {firstName}
+                  </span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-150 ${
+                      profileDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-44 max-w-[calc(100vw-32px)] bg-white rounded-2xl shadow-xl border border-[#E2E8F0] py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="absolute right-0 mt-2 w-52 max-w-[calc(100vw-32px)] bg-white rounded-2xl shadow-xl border border-[#E2E8F0] py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="px-4 py-2 border-b border-[#F1F5F9]">
+                      <span className="text-xs font-bold text-[#0B3B60] block truncate">
+                        {displayName}
+                      </span>
+                      <span className="text-[10px] text-[#64748B] block truncate">
+                        {user.email}
+                      </span>
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => {
                         setProfileDropdownOpen(false);
-                        navigateTo('login');
+                        navigateTo('profile');
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-[#0B3B60] hover:bg-[#EFF6FF] cursor-pointer min-h-[44px]"
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#1E293B] hover:bg-[#F8FAFC] cursor-pointer transition-colors min-h-[40px]"
                     >
-                      <User className="w-3.5 h-3.5 text-[#0B3B60]" />
-                      <span>Login</span>
+                      <User className="w-3.5 h-3.5 text-gray-500" />
+                      <span>{t('header.profile', 'Profile')}</span>
                     </button>
+
                     <button
                       type="button"
                       onClick={() => {
                         setProfileDropdownOpen(false);
-                        navigateTo('signup');
+                        navigateTo('settings');
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-[#0B3B60] hover:bg-[#EFF6FF] cursor-pointer min-h-[44px]"
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#1E293B] hover:bg-[#F8FAFC] cursor-pointer transition-colors min-h-[40px]"
                     >
-                      <User className="w-3.5 h-3.5 text-[#0B3B60]" />
-                      <span>Sign Up</span>
+                      <Settings className="w-3.5 h-3.5 text-gray-500" />
+                      <span>{t('header.settings', 'Settings')}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        navigateTo('tracking');
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#1E293B] hover:bg-[#F8FAFC] cursor-pointer transition-colors min-h-[40px]"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-gray-500" />
+                      <span>{t('nav.applications', 'My Applications')}</span>
+                    </button>
+
+                    <div className="my-1 border-t border-[#F1F5F9]" />
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#EF4444] hover:bg-[#FEF2F2] cursor-pointer transition-colors min-h-[40px]"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>{t('header.logout', 'Logout')}</span>
                     </button>
                   </div>
                 )}
               </div>
-            </>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Login Button with User Icon */}
+              <button
+                type="button"
+                onClick={() => navigateTo('login')}
+                className="flex items-center gap-1.5 h-9 px-3 text-[#0B3B60] hover:text-[#0E6655] text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+                aria-label="Login"
+              >
+                <User className="w-4 h-4 text-[#0B3B60]" />
+                <span>Login</span>
+              </button>
+
+              {/* Get Started Button */}
+              <button
+                type="button"
+                onClick={() => startJourney(1)}
+                className="h-9 px-4 rounded-xl bg-[#0E6655] hover:bg-[#0B5345] text-white text-xs sm:text-sm font-semibold shadow-2xs transition-all cursor-pointer flex items-center gap-1.5"
+                aria-label="Get Started"
+              >
+                <span>Get Started</span>
+                <span className="text-emerald-200">→</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
