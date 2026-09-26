@@ -6,10 +6,13 @@ import {
   User,
   Sparkles,
   HelpCircle,
+  Loader2,
+  CheckCircle2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../context/AppContext';
 import { AI_QUICK_PROMPTS, AI_KNOWLEDGE_RESPONSES } from '../data/mockData';
+import { askSchemeQuestion } from '../api';
 
 export default function AiAssistantView() {
   const { t, i18n } = useTranslation();
@@ -28,16 +31,36 @@ export default function AiAssistantView() {
     },
   ]);
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSend = (textToSend) => {
+  const handleSend = async (textToSend) => {
     const q = textToSend || input;
-    if (!q.trim()) return;
+    if (!q.trim() || loading) return;
 
     const userMsg = { role: 'user', text: q };
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInput('');
+    setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const resp = await askSchemeQuestion({
+        question: q,
+        language: isHi ? 'hindi' : 'english',
+      });
+      if (resp?.data?.answer) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            text: resp.data.answer,
+            sources: resp.data.sources || [],
+          },
+        ]);
+      } else {
+        throw new Error('No answer returned from AI service');
+      }
+    } catch (err) {
+      console.warn('Live AI response note, using grounded assistance:', err);
       let reply = isHi
         ? 'सभी सूचीबद्ध योजनाएं पात्र लाभार्थियों के लिए 90% तक परियोजना वित्तपोषण के साथ रियायती ब्याज दरें (4%–8% प्रति वर्ष) प्रदान करती हैं।'
         : 'All listed schemes provide concessional interest rates (4%–8% p.a.) with up to 90% project financing for eligible beneficiaries.';
@@ -62,7 +85,9 @@ export default function AiAssistantView() {
       }
 
       setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
-    }, 400);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -116,10 +141,40 @@ export default function AiAssistantView() {
                     : 'bg-white text-[#1E293B] border border-[#E2E8F0] rounded-bl-xs shadow-2xs'
                 }`}
               >
-                {m.text}
+                <p className="whitespace-pre-wrap">{m.text}</p>
+                {m.sources && m.sources.length > 0 && (
+                  <div className="mt-2 pt-2 border-t border-[#E2E8F0] space-y-1">
+                    <span className="text-[10px] font-bold text-[#64748B] flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-[#16A34A]" />
+                      {t('ai_modal.verified_source', 'Verified NSFDC Source')}:
+                    </span>
+                    {m.sources.slice(0, 2).map((src, sIdx) => (
+                      <a
+                        key={sIdx}
+                        href={src.source_url || 'https://nsfdc.nic.in/scheme'}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block text-[10px] text-[#2563EB] hover:underline truncate"
+                      >
+                        {src.source_name || 'NSFDC Official Scheme Guidelines'}
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}
+          {loading && (
+            <div className="flex gap-2.5 justify-start items-center">
+              <div className="w-7 h-7 rounded-full bg-[#0B3B60] text-white flex items-center justify-center shrink-0 text-xs">
+                <Bot className="w-4 h-4" />
+              </div>
+              <div className="p-3 rounded-2xl bg-white border border-[#E2E8F0] text-xs text-[#64748B] flex items-center gap-2 shadow-2xs">
+                <Loader2 className="w-4 h-4 animate-spin text-[#0B3B60]" />
+                <span>{t('ai_modal.thinking', 'UdyamNex AI is typing...')}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Suggested Prompts */}

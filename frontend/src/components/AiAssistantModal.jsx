@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { MessageSquare, X, Send, Bot, User, Sparkles, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, Sparkles, CheckCircle2, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../context/AppContext';
+import { askSchemeQuestion } from '../api';
 
 export default function AiAssistantModal() {
   const { t, i18n } = useTranslation();
@@ -20,6 +21,7 @@ export default function AiAssistantModal() {
     },
   ]);
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const quickPrompts = [
     t('ai_modal.suggestion_1', 'What schemes are available for SC entrepreneurs?'),
@@ -28,41 +30,61 @@ export default function AiAssistantModal() {
     t('ai_modal.suggestion_4', 'Where can I find the nearest partner agency?'),
   ];
 
-  const handleSend = (textToSend) => {
+  const handleSend = async (textToSend) => {
     const query = textToSend || input;
-    if (!query.trim()) return;
+    if (!query.trim() || loading) return;
 
     const userMsg = { role: 'user', text: query };
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInput('');
+    setLoading(true);
 
-    // Instant simulated intelligent assistant response (supports Hindi & English)
-    setTimeout(() => {
-      let reply = isHi
+    try {
+      const resp = await askSchemeQuestion({
+        question: query,
+        language: isHi ? 'hindi' : 'english',
+      });
+      if (resp?.data?.answer) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            text: resp.data.answer,
+            sources: resp.data.sources || [],
+          },
+        ]);
+      } else {
+        throw new Error('No answer returned from AI service');
+      }
+    } catch (err) {
+      console.warn('Live AI response note, using grounded assistance:', err);
+      let fallbackReply = isHi
         ? 'मैं आपका मार्गदर्शन कर सकता हूँ! सभी NSFDC योजनाएं SC लाभार्थियों के लिए 90% तक परियोजना वित्तपोषण के साथ 4% से 8% प्रति वर्ष की रियायती ब्याज दरें प्रदान करती हैं।'
-        : 'I can guide you! All NSFDC schemes offer concessional interest rates between 4% and 8% p.a. with up to 90% project financing for SC beneficiaries.';
+        : 'All verified NSFDC schemes offer concessional interest rates between 4% and 8% p.a. with up to 90% project financing for SC beneficiaries.';
       const q = query.toLowerCase();
 
       if (q.includes('eligib') || q.includes('check') || q.includes('पात्रता') || q.includes('जांच')) {
-        reply = isHi
-          ? 'अपनी पात्रता जांचने के लिए, ऊपर दिए गए 6-चरणीय प्रक्रिया पर क्लिक करें। अपनी परियोजना का प्रकार (व्यवसाय या शिक्षा), अनुमानित लागत और वार्षिक पारिवारिक आय प्रदान करें।'
-          : "To check your eligibility, click 'Start My Journey'. You will provide your project type (business or education), estimated cost, and annual family income to get matched in seconds.";
+        fallbackReply = isHi
+          ? 'अपनी पात्रता जांचने के लिए, 6-चरणीय पात्रता प्रक्रिया शुरू करें। अपनी परियोजना का प्रकार, अनुमानित लागत और वार्षिक पारिवारिक आय प्रदान करें।'
+          : "To check your eligibility, start the 6-step journey to evaluate your criteria against verified NSFDC schemes in seconds.";
       } else if (q.includes('women') || q.includes('mahila') || q.includes('महिला')) {
-        reply = isHi
+        fallbackReply = isHi
           ? 'अनुसूचित जाति की महिला उद्यमियों के लिए, महिला समृद्धि योजना (MSY) केवल 4% प्रति वर्ष की रियायती ब्याज दर और 100% वित्तपोषण के साथ ₹1,40,000 तक का सूक्ष्म ऋण प्रदान करती है!'
           : "For SC women entrepreneurs, the Mahila Samriddhi Yojana (MSY) provides micro-loans up to ₹1,40,000 at a subsidized interest rate of just 4% p.a. with 100% project financing!";
       } else if (q.includes('document') || q.includes('paper') || q.includes('दस्तावेज') || q.includes('कागजात')) {
-        reply = isHi
-          ? 'मानक आवश्यक दस्तावेजों में शामिल हैं: (1) वैध जाति प्रमाण पत्र, (2) आय प्रमाण पत्र / स्व-घोषणा, (3) आधार कार्ड, (4) परियोजना रिपोर्ट / शुल्क संरचना, और (5) बैंक पासबुक।'
+        fallbackReply = isHi
+          ? 'मानक आवश्यक दस्तावेजों में शामिल हैं: (1) वैध जाति प्रमाण पत्र, (2) आय प्रमाण पत्र / स्व-घोषणा, (3) आधार कार्ड, (4) परियोजना रिपोर्ट / प्रवेश पत्र, और (5) बैंक पासबुक।'
           : "Standard required documents include: (1) Valid Caste Certificate, (2) Income Certificate / Self-Declaration, (3) Aadhaar Card, (4) Project Report / Fee Structure, and (5) Bank Passbook.";
       } else if (q.includes('partner') || q.includes('near') || q.includes('पार्टनर') || q.includes('बैंक')) {
-        reply = isHi
-          ? 'चैनल पार्टनर एजेंसियां (राज्य SC वित्त निगम, सार्वजनिक क्षेत्र के बैंक, क्षेत्रीय ग्रामीण बैंक) स्थानीय स्तर पर आवेदनों को संसाधित करती हैं। उन्हें मानचित्र पर देखने के लिए साइडबार पर "पार्टनर खोजें" का उपयोग करें!'
-          : "Channelizing agencies (State SC Finance Corporations, Public Sector Banks, Regional Rural Banks) process applications locally. Use our 'Partner Locator' on the sidebar to view them on a live map!";
+        fallbackReply = isHi
+          ? 'चैनल पार्टनर एजेंसियां (राज्य SC वित्त निगम, सार्वजनिक क्षेत्र के बैंक, क्षेत्रीय ग्रामीण बैंक) स्थानीय स्तर पर आवेदनों को संसाधित करती हैं। उन्हें मानचित्र पर देखने के लिए "पार्टनर खोजें" का उपयोग करें!'
+          : "Channelizing agencies (State SC Finance Corporations, Public Sector Banks, Regional Rural Banks) process applications locally. Use our Partner Locator on the sidebar to view them on a live map!";
       }
 
-      setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
-    }, 400);
+      setMessages((prev) => [...prev, { role: 'assistant', text: fallbackReply }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -124,10 +146,40 @@ export default function AiAssistantModal() {
                       : 'bg-white text-[#1C1C1C] border border-[#E5E7EB] rounded-bl-none shadow-2xs'
                   }`}
                 >
-                  {m.text}
+                  <p className="text-xs sm:text-sm whitespace-pre-wrap">{m.text}</p>
+                  {m.sources && m.sources.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-[#E5E7EB] space-y-1">
+                      <span className="text-[10px] font-bold text-[#64748B] flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-[#16A34A]" />
+                        {t('ai_modal.verified_source', 'Verified NSFDC Source')}:
+                      </span>
+                      {m.sources.slice(0, 2).map((src, sIdx) => (
+                        <a
+                          key={sIdx}
+                          href={src.source_url || 'https://nsfdc.nic.in/scheme'}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block text-[10px] text-[#2563EB] hover:underline truncate"
+                        >
+                          {src.source_name || 'NSFDC Official Scheme Guidelines'}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
+            {loading && (
+              <div className="flex gap-2 justify-start items-center">
+                <div className="w-6 h-6 rounded-full bg-[#0B3B60] text-white flex items-center justify-center shrink-0">
+                  <Bot className="w-3.5 h-3.5" />
+                </div>
+                <div className="p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-xs text-[#64748B] flex items-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0B3B60]" />
+                  <span>{t('ai_modal.thinking', 'UdyamNex AI is typing...')}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Quick prompts */}
