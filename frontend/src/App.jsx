@@ -110,6 +110,7 @@ export default function App() {
     }
   };
 
+  const isJourneyMode = currentView === 'journey' || currentView === 'wizard' || currentView === 'find_scheme';
   const isFullWidthView = currentView === 'home' || isJourneyMode;
 
   return (
